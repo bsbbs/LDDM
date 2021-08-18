@@ -1,17 +1,12 @@
-function [nu_wind, s_wind, rt, choice, H, S] = wong06(Vinput,miu0,sgm,I0,JN,...
+function [nu_wind, s_wind, rt, choice, H, S] = wong06(cp,miu0,sgm,I0,JN,...
         gamma, tauS, tauAMPA, dur, dt, presentt, stimdur, thresh, initialvals, stoprule)
 %%%%%%%%%%%%
 % adapted version of the appendix function in Wong & Wang, 2006
 % Created by Bo Shen, NYU, 2019
 %%%%%%%%%%%%
-sizeVinput = size(Vinput);
+sizeVinput = size(cp);
 if sizeVinput(1) > 1 error('Error: the size of Vinput has to be 1xN'); end
 
-% cp = 2*Vinput/(Vinput(1) + Vinput(2));
-cp = Vinput/256;
-% if max(cp) > 2
-%     warning('The input scale exeeds the orignal settings in Wong & Wang, 2006');
-% end
 %% set parameters
 % parameter in H
 a = 270; %VnC^-1
