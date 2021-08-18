@@ -14,6 +14,16 @@ function [choice, rt] = wong06_GPU3(cp,miu0,sgm,I0,JN,...
 %   cp =  [0.6250    0.3750 0.3750
 %         0.5625    0.4375  0.3750
 %         0.5273    0.4688  0.3750];
+%    Format B: input coherences as a structure with fields defining c1, c2, c3 matrices.
+%       The input matrices have to be the same dimension of 2. Values at the same position
+%       of the matrices will be used as a set of inputs.
+%    - example
+%    c = [0, .032, .064, .128, .256, .512]';
+%    c1 = [1 - flip(c); 1 + c];
+%    c2 = ones(size(c1));
+%    c3 = c;
+%    [cp.cp1, ~] = meshgrid(c1, c3);
+%    [cp.cp2, cp.cp3] = meshgrid(c2, c3);
 %%%%%%%%%%%%%%%
 %% set parameters
 % parameter in H
@@ -27,12 +37,7 @@ unit = 1; % set as 1 if the unit of time related variables is second.
 JAext = 5.2 * 10^-4; %nA/Hz
 
 %% preparation
-miu0Array = gpuArray(miu0);
 I0Array = gpuArray(I0);
-sigmaArray = gpuArray(sgm);
-tauSArray = gpuArray(tauS/unit);
-tauAMPAArray = gpuArray(tauAMPA/unit);
-dtArray = gpuArray(dt/unit);
 JN11 = (JN(1,1));
 JN12 = (JN(1,2));
 JN13 = (JN(1,3));
@@ -42,11 +47,16 @@ JN23 = (JN(2,3));
 JN31 = (JN(3,1));
 JN32 = (JN(3,2));
 JN33 = (JN(3,3));
-JAextArray = gpuArray(JAext);
-threshArray = gpuArray(thresh);
-cp1 = cp(:,1);
-cp2 = cp(:,2);
-cp3 = cp(:,3);
+if isstruct(cp) % Format B
+    name = fieldnames(cp);
+    cp1 = cp.(name{1});
+    cp2 = cp.(name{2});
+    cp3 = cp.(name{2});
+else % Formart A
+    cp1 = cp(:,1);
+    cp2 = cp(:,2);
+    cp3 = cp(:,3);
+end
 size_input = size(cp1);
 sizeComput = [size_input, sims];
 NComput = prod(sizeComput);
@@ -106,7 +116,7 @@ for ti = 1:(max(total_time_steps(:)))
     I3 = JAext*miu0*cp3Array;
     x1 = JN11*S1 + JN12*S2 + JN13*S3 + I0Array + I1 + Inoise1;
     x2 = JN21*S1 + JN22*S2 + JN23*S3 + I0Array + I2 + Inoise2;
-    x3 = JN21*S1 + JN22*S2 + JN23*S3 + I0Array + I3 + Inoise3;
+    x3 = JN31*S1 + JN32*S2 + JN33*S3 + I0Array + I3 + Inoise3;
     H1new = (a*x1 - b)./(1 - exp(-d*(a*x1 - b)));
     H2new = (a*x2 - b)./(1 - exp(-d*(a*x2 - b)));
     H3new = (a*x3 - b)./(1 - exp(-d*(a*x3 - b)));
@@ -137,7 +147,7 @@ for ti = 1:(max(total_time_steps(:)))
     flip = (inside > 0) .* (rt == 0);
     NComput = NComput - sum(flip(:));
     rt = rt + (ti-onset_of_stimuli)*dt*flip;
-    choice = choice + ( (H1_wind > H2_wind).*(H1_wind > H3_wind) + 2*(H2_wind > H1_wind).*(H2_wind > H2_wind) + 3*(H3_wind > H1_wind).*(H3_wind > H2_wind) ) .* flip;
+    choice = choice + ( (H1_wind > H2_wind).*(H1_wind > H3_wind) + 2*(H2_wind > H1_wind).*(H2_wind > H3_wind) + 3*(H3_wind > H1_wind).*(H3_wind > H2_wind) ) .* flip;
     % 1 for choosing H1; 2 for choosing H2; 3 for choosing H3; 0 for having equal high values, choice is not made
     % when all of the channel hit the decision boundary, stop simulation
     if stoprule == 1
@@ -146,7 +156,7 @@ for ti = 1:(max(total_time_steps(:)))
         end
     end
 end
-choice(choice==0.*rt==0) = NaN; % 1 for choosing H1; 2 for choosing H2; 3 for choosing H3; 0 for having equal high values; NaN choice is not made
+choice((choice==0)&(rt==0)) = NaN; % 1 for choosing H1; 2 for choosing H2; 3 for choosing H3; 0 for having equal high values; NaN choice is not made
 rt(rt==0) = NaN;
 rt = gather(rt);
 choice = gather(choice);
