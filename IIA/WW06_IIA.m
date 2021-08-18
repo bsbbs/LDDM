@@ -13,10 +13,7 @@ end
 fontsize = 14;
 mksz = 5;
 lwd = 2;
-colorpalette = {'#ef476f','#ffd166','#06d6a0','#118ab2','#073b4c'};
-colorpalettergb = [239,71,111;255,209,102;6,214,160;17,138,178;7,59,76]/255;
-%% simulation begin
-% inital parameters as in the paper of Wong & Wang, 2006
+%% initalize parameters as in the paper of Wong & Wang, 2006
 miu0 = 30; % Hz
 sgm = .02; % nA
 I0 = .3255; %nA
