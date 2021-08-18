@@ -42,31 +42,8 @@ stim_duration = round(stimdur/dt);
 rt = NaN;
 choice = NaN;
 %% get initial values
-Hi = initialvals(1,:);
-Si = initialvals(2,:);
-for vi = 1:sizeVinput(2)
-    syms x;
-    if Hi(vi) < 10^-5
-        xi(vi) = 0;
-    else
-        s1 = solve((a*x - b)./(1 - exp(-d*(a*x - b))) == Hi(vi), x);
-        xi(vi) = real(double(vpa(s1)));
-    end
-end
-%% stablizing noise
-Inoise(1,:) = zeros(1,sizeVinput(2));
-stablizetime = round(.2/unit/dt);
-for kk = 1:stablizetime
-    dInoise = (-Inoise/tauAMPA*dt + randn(sizeVinput)*sqrt(dt/tauAMPA*sgm^2)); %
-    Inoise = Inoise + dInoise;
-    H = (a*(xi+Inoise) - b)./(1 - exp(-d*(a*(xi+Inoise) - b)));
-    H(H < 0) = 0;
-    loci = mod(kk,time_wind) + (mod(kk,time_wind) == 0)*time_wind;
-    Hbuffer(loci,:) = real(H);
-    Sbuffer(loci,:) = real(Si);
-end
-H = real(mean(Hbuffer,1));
-S = H*gamma*tauS./(H*gamma*tauS+1);
+H = initialvals(1,:);
+S = initialvals(2,:);
 nu_wind = H;
 s_wind = S;
 %% simulation begin
@@ -99,12 +76,3 @@ for ti = 2:total_time_steps
         end
     end
 end
-
-%% Calculating the mean rates and gating variables with sliding window
-% T_total = length(H);
-% nu_wind = mean(H(1:time_wind,:),1);
-% s_wind  = mean(S(1:time_wind,:),1) ;
-% for t = 1:((T_total-time_wind)/slide_wind)
-%     nu_wind(t+1,:) = mean(H((1:time_wind)+slide_wind*t,:),1);
-%     s_wind(t+1,:)  = mean(S((1:time_wind)+slide_wind*t,:),1);
-% end
