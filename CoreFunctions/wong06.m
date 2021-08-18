@@ -12,12 +12,11 @@ if sizeVinput(1) > 1 error('Error: the size of Vinput has to be 1xN'); end
 a = 270; %VnC^-1
 b = 108; %Hz
 d = .154; %s
-% gamma = .641;
+% time unit
 unit = 1; % set as 1 if the unit of time related variables is second.
 % change it to .001 if the unit of time related varibales is msec. 
 
 % connectivity strength
-% JN = eye(sizeVinput(2))*(.2609+.0497) - ones(sizeVinput(2))*.0497; %nA
 JAext = 5.2 * 10^-4; %nA/Hz
 
 %% preparation
@@ -39,22 +38,26 @@ choice = NaN;
 %% get initial values
 H = initialvals(1,:);
 S = initialvals(2,:);
+Inoise = randn(sizeVinput)*sgm;
 nu_wind = H;
 s_wind = S;
 %% simulation begin
-for ti = 2:total_time_steps
-    % update nerual firing rates and synaptic activities
+for ti = 1:total_time_steps
+    % update nerual firing rates based on inputs
     I = JAext*miu0*cp*(ti >= onset_of_stimuli & ti < onset_of_stimuli+stim_duration);
-    x = (JN*S(ti-1,:)')' + I0 + I + Inoise;
-    H(ti,:) = (a*x - b)./(1 - exp(-d*(a*x - b)));
-    dS = (-S(ti-1,:)/tauS + (1-S(ti-1,:)).*H(ti-1,:)*unit*gamma)*dt;
-    S(ti,:) = S(ti-1,:) + dS;
+    x = (JN*S(ti,:)')' + I0 + I + Inoise;
+    H(ti+1,:) = (a*x - b)./(1 - exp(-d*(a*x - b)));
+    % update synaptic activities based on firing rates
+    dS = (-S(ti,:)/tauS + (1-S(ti,:)).*H(ti,:)*unit*gamma)*dt;
+    S(ti+1,:) = S(ti,:) + dS;
     % update noise
     dInoise = (-Inoise/tauAMPA*dt + randn(sizeVinput)*sqrt(dt/tauAMPA*sgm^2)); %
     Inoise = Inoise + dInoise;
+    
     % To ensure firing rates are always positive (noise may cause negative)
-    H(ti,H(ti,:) < 0) = 0;
-    loci = mod(kk+1+ti,time_wind) + (mod(kk+1+ti,time_wind) == 0)*time_wind;
+    H(ti+1,H(ti+1,:) < 0) = 0;
+    % drop in buffer to sliding window
+    loci = mod(ti,time_wind) + (mod(ti,time_wind) == 0)*time_wind;
     Hbuffer(loci,:) = H(ti,:);
     Sbuffer(loci,:) = S(ti,:);
     nu_wind(ti,:) = mean(Hbuffer,1);
