@@ -37,15 +37,15 @@ JN21 = (JN(2,1));
 JN22 = (JN(2,2));
 if isstruct(cp)
     name = fieldnames(cp);
-    c1 = cp.(name{1});
-    c2 = cp.(name{2});
+    cp1 = cp.(name{1});
+    cp2 = cp.(name{2});
 else
-    c1 = cp(:,1);
-    c2 = cp(:,2);
+    cp1 = cp(:,1);
+    cp2 = cp(:,2);
 end
-cp1Array = gpuArray(repmat(c1,1,1,sims)/256);
-cp2Array = gpuArray(repmat(c2,1,1,sims)/256);
-sizeVinput = size(c1);
+cp1Array = gpuArray(repmat(cp1,1,1,sims)/256);
+cp2Array = gpuArray(repmat(cp2,1,1,sims)/256);
+sizeVinput = size(cp1);
 sizeComput = [sizeVinput, sims];
 NComput = prod(sizeComput);
 
@@ -115,11 +115,11 @@ for ti = 1:(max(total_time_steps(:)))
     H1_wind = mean(H1buffer,4); % smoothed firing rates by sliding windows
     H2_wind = mean(H2buffer,4);
     % threshold detecting
-    inside = (R1 >= thresh) + (R2 >= thresh);
+    inside = (H1_wind >= thresh) + (H2_wind >= thresh);
     flip = (inside > 0) .* (rt == 0);
     NComput = NComput - sum(flip(:));
     rt = rt + (ti-onset_of_stimuli)*dt*flip;
-    choice = choice + ((R2 > R1) - (R1 > R2) +3) .* flip; % 2 choose R1, 4 choose R2, 3 R1 = R2, 0 choice is not made
+    choice = choice + ((H2_wind > H1_wind) - (H1_wind > H2_wind) +3) .* flip; % 2 choose R1, 4 choose R2, 3 R1 = R2, 0 choice is not made
     % when all of the channel hit the decision boundary, stop simulation
     if stoprule == 1
         if NComput == 0
