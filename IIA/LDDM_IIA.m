@@ -14,7 +14,7 @@ fontsize = 14;
 mksz = 5;
 lwd = 2;
 %% initalize parameters as in the paper of Wong & Wang, 2006
-task = 'RT';%'FD';
+task = 'FDon';%'RT';%'FD';
 a = eye(3)*15;
 b = eye(3)*1.02;
 w = ones(3);
@@ -31,6 +31,11 @@ if strcmp(task,'FD')
     dur = 7; % second
     triggert = 2.5; %presentt;
     stimdur = 2.5;
+elseif strcmp(task,'FDon')
+    sgm = 10;
+    dur = 7; % second
+    triggert = 2.5; %presentt;
+    stimdur = dur;
 elseif strcmp(task,'RT')
     sgm = 20;
     dur = 5; % second
@@ -110,6 +115,8 @@ plot(c1, y, '.k','MarkerSize',mksz*3);
 % plot conditional ratio as a function of V3
 if strcmp(task,'FD')
     c = [.512]';
+elseif strcmp(task,'FDon')
+    c = [.128]';
 elseif strcmp(task,'RT')
     c = [.256]';
 end
@@ -140,6 +147,8 @@ for i = 1:length(c3)
 end
 if strcmp(task,'FD')
     ylim([.8,.9]);  
+elseif strcmp(task,'FDon')
+    ylim([.75,1]);  
 elseif strcmp(task,'RT')
     ylim([.75,.95]);
 end
