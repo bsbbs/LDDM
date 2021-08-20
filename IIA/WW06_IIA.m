@@ -84,7 +84,7 @@ plot(c2, y,'.k','MarkerSize',mksz*3);
 y = 3.1*ones(size(c1));
 plot(c1, y, '.k','MarkerSize',mksz*3);
 % plot conditional ratio as a function of V3
-c = [.064]';
+c = [.128]';
 c1 = [1 + c];
 c2 = ones(size(c1));
 c3 = 0:.05:2;
@@ -106,7 +106,7 @@ mycol = colormap(jet(length(c3)));
 for i = 1:length(c3)
     plot(cp.cp3(i,1), cndratio(i,1),'.','color',mycol(i,:),'LineWidth',lwd,'MarkerSize',mksz*3);
 end
-ylim([.5,.9]);
+ylim([.75,1]);
 xlabel('V_3');
 ylabel({'Conditional choice probability';'Opt. 1 vs. Opt. 2'});
 savefig(h, figname, outdir, fontsize, aspect);

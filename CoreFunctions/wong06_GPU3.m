@@ -51,7 +51,7 @@ if isstruct(cp) % Format B
     name = fieldnames(cp);
     cp1 = cp.(name{1});
     cp2 = cp.(name{2});
-    cp3 = cp.(name{2});
+    cp3 = cp.(name{3});
 else % Formart A
     cp1 = cp(:,1);
     cp2 = cp(:,2);
