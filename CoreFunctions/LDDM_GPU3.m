@@ -115,7 +115,16 @@ onset_of_stimuli = gpuArray(round(presentt/dt));
 onset_of_trigger = gpuArray(round(triggert/dt));
 stim_duration = gpuArray(round(stimdur/dt));
 offset_of_stimuli = onset_of_stimuli + stim_duration;
+%%
+trigismat = 0;
+if prod(size(onset_of_trigger) == size(V1mat))
+    onset_of_trigger = repmat(onset_of_trigger,1,1,sims);
+    trigismat = 1;
+end
 %% stablizing noise
+InoiseV1=gpuArray(X*0);
+InoiseV2=gpuArray(X*0);
+InoiseV3=gpuArray(X*0);
 InoiseR1=gpuArray(X*0);
 InoiseG1=gpuArray(X*0);
 InoiseI1=gpuArray(X*0);
@@ -127,6 +136,9 @@ InoiseG3=gpuArray(X*0);
 InoiseI3=gpuArray(X*0);
 stablizetime = round(.2/dt);
 for kk = 1:stablizetime
+    InoiseV1 = InoiseV1 + (-InoiseV1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+    InoiseV2 = InoiseV2 + (-InoiseV2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+    InoiseV3 = InoiseV3 + (-InoiseV3 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
     InoiseR1 = InoiseR1 + (-InoiseR1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
     InoiseR2 = InoiseR2 + (-InoiseR2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
     InoiseR3 = InoiseR3 + (-InoiseR3 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
@@ -170,14 +182,16 @@ for ti = 1:max(total_time_steps(:))
         V2Array(withdraw) = 0;
         V3Array(withdraw) = 0;
     end
-    if numel(onset_of_trigger) == 1
+    if ~trigismat % numel(onset_of_trigger) == 1
         if ti >= onset_of_trigger
             BetasUp = gpuArray(ones(sizeComput));
         end
-    elseif prod(size(onset_of_trigger) == size(V1mat))
-        error('currently not support different trigger time yet');
+    elseif trigismat %prod(size(onset_of_trigger) == size(V1mat))
+        BetasUp(ti >= onset_of_trigger) = 1;
     end
-    
+%     V1Array = V1Array + InoiseV1;
+%     V2Array = V2Array + InoiseV2;
+%     V3Array = V3Array + InoiseV3;
     % update R, G, I
     R1 = R1new;
     R2 = R2new;
@@ -192,6 +206,9 @@ for ti = 1:max(total_time_steps(:))
     I2 = I2 + (-I2 + (beta21*R1 + beta22*R2 + beta23*R3).*Continue.*BetasUp)/TauI*dtArray + InoiseI2;
     I3 = I3 + (-I3 + (beta31*R1 + beta32*R2 + beta33*R3).*Continue.*BetasUp)/TauI*dtArray + InoiseI3;
     % update noise
+    InoiseV1 = InoiseV1 + (-InoiseV1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+    InoiseV2 = InoiseV2 + (-InoiseV2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+    InoiseV3 = InoiseV3 + (-InoiseV3 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
     InoiseR1 = InoiseR1 + (-InoiseR1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
     InoiseR2 = InoiseR2 + (-InoiseR2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
     InoiseR3 = InoiseR3 + (-InoiseR3 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
@@ -225,7 +242,7 @@ for ti = 1:max(total_time_steps(:))
     inside = (R1 >= threshArray) + (R2 >= threshArray) + (R3 >= threshArray);
     flip = (inside > 0) .* (rt == 0) .* (ti > onset_of_trigger);
     NComput = NComput - sum(flip(:));
-    rt = rt + (ti-onset_of_trigger)*dtArray*flip;
+    rt = rt + (ti-onset_of_trigger)*dtArray.*flip;
     choice = choice + ((R1 > R2).*(R1 > R3) + 2*(R2 > R1).*(R2 > R3) + 3*(R3 > R1).*(R3 > R2)) .* flip;
     % 1 for choosing R1; 2 for choosing R2; 3 for choosing R3, 0 for having high equal values, choice is not made
     Continue = rt == 0;
