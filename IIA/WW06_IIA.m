@@ -43,10 +43,15 @@ c2 = ones(size(c1));
 c3 = 0:.5:2;
 [cp.cp1, ~] = meshgrid(c1, c3);
 [cp.cp2, cp.cp3] = meshgrid(c2, c3);
+% divisively normalized inputs
+Gamma = .2;
+cpdn.cp1 = cp.cp1./(Gamma + cp.cp1 + cp.cp2 + cp.cp3);
+cpdn.cp2 = cp.cp2./(Gamma + cp.cp1 + cp.cp2 + cp.cp3);
+cpdn.cp3 = cp.cp3./(Gamma + cp.cp1 + cp.cp2 + cp.cp3);
 % simulation
-simrslt = fullfile(outdir,sprintf('WW06_%ic1_%ic2_%ic3_sim%i.mat',length(c1),length(unique(c2)),length(unique(c3)),sims));
+simrslt = fullfile(outdir,sprintf('WW06_DN_%ic1_%ic2_%ic3_sim%i.mat',length(c1),length(unique(c2)),length(unique(c3)),sims));
 if ~exist(simrslt,'file')
-    [choice, rt] = wong06_GPU3(cp,miu0,sgm,I0,JN,...
+    [choice, rt] = wong06_GPU3(cpdn,miu0,sgm,I0,JN,...
         gamma, tauS, tauAMPA, dur, dt, presentt, stimdur, thresh, initialvals, stoprule, sims);
     save(simrslt,'choice','rt');
 else
@@ -90,10 +95,15 @@ c2 = ones(size(c1));
 c3 = 0:.05:2;
 [cp.cp1, ~] = meshgrid(c1, c3);
 [cp.cp2, cp.cp3] = meshgrid(c2, c3);
+% divisively normalized inputs
+Gamma = .2;
+cpdn.cp1 = cp.cp1./(Gamma + cp.cp1 + cp.cp2 + cp.cp3);
+cpdn.cp2 = cp.cp2./(Gamma + cp.cp1 + cp.cp2 + cp.cp3);
+cpdn.cp3 = cp.cp3./(Gamma + cp.cp1 + cp.cp2 + cp.cp3);
 % simulation
-simrslt = fullfile(outdir,sprintf('WW06_%ic1_%ic2_%ic3_sim%i.mat',length(c1),length(unique(c2)),length(unique(c3)),sims));
+simrslt = fullfile(outdir,sprintf('WW06_DN_%ic1_%ic2_%ic3_sim%i.mat',length(c1),length(unique(c2)),length(unique(c3)),sims));
 if ~exist(simrslt,'file')
-    [choice, rt] = wong06_GPU3(cp,miu0,sgm,I0,JN,...
+    [choice, rt] = wong06_GPU3(cpdn,miu0,sgm,I0,JN,...
         gamma, tauS, tauAMPA, dur, dt, presentt, stimdur, thresh, initialvals, stoprule, sims);
     save(simrslt,'choice','rt');
 else

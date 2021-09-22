@@ -1,4 +1,4 @@
-function [choice, rt] = LDDM_GPU3(cp, scale, w, a, b, sgm, Tau, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims)
+function [choice, rt, argmaxR] = LDDM_GPU3ABS(cp, eqlbmat, w, a, b, sgm, Tau, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims)
 %%%%%%%%%%%%%%%%%%
 %% GPU calculation, only trinary choice is allowed. N is limited as 3.
 % Created by Bo Shen, NYU, 2021
@@ -83,15 +83,6 @@ w33 = gpuArray(w(3,3));
 TauR = gpuArray(Tau(1));
 TauG = gpuArray(Tau(2));
 TauI = gpuArray(Tau(3));
-alpha11 = gpuArray(a(1,1));
-alpha12 = gpuArray(a(1,2));
-alpha13 = gpuArray(a(1,3));
-alpha21 = gpuArray(a(2,1));
-alpha22 = gpuArray(a(2,2));
-alpha23 = gpuArray(a(2,3));
-alpha31 = gpuArray(a(3,1));
-alpha32 = gpuArray(a(3,2));
-alpha33 = gpuArray(a(3,3));
 beta11 = gpuArray(b(1,1));
 beta12 = gpuArray(b(1,2));
 beta13 = gpuArray(b(1,3));
@@ -102,13 +93,13 @@ beta31 = gpuArray(b(3,1));
 beta32 = gpuArray(b(3,2));
 beta33 = gpuArray(b(3,3));
 threshArray = gpuArray(thresh);
+scale = 3*eqlbmat.^2 + (1-a).*eqlbmat; % 11 c3 * 11 e 
 if isstruct(cp)
     name = fieldnames(cp);
     V1mat = cp.(name{1}).*scale;
     V2mat = cp.(name{2}).*scale;
     V3mat = cp.(name{3}).*scale;
 else
-    
     V1mat = cp(:,1).*scale;
     V2mat = cp(:,2).*scale;
     V3mat = cp(:,3).*scale;
@@ -128,6 +119,12 @@ if prod(size(onset_of_trigger) == size(V1mat))
     onset_of_trigger = repmat(onset_of_trigger,1,1,sims);
     trigismat = 1;
 end
+if prod(size(a) == size(V1mat))
+    amat = gpuArray(repmat(a,1,1,sims));
+else
+    amat = a;
+end
+
 %% stablizing noise
 InoiseV1=gpuArray(X*0);
 InoiseV2=gpuArray(X*0);
@@ -156,18 +153,19 @@ for kk = 1:stablizetime
     InoiseI2 = InoiseI2 + (-InoiseI2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
     InoiseI3 = InoiseI3 + (-InoiseI3 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
 end
-R1new = gpuArray(X*initialvals(1,1).*scale) + InoiseR1;
-R2new = gpuArray(X*initialvals(1,2).*scale) + InoiseR2;
-R3new = gpuArray(X*initialvals(1,3).*scale) + InoiseR3;
-G1 = gpuArray(X*initialvals(2,1).*scale) + InoiseG1;
-G2 = gpuArray(X*initialvals(2,2).*scale) + InoiseG2;
-G3 = gpuArray(X*initialvals(2,3).*scale) + InoiseG3;
-I1 = gpuArray(X*initialvals(3,1).*scale) + InoiseI1;
-I2 = gpuArray(X*initialvals(3,2).*scale) + InoiseI2;
-I3 = gpuArray(X*initialvals(3,3).*scale) + InoiseI3;
+R1new = gpuArray(X*initialvals(1,1).*eqlbmat) + InoiseR1;
+R2new = gpuArray(X*initialvals(1,2).*eqlbmat) + InoiseR2;
+R3new = gpuArray(X*initialvals(1,3).*eqlbmat) + InoiseR3;
+G1 = gpuArray(X*initialvals(2,1).*eqlbmat) + InoiseG1;
+G2 = gpuArray(X*initialvals(2,2).*eqlbmat) + InoiseG2;
+G3 = gpuArray(X*initialvals(2,3).*eqlbmat) + InoiseG3;
+I1 = gpuArray(X*initialvals(3,1).*eqlbmat) + InoiseI1;
+I2 = gpuArray(X*initialvals(3,2).*eqlbmat) + InoiseI2;
+I3 = gpuArray(X*initialvals(3,3).*eqlbmat) + InoiseI3;
 %% simulation
 rt = gpuArray(zeros(sizeComput));
 choice = gpuArray(zeros(sizeComput));
+argmaxR = gpuArray(zeros(sizeComput));
 Continue = gpuArray(ones(sizeComput));
 BetasUp = gpuArray(zeros(sizeComput));
 for ti = 1:max(total_time_steps(:))
@@ -203,9 +201,9 @@ for ti = 1:max(total_time_steps(:))
     R1 = R1new;
     R2 = R2new;
     R3 = R3new;
-    R1new = R1 + (-R1 + Continue.*(V1Array + alpha11*R1+alpha12*R2+alpha13*R3)./(1+G1))/TauR*dtArray + InoiseR1;
-    R2new = R2 + (-R2 + Continue.*(V2Array + alpha21*R1+alpha22*R2+alpha23*R3)./(1+G2))/TauR*dtArray + InoiseR2;
-    R3new = R3 + (-R3 + Continue.*(V3Array + alpha31*R1+alpha32*R2+alpha33*R3)./(1+G3))/TauR*dtArray + InoiseR3;
+    R1new = R1 + (-R1 + Continue.*(V1Array + amat.*R1)./(1+G1))/TauR*dtArray + InoiseR1;
+    R2new = R2 + (-R2 + Continue.*(V2Array + amat.*R2)./(1+G2))/TauR*dtArray + InoiseR2;
+    R3new = R3 + (-R3 + Continue.*(V3Array + amat.*R3)./(1+G3))/TauR*dtArray + InoiseR3;
     G1 = G1 + (-G1 + w11*R1 + w12*R2 + w13*R3  - I1)/TauG*dtArray + InoiseG1;
     G2 = G2 + (-G2 + w21*R1 + w22*R2 + w23*R3  - I2)/TauG*dtArray + InoiseG2;
     G3 = G3 + (-G3 + w31*R1 + w32*R2 + w33*R3  - I3)/TauG*dtArray + InoiseG3;
@@ -250,9 +248,11 @@ for ti = 1:max(total_time_steps(:))
     flip = (inside > 0) .* (rt == 0) .* (ti > onset_of_trigger);
     NComput = NComput - sum(flip(:));
     rt = rt + (ti-onset_of_trigger)*dtArray.*flip;
-    choice = choice + ((R1 > R2).*(R1 > R3) + 2*(R2 > R1).*(R2 > R3) + 3*(R3 > R1).*(R3 > R2)) .* flip;
+    prob = (R1 > R2).*(R1 > R3) + 2*(R2 > R1).*(R2 > R3) + 3*(R3 > R1).*(R3 > R2);
+    choice = choice + prob .* flip;
     % 1 for choosing R1; 2 for choosing R2; 3 for choosing R3, 0 for having high equal values, choice is not made
     Continue = rt == 0;
+    argmaxR(Continue) = prob(Continue);
     % after every channel hit the decision threshold, stop simulation
     if stoprule == 1
         if NComput == 0
@@ -264,3 +264,4 @@ choice(rt == 0) = NaN; % time out trials
 rt(rt==0) = NaN;
 choice = gather(choice);
 rt = gather(rt);
+argmaxR = gather(argmaxR);
