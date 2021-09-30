@@ -7,7 +7,7 @@ fontsize = 14;
 mksz = 5;
 lwd = 2;
 
-eqlbvec = 17; %42; %[5:6:70]; % 11 e
+eqlbvec = 42; %[5:6:70]; % 11 e
 alen = 9;
 amat = nan([alen, numel(eqlbvec)]); % 9a * 11e
 for ei = 1:numel(eqlbvec)
@@ -20,7 +20,7 @@ eqlbmat = repmat(eqlbvec,alen,1);% 9a * 11e
 dt = .001; % second
 tauR = .1; % second
 tauG = .1; % second
-tauI = .5; % second
+tauI = .1; % second
 Tau = [tauR, tauG, tauI];
 b = .2*eye(3);
 w = ones(3);
@@ -43,7 +43,7 @@ initialset = [1,1,1;3,3,3;0,0,0];
 mygray = flip(gray(length(c3) + 1));
 mycol2 = colormap(winter(length(c3)));
 aspect = [3,3]*ceil(sqrt(alen));
-task = 'RTSlowLD';
+task = 'PrepSgnlABS';
 
 %% in space of R1-R2
 sgm = 0;
@@ -69,7 +69,7 @@ for ei = 1:numel(eqlbvec) % the same equilibirum level and starting points but d
             %R0(end-100:end,:) = NaN;
             R = [R0; R];
             lgd3(vi) = plot(R(:,1), R(:,2), '-', 'Color', mygray(vi+1,:), 'LineWidth',lwd/2);
-            plot([0,R(round((triggert + 2.8)/dt),1)],[0,R(round((triggert + 2.8)/dt),2)],'.-', 'Color', mycol2(vi,:), 'LineWidth',lwd/2,'MarkerSize',mksz*2);
+            plot([0,R(end,1)],[0,R(end,2)],'.-', 'Color', mycol2(vi,:), 'LineWidth',lwd/2,'MarkerSize',mksz*2);
             lim = max([lim, max(R(:,1:2))]);
         end
         if 1

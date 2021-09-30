@@ -129,12 +129,12 @@ for ti = 1:(onset_of_stimuli-1)
     R1 = R1 + (-R1)/Tau1*dtArray + InoiseR1;
     R2 = R2 + (-R2)/Tau1*dtArray + InoiseR2;
     % update noise
-    InoiseR1 = InoiseR1 + (-InoiseR1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseR2 = InoiseR2 + (-InoiseR2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseG1 = InoiseG1 + (-InoiseG1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseG2 = InoiseG2 + (-InoiseG2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseI1 = InoiseI1 + (-InoiseI1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseI2 = InoiseI2 + (-InoiseI2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+    InoiseR1 = InoiseR1 + (-InoiseR1 + NMDA*gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+    InoiseR2 = InoiseR2 + (-InoiseR2 + NMDA*gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+    InoiseG1 = InoiseG1 + (-InoiseG1 + NMDA*gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+    InoiseG2 = InoiseG2 + (-InoiseG2 + NMDA*gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+    InoiseI1 = InoiseI1 + (-InoiseI1 + NMDA*gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+    InoiseI2 = InoiseI2 + (-InoiseI2 + NMDA*gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
     % setting lower boundary, forcing neural firing rates to be non-negative
     inside = G1 >= 0;
     G1 = G1 .* inside;
@@ -209,15 +209,15 @@ for ti = (ti0 + 1):max(total_time_steps(:)) %(onset_of_trigger -1)
     G2 = G2 + (-G2 + NMDA*w21*R1 + NMDA*w22*R2  - I2)/Tau2*dtArray + InoiseG2;
     I1 = I1 + (-I1 + NMDA*beta11*R1.*Continue.*BetasUp + NMDA*beta12*R2.*Continue.*BetasUp)/Tau3*dtArray + InoiseI1;
     I2 = I2 + (-I2 + NMDA*beta21*R1.*Continue.*BetasUp + NMDA*beta22*R2.*Continue.*BetasUp)/Tau3*dtArray + InoiseI2;
-    R1 = R1 + (-R1 + (V1Array + NMDA*alpha11*R1+NMDA*alpha12*R2)./(1+G1old))/Tau1*dtArray + InoiseR1;
-    R2 = R2 + (-R2 + (V2Array + NMDA*alpha21*R1+NMDA*alpha22*R2)./(1+G2old))/Tau1*dtArray + InoiseR2;
+    R1 = R1 + (-R1 + (NMDA*V1Array + NMDA*alpha11*R1+NMDA*alpha12*R2)./(1+G1old))/Tau1*dtArray + InoiseR1;
+    R2 = R2 + (-R2 + (NMDA*V2Array + NMDA*alpha21*R1+NMDA*alpha22*R2)./(1+G2old))/Tau1*dtArray + InoiseR2;
     % update noise
-    InoiseR1 = InoiseR1 + (-InoiseR1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseR2 = InoiseR2 + (-InoiseR2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseG1 = InoiseG1 + (-InoiseG1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseG2 = InoiseG2 + (-InoiseG2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseI1 = InoiseI1 + (-InoiseI1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseI2 = InoiseI2 + (-InoiseI2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+    InoiseR1 = InoiseR1 + (-InoiseR1 + NMDA*gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+    InoiseR2 = InoiseR2 + (-InoiseR2 + NMDA*gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+    InoiseG1 = InoiseG1 + (-InoiseG1 + NMDA*gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+    InoiseG2 = InoiseG2 + (-InoiseG2 + NMDA*gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+    InoiseI1 = InoiseI1 + (-InoiseI1 + NMDA*gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+    InoiseI2 = InoiseI2 + (-InoiseI2 + NMDA*gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
     % setting lower boundary, forcing neural firing rates to be non-negative
     inside = G1 >= 0;
     G1 = G1 .* inside;

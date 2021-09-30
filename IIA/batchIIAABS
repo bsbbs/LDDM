@@ -1,0 +1,6 @@
+#!/bin/bash
+cd /gpfs/data/glimcherlab/BoShen/LDDM/IIA
+module load cuda
+module load matlab
+matlab -nodisplay -r LDDM_IIA_ABSsvr
+

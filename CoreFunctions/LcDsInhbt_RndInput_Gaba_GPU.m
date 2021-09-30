@@ -94,6 +94,12 @@ onset_of_stimuli = gpuArray(round(presentt/dt));
 onset_of_trigger = gpuArray(round(triggert/dt));
 stim_duration = gpuArray(round(stimdur/dt));
 offset_of_stimuli = onset_of_stimuli + stim_duration;
+%%
+trigismat = 0;
+if prod(size(onset_of_trigger) == size(V1mat))
+    onset_of_trigger = repmat(onset_of_trigger,1,1,sims);
+    trigismat = 1;
+end
 %% stablizing noise
 InoiseR1=gpuArray(X*0);
 InoiseG1=gpuArray(X*0);
@@ -200,13 +206,12 @@ for ti = (ti0 + 1):max(total_time_steps(:)) %(onset_of_trigger -1)
         % R1Rprsnt(flip) = R1(flip);
         % R2Rprsnt(flip) = R2(flip);
     end
-    if numel(onset_of_trigger) == 1
+    if ~trigismat % numel(onset_of_trigger) == 1
         if ti >= onset_of_trigger
             BetasUp = gpuArray(ones(sizeComput));
         end
-    elseif prod(size(onset_of_trigger) == size(V1mat))
-        flip = onset_of_trigger >= ti;
-        BetasUp(flip) = 1;
+    elseif trigismat %prod(size(onset_of_trigger) == size(V1mat))
+        BetasUp(ti >= onset_of_trigger) = 1;
     end
     if (mod(ti*dt, .05) == 0)
         V1Array = (V1Input + gpuArray.randn(size(V1Array)).*Scale.*sgmInput).*(V1Array ~= 0);
@@ -246,7 +251,7 @@ for ti = (ti0 + 1):max(total_time_steps(:)) %(onset_of_trigger -1)
     inside = (R1 >= threshArray) + (R2 >= threshArray);
     flip = (inside > 0) .* (rt == 0) .* (ti > onset_of_trigger);
     NComput = NComput - sum(flip(:));
-    rt = rt + gpuArray(ti-onset_of_trigger).*flip*dtArray;
+    rt = rt + (ti-onset_of_trigger).*flip*dtArray;
     choice = choice + ((R2 > R1) - (R1 > R2) +3) .* flip; % 2 choose R1, 4 choose R2, 3 R1 = R2, 0 choice is not made
     Continue = choice == 0;
     R1Out = R1Out + R1.*flip;
