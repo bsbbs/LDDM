@@ -65,7 +65,7 @@ InoiseR = randn(sizeVinput)*sgm;
 InoiseI = randn(sizeVinput)*sgm;
 for ti = 1:total_time_steps
     % update R, G, I
-    dR = (-R(ti,:)' + (Vinput'*(ti >= onset_of_stimuli & ti < onset_of_stimuli+stim_duration) + a*(ti >= onset_of_stimuli)*R(ti,:)')./(1+G(ti,:)'))/Tau(1)*dt;
+    dR = (-R(ti,:)' + (Vinput'*(ti >= onset_of_stimuli & ti < onset_of_stimuli+stim_duration) + a*R(ti,:)')./(1+G(ti,:)'))/Tau(1)*dt;
     dG = (-G(ti,:)' + w * R(ti,:)' - I(ti,:)')/Tau(2)*dt;
     dI = (-I(ti,:)' + b*(ti >= onset_of_trigger)*R(ti,:)')/Tau(3)*dt;
     R(ti+1,:) = R(ti,:) + dR' + InoiseR(ti,:);
