@@ -117,5 +117,4 @@ for ci = 1:size(vals,2)
 end
 
 h = figure; hold on;
-plot(b(1,:),b(2,:),'g.');
-plot(bg(1,:),bg(2,:),'r.');
+plot(b(1,:),b(2,:),'.')

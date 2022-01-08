@@ -1,0 +1,34 @@
+% Notes for Selective inhibition
+% Bo Shen tried to find evidence of disinhibition from the dataset of
+% Najafi et al., 2020
+% Najafi, Farzaneh and Elsayed, Gamaleldin F and Pnevmatikakis, Eftychios 
+% and Cunningham, John P and Churchland, Anne K (2018) 
+% Inhibitory and excitatory populations in parietal cortex are equally selective for decision outcome in both novices and experts.
+
+% The attempt failed because of the following reasons
+
+% To find evidence of disinhibition from the spiking activities of cells with labeling of
+% types (excitatory and inhibitory), there are at least two ways to do
+% that:
+
+% 1. To see whether the time course of inhibitory cells activities within
+% response field bifurcate in the late stage of decision-making. As the
+% prediction of LDDM, G and I activities to input stimuli goes the opposite
+% direction in the late stage of decision-making because I inhibits G.
+% However, such an idea is not able to conduct on the current dataset due
+% to no labeling of 'response field' for any of the cells. It is hard to
+% tell whether the bifucation is because of disinhibition or soley lateral
+% inhibition.
+
+% 2. The second way to proof is to see whether the coding in inhibitory
+% cells exhibit switching of states from value coding to choice. During
+% value coding, the G cells are supposed to be non-selective for inputs.
+% They bifurcate in the decision phase, in an opposite direction as I
+% cells. However, because of lacking labels of response field, what the
+% model can predict is only the emergence of choice predictions on these
+% cells, not specific as a prediction of disinhibition.
+
+% 3. There might exist a population of inhibitory cells (G) that switch from non-selective
+% coding of input stimuli (summed values) to selective coding of choice. Another
+% population of inhibitory cells (I) that have no coding of summed input values
+% but progressively exhibit coding of choice.
