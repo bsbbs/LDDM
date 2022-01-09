@@ -1,9 +1,10 @@
 %% define paths
-Homedir = 'C:\Users\Bo';
+% Homedir = 'C:\Users\Bo';
+Homedir = '~';
 addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
 addpath(fullfile(Homedir,'Documents','LDDM','utils'));
-cd('G:\My Drive\LDDM\Froemke');
-% cd('/Volumes/GoogleDrive/My Drive/LDDM/Outputs/Froemke');
+% cd('G:\My Drive\LDDM\Froemke');
+cd('/Volumes/GoogleDrive/My Drive/LDDM/Froemke');
 plotdir = fullfile('./Graphics');
 if ~exist(plotdir,'dir')
     mkdir(plotdir);
@@ -122,6 +123,7 @@ else
     load(output);
 end
 h = figure;
+filename = sprintf('Choice_RT_%1.1f_%1.1f_sgm%2.2f',boost, sgm);
 subplot(2,1,1); hold on;
 for level = 1:length(boost)
     plot(cp,ACC(level,:),'.-');
@@ -130,11 +132,11 @@ set(gca,'XScale','log');
 ylabel('% correct');
 lgd = legend('Control', 'Agonist',...
     'Location','SouthEast', 'FontSize', fontsize-8, 'Box','off');
+savefigs(h, filename, plotdir,fontsize, flip(aspect1));
 subplot(2,1,2); hold on;
 for level = 1:length(boost)
     plot(cp,meanRT(level,:),'.-');
 end
 set(gca,'XScale','log');
 ylabel('RT (s)');
-filename = sprintf('Choice_RT_%1.1f_%1.1f_sgm%2.2f',boost, sgm);
 savefigs(h, filename, plotdir,fontsize, flip(aspect1));
