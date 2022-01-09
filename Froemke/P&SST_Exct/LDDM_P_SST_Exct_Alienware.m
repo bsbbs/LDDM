@@ -1,8 +1,8 @@
 %% define paths
 Homedir = 'C:\Users\Bo';
-addpath(fullfile(Homedir,'Documents','GitHub','LDDM','CoreFunctions'));
-addpath(fullfile(Homedir,'Documents','GitHub','LDDM','utils'));
-cd('G:\My Drive\LDDM\Outputs\Froemke');
+addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
+addpath(fullfile(Homedir,'Documents','LDDM','utils'));
+cd('G:\My Drive\LDDM\Froemke');
 % cd('/Volumes/GoogleDrive/My Drive/LDDM/Outputs/Froemke');
 plotdir = fullfile('./Graphics');
 if ~exist(plotdir,'dir')
