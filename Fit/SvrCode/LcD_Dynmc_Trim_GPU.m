@@ -393,12 +393,13 @@ end
 R1Out = R1Out + R1.*(R1Out == 0);
 R2Out = R2Out + R2.*(R2Out == 0);
 %% calculate
-choice = choice/2; %1 choose R1, 2 choose R2, 1.5 R1 = R2,  0 choice is not made
+choice = gather(choice/2); %1 choose R1, 2 choose R2, 1.5 R1 = R2,  0 choice is not made
+rt = gather(rt);
 rt(rt==0) = NaN;
 choice(choice == 0) = NaN; %1 choose R1, 2 choose R2, 1.5 R1 = R2, NaN choice is not made
 inside = R1Out < R2Out;
 inside = inside + (R1Out == R2Out)/2;% R1 < R2 recorded as 1, R1 > R2 recorded as 0, R1 == R2 recorded as .5;
-argmaxR = inside + 1; % keep consistant as other models, 1 for choose R1, 2 for choose R2, and 1.5 for equal
+argmaxR = gather(inside) + 1; % keep consistant as other models, 1 for choose R1, 2 for choose R2, and 1.5 for equal
 % argmaxR = 2 - mean(inside,3);
 %% post calculus
 for i = 1:size(rt,1)
@@ -419,7 +420,7 @@ for i = 1:size(rt,1)
         m_mr2cD(1:(memolen - round((mRT/dt - time_spcD)/step)),i,j) = NaN;
     end
 end
-m_mr1c = squeeze(m_mr1c);
-m_mr2c = squeeze(m_mr2c);
-m_mr1cD = squeeze(m_mr1cD);
-m_mr2cD = squeeze(m_mr2cD);
+m_mr1c = gather(squeeze(m_mr1c));
+m_mr2c = gather(squeeze(m_mr2c));
+m_mr1cD = gather(squeeze(m_mr1cD));
+m_mr2cD = gather(squeeze(m_mr2cD));

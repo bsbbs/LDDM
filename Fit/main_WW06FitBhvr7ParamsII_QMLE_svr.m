@@ -74,8 +74,14 @@ t = datenum(clock)*10^10 - floor(datenum(clock)*100)*10^8 + sortNum*10^7 + i*10^
 save(fullfile(out_dir,sprintf('CollectRslts%i.mat',t)),'Collect');
 
 %% hand tuning
-addpath('../CoreFunctions/');
-addpath('./SvrCode/');
+% addpath('../CoreFunctions/');
+% addpath('./SvrCode/');
+Homedir = 'C:\Users\Bo';
+addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
+addpath(fullfile(Homedir,'Documents','LDDM','utils'));
+addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
+% cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
+cd('G:\My Drive\LDDM\Fit');
 out_dir = './Rslts/WW06FitBhvr7ParamsII_QMLE_GPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
@@ -92,13 +98,14 @@ rng(randseed);
 %    JNp, JNn, I0, noise, miu0, tauS, tauAMPA, nLL
 params = [0.475556	0.12605	0.162363	0.099998	119.982527	0.158728	0.004346	16638.810193];
 %[0.428032	0.1131	0.350868	0.022471	105.691412	0.042461	0.014988	16877.754482];
+name = sprintf('JNp%2.1f_JNn%1.2f_I0%1.2f_noise%1.2f_miu0%2.2f_nLL%4.1f',params);
+
 % simulation
 tic;
 [nLL, Chi2, BIC, AIC, rtmat, choicemat] = WW06FitBhvr7ParamsII_QMLE_GPU(params,dataDynmc, dataBhvr);
 num2str(nLL)
 num2str(AIC)
 num2str(BIC)
-name = sprintf('JNp%2.1f_JNn%1.2f_I0%1.2f_noise%1.2f_miu0%2.2f_nLL%4.1f',params);
 save(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),...
     'rtmat','choicemat','params','nLL','Chi2','BIC','AIC');
 toc

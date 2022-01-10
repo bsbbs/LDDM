@@ -74,8 +74,14 @@ t = datenum(clock)*10^10 - floor(datenum(clock)*100)*10^8 + sortNum*10^7 + i*10^
 save(fullfile(out_dir,sprintf('CollectRslts%i.mat',t)),'Collect');
 
 %% hand tuning
-addpath('../../CoreFunctions/');
-addpath('./SvrCode/');
+% addpath('../../CoreFunctions/');
+% addpath('./SvrCode/');
+Homedir = 'C:\Users\Bo';
+addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
+addpath(fullfile(Homedir,'Documents','LDDM','utils'));
+addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
+% cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
+cd('G:\My Drive\LDDM\Fit');
 out_dir = './Rslts/AsymWFitBhvr6Params_QMLE_GPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
@@ -85,17 +91,17 @@ if ~exist(plot_dir,'dir')
     mkdir(plot_dir);
 end
 dataDynmc = load('./Data/Data.mat');
-dataBhvr = LoadRoitmanData('../../RoitmanDataCode');
+dataBhvr = LoadRoitmanData('../RoitmanDataCode');
 
 randseed = 105874882;
 rng(randseed);
 % a, w1, noise, scale, tauR, tauG, nLL
 params = [36.538884	0.134803	7.401239	284.382666	0.052278	0.231087	16675.6422];
+name = sprintf('a%2.1f_w%1.1f_noise2.1f_scl%2.1f_tau%1.3f_%1.3f',params);
 
 % simulation
 tic;
 [nLL, Chi2, BIC, AIC, rtmat, choicemat] = AsymWFitBhvr6Params_QMLE_GPU(params,dataDynmc, dataBhvr);
-name = sprintf('a%2.1f_w%1.1f_noise2.1f_scl%2.1f_tau%1.3f_%1.3f',params);
 save(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),...
     'rtmat','choicemat','params','nLL','Chi2','AIC','BIC');
 toc
