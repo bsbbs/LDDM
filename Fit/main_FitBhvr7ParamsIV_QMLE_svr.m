@@ -74,12 +74,13 @@ t = datenum(clock)*10^10 - floor(datenum(clock)*100)*10^8 + sortNum*10^7 + i*10^
 save(fullfile(out_dir,sprintf('CollectRslts%i.mat',t)),'Collect');
 
 %% hand tuning
-Homedir = 'C:\Users\Bo';
+% Homedir = 'C:\Users\Bo';
+Homedir = '~';
 addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
 addpath(fullfile(Homedir,'Documents','LDDM','utils'));
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
-% cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
-cd('G:\My Drive\LDDM\Fit');
+cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
+% cd('G:\My Drive\LDDM\Fit');
 out_dir = './Rslts/FitBhvr7ParamsIV_QMLE_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
@@ -95,14 +96,16 @@ rng(randseed);
 % a, b, noise, scale, tauRGI, nLL
 params = [	0	1.433631	25.35945	3251.289056	0.185325	0.224459	0.323132	16539.138186];
 name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f_nLL%4.0f',params);
-
-tic;
-[nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LcDFitBhvr7ParamsIV_QMLE_GPU(params,dataDynmc, dataBhvr);
-%sm_mr1c = gather(sm_mr1c);
-save(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),...
-    'rtmat','choicemat','sm_mr1c','sm_mr2c','sm_mr1cD','sm_mr2cD','params');
-toc
-load(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)));
+if ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
+    tic;
+    [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LcDFitBhvr7ParamsIV_QMLE_GPU(params,dataDynmc, dataBhvr);
+    %sm_mr1c = gather(sm_mr1c);
+    save(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),...
+        'rtmat','choicemat','sm_mr1c','sm_mr2c','sm_mr1cD','sm_mr2cD','params');
+    toc
+else
+    load(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)));
+end
 %% plot time course
 load('./Data/Data.mat');
 m_mr1c = m_mr1c';
@@ -361,6 +364,9 @@ h.PaperPosition = [0 0 9 3.0];
 saveas(h,fullfile(plot_dir,sprintf('RT&ACC_%s.eps',name)),'epsc2');
 
 %% Q-Q plot for reaction time and choice
+lwd = 1.0;
+mksz = 3;
+fontsize = 10;
 x = dataBhvr.proportionmat;
 y = dataBhvr.q;
 qntls = dataBhvr.qntls;
@@ -368,8 +374,8 @@ h = figure; hold on;
 for vi = 1:length(x)
     xc = x(vi)*ones(size(y(:,1,vi)));
     xw = 1 - x(vi)*ones(size(y(:,2,vi)));
-    plot(xc,y(:,1,vi),'gx');
-    plot(xw,y(:,2,vi),'rx');
+    plot(xc,y(:,1,vi),'gx','MarkerSize',mksz+1,'LineWidth',lwd);
+    plot(xw,y(:,2,vi),'rx','MarkerSize',mksz+1,'LineWidth',lwd);
     % fitted value
     En(vi) = numel(rtmat(:,vi));
     RT_corr = rtmat(choicemat(:,vi) == 1,vi);
@@ -381,14 +387,18 @@ for vi = 1:length(x)
 end
 for qi = 1:size(q,1)
     xq = [flip(1-x), x]';
-    plot(xq,[squeeze(flip(q(qi,2,:)));squeeze(q(qi,1,:))],'k-o');
+    plot(xq,[squeeze(flip(q(qi,2,:)));squeeze(q(qi,1,:))],'k-o','MarkerSize',mksz,'LineWidth',lwd/2);
 end
+xlim([-.1 1.1]);
+ylim([.2, 1.4]);
 xlabel('Proportion');
 ylabel('RT (s)');
-h.PaperUnits = 'inches';
-h.PaperPosition = [0 0 4 5];
-%saveas(h,fullfile(plot_dir,sprintf('Q-QPlot_%s.fig',name)),'fig');
-saveas(h,fullfile(plot_dir,sprintf('Q-QPlot_%s.eps',name)),'epsc2');
+% h.PaperUnits = 'inches';
+% h.PaperPosition = [0 0 4 5];
+% saveas(h,fullfile(plot_dir,sprintf('Q-QPlot_%s.fig',name)),'fig');
+filename = sprintf('Q-QPlot_%s',name);
+% saveas(h,fullfile(plot_dir,filename),'epsc2');
+savefigs(h, filename, plot_dir, fontsize, [1.8 2.5]);
 %% the original space of QMLE
 acc = dataBhvr.proportionmat;
 ON = dataBhvr.ON;

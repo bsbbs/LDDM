@@ -1,14 +1,14 @@
-function savefig(h, filename, outdir, fontsize, aspect)
+function savefigs(h, filename, outdir, fontsize, aspect)
 set(gca,'FontSize',fontsize);
 set(gca,'TickDir','out');
-set(gca,'LineWidth',1.4); 
+set(gca,'LineWidth',1); 
 xl = get(gca,'XLabel');
 xAX = get(gca,'XAxis');
-set(xAX,'FontSize', fontsize-4)
+set(xAX,'FontSize', fontsize-2)
 set(xl, 'FontSize', fontsize);
 yl = get(gca,'YLabel');
 yAX = get(gca,'YAxis');
-set(yAX,'FontSize', fontsize-4)
+set(yAX,'FontSize', fontsize-2)
 set(yl, 'FontSize', fontsize);
 h.PaperUnits = 'inches';
 h.PaperPosition = [0 0 aspect];
