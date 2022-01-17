@@ -3,7 +3,7 @@ Homedir = 'C:\Users\Bo';
 % Homedir = '~';
 addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
 addpath(fullfile(Homedir,'Documents','LDDM','utils'));
-cd('G:\My Drive\LDDM\Froemke\P&SST_Exct');
+cd('G:\My Drive\LDDM\Froemke\SST_NMDA');
 % cd('/Volumes/GoogleDrive/My Drive/LDDM/Froemke');
 plotdir = fullfile('./Graphics');
 if ~exist(plotdir,'dir')
@@ -54,8 +54,8 @@ h = figure;
 hold on;
 mycl = jet(length(boost)*10);
 for level = 1:length(boost)
-    Vinput = [c1, c2]*scale*boost(level);
-    a = a0*boost(level);
+    Vinput = [c1, c2]*scale;%*boost(level);
+    a = a0;%*boost(level);
     b = b0;
     w = w0.*boost(level);
     initialvals = (a-1)./sum(w,2)'.*[1,1; sum(w,2)'; 0, 0]; % for R, G, and I variables, will be further scaled
@@ -63,10 +63,10 @@ for level = 1:length(boost)
         dt, presentt, triggert, thresh*5, initialvals, stimdur, stoprule);
     plot(R(:,1), 'LineWidth', lwd, 'Color',mycl(5+(level-1)*10,:));
     plot(R(:,2), '--', 'LineWidth', lwd, 'Color',mycl(5+(level-1)*10,:));
-    %plot(G(:,1), 'LineWidth', lwd, 'Color',mycl(5+(level-1)*10,:));
-    %plot(G(:,2), '--', 'LineWidth', lwd, 'Color',mycl(5+(level-1)*10,:));
-    %plot(I(:,1), 'LineWidth', lwd, 'Color',mycl(5+(level-1)*10,:));
-    %plot(I(:,2), '--', 'LineWidth', lwd, 'Color',mycl(5+(level-1)*10,:));
+% plot(G(:,1), 'LineWidth', lwd, 'Color',mycl(5+(level-1)*10,:));
+% plot(G(:,2), '--', 'LineWidth', lwd, 'Color',mycl(5+(level-1)*10,:));
+%     plot(I(:,1), 'LineWidth', lwd, 'Color',mycl(5+(level-1)*10,:));
+%     plot(I(:,2), '--', 'LineWidth', lwd, 'Color',mycl(5+(level-1)*10,:));
 end
 ylim([0,100]);
 xlabel('Time (a.u.)');
@@ -75,7 +75,7 @@ xticklabels({'stimuli','action'});
 ylabel('Firing Rates (Hz)');
 lgd = legend(' ', ' ', 'R1', 'R2',...
     'Location','Northeast','NumColumns',2, 'FontSize', fontsize-8, 'Box','off');
-title(lgd, "Baseline                  STDP      .");
+title(lgd, "Baseline                  iSTDP      .");
 filename = sprintf('timeCourse_RT_R_%1.1f_%1.1f_sgm%2.2f',boost, sgm);
 savefigs(h, filename, plotdir,fontsize, aspect1);
 %% behavior at two levels of boost
@@ -109,11 +109,11 @@ ACC = [];
 meanRT = [];
 if ~exist(output,'file')
     for level = 1:length(boost)
-        a = a0*boost(level);
+        a = a0;%*boost(level);
         b = b0;
         w = w0.*boost(level);
         initialvals = (a-1)./sum(w,2)'.*[1,1; sum(w,2)'; 0, 0]; % for R, G, and I variables, will be further scaled
-        Vinput = scale*[1+cp, 1-cp]*boost(level);
+        Vinput = scale*[1+cp, 1-cp];%*boost(level);
         [rt, choice, ~] = LcDsInhbt_GPU(Vinput, w, eye(2)*a, eye(2)*b, sgm, Tau,...
             dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims);
         ACC(level,:,:) = gather(mean(2-squeeze(choice),2,'omitnan'));
