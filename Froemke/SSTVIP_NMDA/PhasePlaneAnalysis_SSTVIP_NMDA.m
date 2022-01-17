@@ -4,7 +4,7 @@ Homedir = '~';
 addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
 addpath(fullfile(Homedir,'Documents','LDDM','utils'));
 % cd('G:\My Drive\LDDM\Froemke');
-cd('/Volumes/GoogleDrive/My Drive/LDDM/Froemke');
+cd('/Volumes/GoogleDrive/My Drive/LDDM/Froemke/SSTVIP_NMDA/');
 plotdir = fullfile('./Graphics');
 if ~exist(plotdir,'dir')
     mkdir(plotdir);
@@ -42,7 +42,7 @@ mycl = jet(length(boost)*10);
 for level = 1:2
     V = 30*[1+c, 1-c]; %*boost(level);
     a = a0; %*boost(level);
-    b = b0;
+    b = b0*boost(level);
     w = w0*boost(level);
     v = v0*boost(level);
     R2 = linspace(.1,35,200);
