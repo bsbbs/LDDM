@@ -34,7 +34,7 @@ b0 = 1.7;
 
 presentt = dt*300;
 stimdur = Inf;
-triggert = presentt + dt;
+triggert = presentt + dt + .8;
 dur = 2.5; % second
 
 thresh = 70; % Hz
@@ -76,10 +76,10 @@ ylabel('Firing Rates (Hz)');
 lgd = legend(' ', ' ', 'R1', 'R2',...
     'Location','Northeast','NumColumns',2, 'FontSize', fontsize-8, 'Box','off');
 title(lgd, "Baseline                  iSTDP      .");
-filename = sprintf('timeCourse_RT_R_%1.1f_%1.1f_sgm%2.2f',boost, sgm);
+filename = sprintf('timeCourse_FD_R_%1.1f_%1.1f_sgm%2.2f',boost, sgm);
 savefigs(h, filename, plotdir,fontsize, aspect1);
 %% behavior at two levels of boost
-boost = [1, 1.3];
+boost = [1, 2];
 sims = 10000;
 sgmInput = 0; % 1/3
 sgm = 10; %6.8/2;
