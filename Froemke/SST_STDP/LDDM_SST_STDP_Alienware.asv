@@ -197,21 +197,21 @@ if ~exist(output,'file')
 else
     load(output);
 end
-mygray = [.9:-.9/numel(boost):0];
+mygray = .9:-1/numel(boost):0
 h = figure;
 filename = sprintf('Choice_RT_%1.1fto%1.1f_sgm%2.2f',boost, sgm);
 subplot(2,1,1); hold on;
 for level = 1:numel(boost)
-    plot(cp,ACC(level,:),'.-','Color',mygray(level)*[1,1,1]);
+    plot(cp,ACC(level,:),'.-','Color',mygray(level,:));
 end
 set(gca,'XScale','log');
 ylabel('% correct');
-% lgd = legend('Baseline', 'iSTDP',...
-%     'Location','SouthEast', 'FontSize', fontsize-8, 'Box','off');
+lgd = legend('Baseline', 'iSTDP',...
+    'Location','SouthEast', 'FontSize', fontsize-8, 'Box','off');
 savefigs(h, filename, plotdir,fontsize, flip(aspect1));
 subplot(2,1,2); hold on;
-for level = 1:numel(boost)
-    plot(cp,meanRT(level,:),'.-','Color',mygray(level)*[1,1,1]);
+for level = 1:length(boost)
+    plot(cp,meanRT(level,:),'.-');
 end
 set(gca,'XScale','log');
 ylabel('RT (s)');

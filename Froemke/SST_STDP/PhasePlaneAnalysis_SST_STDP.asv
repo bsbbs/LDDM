@@ -58,11 +58,8 @@ for level = 1:2
     plot([min(R1), V(1)/(1-a)],[V(2)/(1-a), V(2)/(1-a)],'--k','LineWidth',1);
     Line2 = [R1' R2'];
     if 1
-        [choice, rt, R, G, I] = LDDM_SST(V, iSTDP, [w,v;v,w], a, b, sgm, Tau, dur,...
-        dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-        
-%         [R, G, I, ~, ~] = LcDsInhbt(V, [w,v;v,w], a*eye(2), b*eye(2),...
-%             sgm, Tau, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+        [R, G, I, ~, ~] = LcDsInhbt(V, [w,v;v,w], a*eye(2), b*eye(2),...
+            sgm, Tau, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
         ldgtrc(level) = plot(R(round(presentt/dt):end,1), R(round(presentt/dt):end,2),'-','Color',mycl(5+(level-1)*10,:),'LineWidth',lwd/2); % '#ef476f'
 %         [R, G, I, ~, ~] = LcDsInhbt(V, [w,v;v,w], a*eye(2), b*eye(2),...
 %             sgm, Tau, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
@@ -72,8 +69,8 @@ for level = 1:2
         plot([0.1,1000],[0.1,1000],'--k');
     end
     syms R1 R2
-    eqns = [(V(1)/R1 - iSTDP*(w - b)*R1 - (1-a))/v/iSTDP == R2, ... % dR1/dt = 0
-        (V(2)/R2 - iSTDP*(w - b)*R2 - (1-a))/v/iSTDP == R1];% dR2/dt = 0
+    eqns = [(V(1)/R1 - (w - b)*R1 - (1-a))/v == R2, ... % dR1/dt = 0
+        (V(2)/R2 - (w - b)*R2 - (1-a))/v == R1];% dR2/dt = 0
     vars = [R1 R2];
     [AnswR1,AnswR2] = solve(eqns, vars);
     AnswI1 = b*AnswR1;
@@ -88,10 +85,10 @@ for level = 1:2
         R2star = double(AnswR2(i));
         G1star = double(AnswG1(i));
         G2star = double(AnswG2(i));
-        JMat = [-1 + a/(1+iSTDP*G1star), -iSTDP*(V(1)+a*R1star)/(1+iSTDP*G1star)^2, 0, 0, 0, 0
+        JMat = [-1 + a/(1+G1star), -(V(1)+a*R1star)/(1+G1star)^2, 0, 0, 0, 0
             w, -1, -1, v, 0, 0
             b, 0, -1, 0, 0, 0
-            0, 0, 0, -1+a/(1+iSTDP*G2star),   -iSTDP*(V(2)+a*R2star)/(1+iSTDP*G2star)^2, 0
+            0, 0, 0, -1+a/(1+G2star),   -(V(2)+a*R2star)/(1+G2star)^2, 0
             v, 0, 0, w, -1, -1
             0, 0, 0, b, 0, -1];
         A = eig(JMat);
