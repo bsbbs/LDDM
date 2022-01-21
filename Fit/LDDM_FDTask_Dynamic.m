@@ -19,9 +19,12 @@ dataBhvr = LoadRoitmanData('../RoitmanDataCode');
 randseed = 69094639;
 rng(randseed);
 % a, b, noise, scale, tauRGI, nLL
-params = [0	1.433631	25.35945	3251.289056	0.185325	0.224459	0.323132	16539.138186];
+% syms eqlb;
+% sol = solve(3251.289056 == 2*eqlb.^2 + eqlb, eqlb); % 40.0701
+a = 60;
+scale = (2*40.0701.^2 + (1-a).*40.0701)/5;
+params = [a	1.433631	25.35945	scale	0.185325	0.224459	0.323132	16539.138186]; % scale fitted = 3251.289056
 name = sprintf('LDDM_FD_a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f_nLL%4.0f',params);
-
 
 % reload Roitman's data, processed
 dot_ax = dataDynmc.dot_ax';
@@ -48,15 +51,16 @@ deduction = 1;
 sims = 1024/deduction;
 Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
 predur = 0;
-triggert = 1+1.5;%-2.5;
-dur = 5;
+stimdur = 1;
+triggert = stimdur + rand([size(Cohr'), sims])+.5;
+dur = 7;
 dt =.001;
 thresh = 70; %70.8399; % mean(max(m_mr1cD))+1; 
-stimdur = 2.5;
+
 stoprule = 1;
 w = [1 1; 1 1];
 Rstar = 32; % ~ 32 Hz at the bottom of initial fip, according to Roitman and Shadlen's data
-initialvals = [Rstar,Rstar; sum(w(1,:))*Rstar,sum(w(2,:))*Rstar; 0,0];
+initialvals = [Rstar,Rstar; sum(w(1,:))*Rstar,sum(w(2,:))*Rstar; 0,0]/1.3;
 Vprior = ones(6,2)*((1-a(1,1))*Rstar + 2*Rstar^2);
 
 Tau = [tauR tauG tauI];
@@ -102,26 +106,28 @@ set(gca,'TickDir','out');
 H = gca;
 H.LineWidth = 1;
 % ylim([20,60]);
-ylim([20,70.5]);
+ylim([15,72.5]);
 ylabel('Firing rate (sp/s)');
 xlabel('Time (secs)');
-xlim([-.05, .8]);
+xlim([-.05, 1]);
 xticks([0:.2:.8]);
 % set(gca,'FontSize',16);
 savefigs(h,filename,plot_dir,fontsize,aspect);
 subplot(1,2,2);hold on;
-plot([0,0],[20,71],'-k');
+%plot([10,0],[20,71],'-k');
+sm_mr1cD(1:24,:) = NaN;
+sm_mr2cD(1:24,:) = NaN;
 for ci = 1:6
     lg(ci) = plot(sac_ax/1000, sm_mr1cD(:,ci),'Color',colvec{ci},'LineWidth',lwd);
     plot(sac_ax/1000, sm_mr2cD(:,ci),'--','Color',colvec{ci},'LineWidth',lwd);
 end
-xlim([-.8, .05]);
+xlim([-1, .05]);
 set(gca,'TickDir','out');
 H = gca;
 H.LineWidth = 1;
 yticks([]);
 set(gca,'ycolor',[1 1 1]);
-ylim([20,70.5]);
-legend(lg,{'0','3.2','6.4','12.8','25.6','51.2'},'Location','best','FontSize',fontsize-2);
+ylim([15,72.5]);
+legend(lg,{'0','3.2','6.4','12.8','25.6','51.2'},'Location','southwest','FontSize',fontsize-2);
 savefigs(h,filename,plot_dir,fontsize,aspect);
 saveas(h,fullfile(plot_dir,[filename, '.fig']),'fig');

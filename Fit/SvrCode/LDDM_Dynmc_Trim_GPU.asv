@@ -101,9 +101,6 @@ NComput = prod(sizeComput);
 premotion_steps = round(predur/dt);
 onset_of_stimuli = gpuArray(round(presentt/dt));
 onset_of_trigger = gpuArray(round(triggert/dt));
-if isequal(size(onset_of_trigger), size(V1mat))
-    onset_of_trigger = gpuArray(repmat(onset_of_trigger,1,1,sims));
-end
 total_time_steps = gpuArray(round(dur/dt));
 stim_duration = gpuArray(round(stimdur/dt));
 offset_of_stimuli = onset_of_stimuli + stim_duration;
@@ -200,9 +197,10 @@ for ti = -premotion_steps:max(total_time_steps(:))
         if ti >= onset_of_trigger(1)
             BetasUp = gpuArray(ones(sizeComput));
         end
-    elseif all(size(onset_of_trigger) == sizeComput)
+    elseif all(size(onset_of_trigger) == size(V1mat))
         flip = ti >= onset_of_trigger;
-        BetasUp(flip) = 1;
+        BetasUp(flip,:) = 1;
+    elseif all(size(onset))
     end
     % update R, G, I
     G1old = G1; G2old = G2;
@@ -238,8 +236,9 @@ for ti = -premotion_steps:max(total_time_steps(:))
     NComput = NComput - sum(flip(:));
     if numel(unique(onset_of_trigger)) == 1
         rt(flip) = ti-onset_of_trigger(1);
-    elseif all(size(onset_of_trigger) == sizeComput)
-        rt(flip) = ti - onset_of_trigger(flip);
+    elseif all(size(onset_of_trigger) == size(V1mat))
+        onset_of_trigger_Array = gpuArray(repmat(onset_of_trigger,1,1,sims));
+        rt(flip) = ti - onset_of_trigger_Array(flip);
     end
     
     choice = choice + ((R2 > R1) - (R1 > R2) +3) .* flip; % 2 choose R1, 4 choose R2, 3 R1 = R2, 0 choice is not made
@@ -251,8 +250,8 @@ for ti = -premotion_steps:max(total_time_steps(:))
     for excl = 1:numel(loc)
         if numel(unique(onset_of_trigger)) == 1
             excldt = rt(loc(excl)) + onset_of_trigger(1) - time_spc;
-        elseif all(size(onset_of_trigger) == sizeComput)
-            excldt = rt(loc(excl)) + onset_of_trigger(loc(excl)) - time_spc;
+        elseif all(size(onset_of_trigger) == size(V1mat))
+            excldt = rt(loc(excl)) + onset_of_trigger_Array(loc(excl)) - time_spc;
         end
         mr1c(dot_ax > excldt,loc(excl)) = NaN;
         mr2c(dot_ax > excldt,loc(excl)) = NaN;
@@ -302,7 +301,7 @@ for i = 1:size(rt,1)
         m_mr1cD(:,i,j) = mean(mr1cD([-min(sac_ax) + sac_ax(sac_ax < 0)' + 1, -min(sac_ax)+(1:sum(sac_ax>=0))],i,j,choose1),4,'omitnan');
         m_mr2cD(:,i,j) = mean(mr2cD([-min(sac_ax) + sac_ax(sac_ax < 0)' + 1, -min(sac_ax)+(1:sum(sac_ax>=0))],i,j,choose1),4,'omitnan');
         % only look at the data more than half numbers of trials
-        mRT = median(rt(i,j,choose1)) + round(mean(triggert - presentt,'all')/dt); % median rt for trials choosing R1,  noticing rt = Inf in non-choice trials
+        mRT = median(rt(i,j,choose1)) + round((triggert - presentt)/dt); % median rt for trials choosing R1,  noticing rt = Inf in non-choice trials
         m_mr1c(dot_ax >= mRT + time_spc,i,j) = NaN;
         m_mr2c(dot_ax >= mRT + time_spc,i,j) = NaN;
         m_mr1cD(sac_ax <= -mRT + time_spcD,i,j) = NaN;
