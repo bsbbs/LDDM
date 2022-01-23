@@ -1,4 +1,4 @@
-function [nLL, Chi2, BIC, AIC] = AsymWFitBhvr6Params_QMLE_GPU(params,dataDynmc, dataBhvr)
+function [nLL, Chi2, BIC, AIC, rtmat, choicemat] = AsymWFitBhvr6Params_QMLE_GPU(params,dataDynmc, dataBhvr)
 % reload Roitman's data, processed
 dot_ax = dataDynmc.dot_ax';
 sac_ax = dataDynmc.sac_ax';
