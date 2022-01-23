@@ -74,13 +74,13 @@ t = datenum(clock)*10^10 - floor(datenum(clock)*100)*10^8 + sortNum*10^7 + i*10^
 save(fullfile(out_dir,sprintf('CollectRslts%i.mat',t)),'Collect');
 
 %% hand tuning
-%Homedir = 'C:\Users\Bo';
-Homedir = '~';
+Homedir = 'C:\Users\Bo';
+% Homedir = '~';
 addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
 addpath(fullfile(Homedir,'Documents','LDDM','utils'));
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
-cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
-% cd('G:\My Drive\LDDM\Fit');
+% cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
+cd('G:\My Drive\LDDM\Fit');
 out_dir = './Rslts/FitBhvr7ParamsIV_QMLE_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
@@ -297,47 +297,44 @@ h.PaperPosition = [0 0 3.0 10];
 %saveas(h,fullfile(plot_dir,sprintf('RTDistrb_%s.fig',name)),'fig');
 saveas(h,fullfile(plot_dir,sprintf('RTDistrb_%s.eps',name)),'epsc2');
 %% aggregated RT & ACC
+lwd = 1;
+mksz = 3;
+fontsize = 11;
 Cohr = [0 32 64 128 256 512]/1000;
 cplist = Cohr*100;
+cplist(1) = 1.1;
 h = figure;
-subplot(1,2,1);
+filename = sprintf('RT&ACC_%s',name);
+subplot(2,1,1);
 hold on;
-plot(cplist, accr*100, 'xk', 'MarkerSize', 8);
-plot(cplist,acc*100,'-k','LineWidth',2);
-ylim([.5,1]*100);
-xlim([0,100]);
-ylabel('Accuracy (%)');
-xlabel('Input Strength (% coh)');
+plot(cplist, accr*100, 'xk', 'MarkerSize', mksz+1);
+plot(cplist, acc*100,'-k','LineWidth',lwd);
+ylim([.45,1]*100);
+yticks([50,100]);
+xlim([1,100]);
+ylabel('Correct (%)');
+xlabel('Input coherence (%)');
 set(gca, 'XScale', 'log');
-set(gca,'FontSize',16);
-set(gca,'TickDir','out');
-H = gca;
-H.LineWidth = 1;
-legend({'data','model'},'NumColumns',2,'Location','SouthEast','FontSize',14);
+legend({'data','model'},'NumColumns',1,'Location','SouthEast','FontSize',fontsize-2);
 legend('boxoff');
+savefigs(h,filename,plot_dir,fontsize,[2,4]);
 
-
-subplot(1,2,2);
+subplot(2,1,2);
 hold on;
-lg1 = plot(cplist, meanrtcr, '.k', 'MarkerSize', 20);
-lg2 = plot(cplist, meanrtc, '-k','LineWidth',2);
-lg3 = plot(cplist, meanrtwr, 'ok', 'MarkerSize', 7);
-lg4 = plot(cplist, meanrtw, '--k','LineWidth',2);
-xlim([0,100]);
-ylabel('Reaction time (secs)');
-xlabel('Input Strength (% coh)');
+lg1 = plot(cplist, meanrtcr, '.k', 'MarkerSize', mksz*3);
+lg2 = plot(cplist, meanrtc, '-k','LineWidth',lwd);
+lg3 = plot(cplist, meanrtwr, 'ok', 'MarkerSize', mksz);
+lg4 = plot(cplist, meanrtw, '--k','LineWidth',lwd);
+xlim([1,100]);
+yticks([.4,1]);
+ylim([.4,1]);
+ylabel('RT (secs)');
+xlabel('Input coherence (%)');
 set(gca, 'XScale', 'log');
-set(gca,'FontSize',16);
-set(gca,'TickDir','out');
-H = gca;
-H.LineWidth = 1;
-lgd = legend([lg3,lg1,lg4,lg2],{'','','Error','Correct'},'NumColumns',2,'Location','SouthWest','FontSize',14);
-%legend({'empirical','fitted'},'NumColumns',2);
-legend('boxoff');
-h.PaperUnits = 'inches';
-h.PaperPosition = [0 0 9 3.0];
-%saveas(h,fullfile(plot_dir,sprintf('RT&ACC_%s.fig',name)),'fig');
-saveas(h,fullfile(plot_dir,sprintf('RT&ACC_%s.eps',name)),'epsc2');
+% lgd = legend([lg3,lg1,lg4,lg2],{'','','Error','Correct'},'NumColumns',2,'Location','SouthWest','FontSize',14);
+% legend('boxoff');
+savefigs(h,filename,plot_dir,fontsize,[2,4]);
+
 
 %% Q-Q plot for reaction time and choice
 lwd = 1.0;

@@ -17,7 +17,7 @@ tgap = 0; % tgap is not assumed for the simulation of WW06
 
 % other fixed parameters
 % sims = 1024;
-deduction = .1;
+deduction = 1;
 sims = 1024/deduction;
 Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
 presentt = 0;

@@ -76,13 +76,13 @@ save(fullfile(out_dir,sprintf('CollectRslts%i.mat',t)),'Collect');
 %% hand tuning
 % addpath('../CoreFunctions/');
 % addpath('./SvrCode/');
-% Homedir = 'C:\Users\Bo';
-Homedir = '~';
+Homedir = 'C:\Users\Bo';
+% Homedir = '~';
 addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
 addpath(fullfile(Homedir,'Documents','LDDM','utils'));
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
-cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
-% cd('G:\My Drive\LDDM\Fit');
+% cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
+cd('G:\My Drive\LDDM\Fit');
 out_dir = './Rslts/WW06FitBhvr7ParamsII_QMLE_GPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
@@ -99,7 +99,7 @@ rng(randseed);
 %    JNp, JNn, I0, noise, miu0, tauS, tauAMPA, nLL
 params = [0.475556	0.12605	0.162363	0.099998	119.982527	0.158728	0.004346	16638.810193];
 %[0.428032	0.1131	0.350868	0.022471	105.691412	0.042461	0.014988	16877.754482];
-name = sprintf('JNp%2.1f_JNn%1.2f_I0%1.2f_noise%1.2f_miu0%2.2f_nLL%4.1f',params);
+name = sprintf('JNp%2.1f_JNn%1.2f_I0%1.2f_noise%1.2f_miu0%2.2f_tauS%0.2f_tauAMPA%.4f_sim1024',params(1:7));
 
 % simulation
 if  ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
@@ -121,7 +121,7 @@ fontsize = 11;
 %    JNp, JNn, I0, noise, miu0, tauS, tauAMPA, nLL
 params = [0.475556	0.12605	0.162363	0.099998	119.982527	0.158728	0.004346	16638.810193];
 %[0.428032	0.1131	0.350868	0.022471	105.691412	0.042461	0.014988	16877.754482];
-simname = sprintf('WW06Dynmc_JNp%2.1f_JNn%1.2f_I0%1.2f_noise%1.2f_miu0%2.2f_nLL%4.1f',params);
+simname = sprintf('WW06Dynmc_JNp%2.1f_JNn%1.2f_I0%1.2f_noise%1.2f_miu0%2.2f_tauS%0.2f_tauAMPA%.4f',params(1:7));
 Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
 c1 = (1 + Cohr)';
 c2 = (1 - Cohr)';
@@ -287,55 +287,54 @@ h.PaperUnits = 'inches';
 h.PaperPosition = [0 0 3.0 10];
 % saveas(h,fullfile(plot_dir,sprintf('RTDistrb_%s.fig',name)),'fig');
 saveas(h,fullfile(plot_dir,sprintf('RTDistrb_%s.eps',name)),'epsc2');
-% aggregated RT & ACC
-Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
+%% aggregated RT & ACC
+lwd = 1;
+mksz = 3;
+fontsize = 11;
+Cohr = [0 32 64 128 256 512]/1000;
 cplist = Cohr*100;
+cplist(1) = 1.1;
 h = figure;
-subplot(1,2,1);
+filename = sprintf('RT&ACC_%s',name);
+subplot(2,1,1);
 hold on;
-plot(cplist, accr*100, 'xk', 'MarkerSize', 8);
-plot(cplist,acc*100,'-k','LineWidth',2);
-ylim([.5,1]*100);
-xlim([0,100]);
-ylabel('Accuracy (%)');
-xlabel('Input Strength (% coh)');
+plot(cplist, accr*100, 'xk', 'MarkerSize', mksz+1);
+plot(cplist, acc*100,'-k','LineWidth',lwd);
+ylim([.45,1]*100);
+yticks([50,100]);
+xlim([1,100]);
+ylabel('Correct (%)');
+xlabel('Input coherence (%)');
 set(gca, 'XScale', 'log');
-set(gca,'FontSize',16);
-set(gca,'TickDir','out');
-H = gca;
-H.LineWidth = 1;
-legend({'data','model'},'NumColumns',2,'Location','SouthEast','FontSize',14);
+legend({'data','model'},'NumColumns',1,'Location','SouthEast','FontSize',fontsize-2);
 legend('boxoff');
-subplot(1,2,2);
-hold on;
-lg1 = plot(cplist, meanrtcr, '.k', 'MarkerSize', 20);
-lg2 = plot(cplist, meanrtc, '-k','LineWidth',2);
-lg3 = plot(cplist, meanrtwr, 'ok', 'MarkerSize', 7);
-lg4 = plot(cplist, meanrtw, '--k','LineWidth',2);
-xlim([0,100]);
-ylabel('Reaction time (secs)');
-xlabel('Input Strength (% coh)');
-set(gca, 'XScale', 'log');
-set(gca,'FontSize',16);
-set(gca,'TickDir','out');
-H = gca;
-H.LineWidth = 1;
-lgd = legend([lg3,lg1,lg4,lg2],{'','','Error','Correct'},'NumColumns',2,'Location','SouthWest','FontSize',14);
-%legend({'empirical','fitted'},'NumColumns',2);
-legend('boxoff');
-h.PaperUnits = 'inches';
-h.PaperPosition = [0 0 9 3.0];
-% saveas(h,fullfile(plot_dir,sprintf('RT&ACC_%s.fig',name)),'fig');
-saveas(h,fullfile(plot_dir,sprintf('RT&ACC_%s.eps',name)),'epsc2');
+savefigs(h,filename,plot_dir,fontsize,[2,4]);
 
-% Q-Q plot for reaction time and choice
+subplot(2,1,2);
+hold on;
+lg1 = plot(cplist, meanrtcr, '.k', 'MarkerSize', mksz*3);
+lg2 = plot(cplist, meanrtc, '-k','LineWidth',lwd);
+lg3 = plot(cplist, meanrtwr, 'ok', 'MarkerSize', mksz);
+lg4 = plot(cplist, meanrtw, '--k','LineWidth',lwd);
+xlim([1,100]);
+yticks([.4,1]);
+ylim([.4, 1]);
+ylabel('RT (secs)');
+xlabel('Input coherence (%)');
+set(gca, 'XScale', 'log');
+% lgd = legend([lg3,lg1,lg4,lg2],{'','','Error','Correct'},'NumColumns',2,'Location','SouthWest','FontSize',14);
+% legend('boxoff');
+savefigs(h,filename,plot_dir,fontsize,[2,4]);
+
+%% Q-Q plot for reaction time and choice
 lwd = 1.0;
 mksz = 3;
-fontsize = 10;
+fontsize = 11;
 x = dataBhvr.proportionmat;
 y = dataBhvr.q;
 qntls = dataBhvr.qntls;
 h = figure; hold on;
+filename = sprintf('Q-QPlot_%s',name);
 for vi = 1:length(x)
     xc = x(vi)*ones(size(y(:,1,vi)));
     xw = 1 - x(vi)*ones(size(y(:,2,vi)));
@@ -354,15 +353,12 @@ for qi = 1:size(q,1)
     xq = [flip(1-x), x]';
     plot(xq,[squeeze(flip(q(qi,2,:)));squeeze(q(qi,1,:))],'k-o','MarkerSize',mksz,'LineWidth',lwd/2);
 end
-xlim([-.1 1.1]);
-ylim([.0, 1.5]);
+xlim([-.05 1.05]);
+ylim([0.2, 1.4]);
+yticks([.2:.4:1.4]);
 xlabel('Proportion');
 ylabel('RT (s)');
-% h.PaperUnits = 'inches';
-% h.PaperPosition = [0 0 4 5];
-filename = sprintf('Q-QPlot_%s',name);
-% saveas(h,fullfile(plot_dir,sprintf('Q-QPlot_%s.eps',name)),'epsc2');
-savefigs(h, filename, plot_dir, fontsize, [1.8 2.5]);
+savefigs(h, filename, plot_dir, fontsize, [2 2.5]);
 %% the original space of QMLE
 acc = dataBhvr.proportionmat;
 ON = dataBhvr.ON;
