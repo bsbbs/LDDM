@@ -303,12 +303,14 @@ plot(cplist, acc*100,'-k','LineWidth',lwd);
 ylim([.45,1]*100);
 yticks([50,100]);
 xlim([1,100]);
+xticks([1,10,100]);
+xticklabels({'0','10','100'});
 ylabel('Correct (%)');
 xlabel('Input coherence (%)');
 set(gca, 'XScale', 'log');
 legend({'data','model'},'NumColumns',1,'Location','SouthEast','FontSize',fontsize-2);
 legend('boxoff');
-savefigs(h,filename,plot_dir,fontsize,[2,4]);
+savefigs(h,filename,plot_dir,fontsize,[2,3.0]);
 
 subplot(2,1,2);
 hold on;
@@ -317,6 +319,8 @@ lg2 = plot(cplist, meanrtc, '-k','LineWidth',lwd);
 lg3 = plot(cplist, meanrtwr, 'ok', 'MarkerSize', mksz);
 lg4 = plot(cplist, meanrtw, '--k','LineWidth',lwd);
 xlim([1,100]);
+xticks([1,10,100]);
+xticklabels({'0','10','100'});
 yticks([.4,1]);
 ylim([.4, 1]);
 ylabel('RT (secs)');
@@ -324,7 +328,7 @@ xlabel('Input coherence (%)');
 set(gca, 'XScale', 'log');
 % lgd = legend([lg3,lg1,lg4,lg2],{'','','Error','Correct'},'NumColumns',2,'Location','SouthWest','FontSize',14);
 % legend('boxoff');
-savefigs(h,filename,plot_dir,fontsize,[2,4]);
+savefigs(h,filename,plot_dir,fontsize,[2,3.0]);
 
 %% Q-Q plot for reaction time and choice
 lwd = 1.0;
