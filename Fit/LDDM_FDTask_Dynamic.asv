@@ -19,8 +19,15 @@ dataBhvr = LoadRoitmanData('../RoitmanDataCode');
 randseed = 69094639;
 rng(randseed);
 % a, b, noise, scale, tauRGI, nLL
-params = [	0	1.433631	25.35945	3251.289056	0.185325	0.224459	0.323132	16539.138186];
+syms eqlb;
+sol = solve(3251.289056 == 3*eqlb.^2 + eqlb, eqlb); %32.7543
+a = 40;
+scale = 3*32.7543.^2 + (1-a).*32.7543
+params = [a	1.433631	25.35945	3251.289056	0.185325	0.224459	0.323132	16539.138186];
 name = sprintf('LDDM_FD_a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f_nLL%4.0f',params);
+
+
+
 
 
 % reload Roitman's data, processed
@@ -48,11 +55,11 @@ deduction = 1;
 sims = 1024/deduction;
 Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
 predur = 0;
-triggert = 0;
+triggert = 2.5;%-2.5;
 dur = 5;
 dt =.001;
 thresh = 70; %70.8399; % mean(max(m_mr1cD))+1; 
-stimdur = dur;
+stimdur = 1;
 stoprule = 1;
 w = [1 1; 1 1];
 Rstar = 32; % ~ 32 Hz at the bottom of initial fip, according to Roitman and Shadlen's data
@@ -65,31 +72,20 @@ Tau = [tauR tauG tauI];
 V1 = (1 + Cohr)';
 V2 = (1 - Cohr)';
 Vinput = [V1, V2]*scale;
-if ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
+if ~exist(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),'file')
     tic;
     [rtmat, choicemat, ~, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDM_Dynmc_Trim_GPU(Vprior, Vinput, w, a, b,...
         sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims, dot_ax, sac_ax);
     rtmat = squeeze(rtmat)'+ndt;
     choicemat = squeeze(choicemat)';
-    save(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),...
-        'rtmat','choicemat','sm_mr1c','sm_mr2c','sm_mr1cD','sm_mr2cD','params');
-    toc
-else
-    load(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)));
-end
-
-%% plot dynamics
-%% plot time course
-if ~exist(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),'file')
-    tic;
-    [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LcDFitBhvr7ParamsIV_QMLE_GPU(params, dataDynmc, dataBhvr);
-    %sm_mr1c = gather(sm_mr1c);
     save(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),...
         'rtmat','choicemat','sm_mr1c','sm_mr2c','sm_mr1cD','sm_mr2cD','params');
     toc
 else
-    load(fullfile(plot_dir, sprintf('PlotDynamic_%s.mat',name)));
+    load(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)));
 end
+
+%% plot time course
 load('./Data/Data.mat');
 m_mr1c = m_mr1c';
 m_mr2c = m_mr2c';
