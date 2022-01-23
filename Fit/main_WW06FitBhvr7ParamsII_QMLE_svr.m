@@ -76,13 +76,13 @@ save(fullfile(out_dir,sprintf('CollectRslts%i.mat',t)),'Collect');
 %% hand tuning
 % addpath('../CoreFunctions/');
 % addpath('./SvrCode/');
-Homedir = 'C:\Users\Bo';
-% Homedir = '~';
+% Homedir = 'C:\Users\Bo';
+Homedir = '~';
 addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
 addpath(fullfile(Homedir,'Documents','LDDM','utils'));
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
-% cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
-cd('G:\My Drive\LDDM\Fit');
+cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
+% cd('G:\My Drive\LDDM\Fit');
 out_dir = './Rslts/WW06FitBhvr7ParamsII_QMLE_GPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
@@ -114,9 +114,72 @@ if  ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
     else
         load(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)));
 end
+%% Example dynamics
+lwd = 1;
+mksz = 3;
+fontsize = 11;
+%    JNp, JNn, I0, noise, miu0, tauS, tauAMPA, nLL
+params = [0.475556	0.12605	0.162363	0.099998	119.982527	0.158728	0.004346	16638.810193];
+%[0.428032	0.1131	0.350868	0.022471	105.691412	0.042461	0.014988	16877.754482];
+simname = sprintf('WW06Dynmc_JNp%2.1f_JNn%1.2f_I0%1.2f_noise%1.2f_miu0%2.2f_nLL%4.1f',params);
+Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
+c1 = (1 + Cohr)';
+c2 = (1 - Cohr)';
+cplist = [c1, c2];
+mygray = flip(gray(length(cplist)));
+JNp = params(1);
+JNn = params(2);
+I0 = params(3);
+sgm = params(4)/5;
+miu0 = params(5);
+ndt = .03 + .09; % sec, initial dip for 90ms after stimuli onset, resort to the saccade side, the activities reaches peak 30ms before initiation of saccade, according to Roitman & Shadlen
+presentt = 0;
+triggert = 0;
+dur = 5;
+dt =.001;
+thresh = 70; % to match the data in Roitman&Shadlen and most of the other evidence
+stimdur = dur;
+stoprule = 1;
+JN = [JNp -JNn; -JNn JNp];
+gamma = .641;
+tauS = params(6);   %.1; % sec
+tauAMPA = params(7); %.002; % sec
+unit = 1; % secs
+initialvals = [32 32; .6723, .6723]; %
+h = figure; hold on;
+filename = sprintf('%s',simname);
+randseed = 75245522;
+rng(randseed);
+for vi = 2:6
+    cp = cplist(vi,:);
+    [~, ~, R, ~, ~, ~] = wong06(cp,miu0,sgm,I0,JN,...
+        gamma, tauS, tauAMPA, dur, dt, presentt, stimdur, thresh, initialvals, stoprule);
+    lgd2(vi-1) = plot(R(:,2), 'k-.', 'Color', mygray(vi,:), 'LineWidth',lwd);
+    lgd1(vi-1) = plot(R(:,1), 'k-', 'Color', mygray(vi,:), 'LineWidth',lwd);
+end
+plot([.2, 1.2]/dt,[thresh,thresh], 'k-');
+text(600,thresh*1.1,'threshold');
+yticks([0,32,70]);
+yticklabels({'0','32','70'});
+ylabel('Activity (Hz)');
+% ylim([0,74]);
+xticks([0, 500, 1000, 1500]);
+xticklabels({'0','.5','1.0','1.5'});
+xlim([-50, 1200]);
+xlabel('Time (s)');
+
+% lgd = legend(lgd3,cellstr(num2str(c3)),...
+%     'Location','best','FontSize',fontsize-5, 'FontName','Times New Roman',...
+%     'FontAngle','italic','NumColumns',1,'Box','off');
+% title(lgd, 'V_3');
+
+savefigs(h, filename, plot_dir, fontsize, [2, 1.5]);
+
+%%%%%%%%%%%%
 
 
-% plot RT distribution - fitted
+
+%% plot RT distribution - fitted
 rate = length(rtmat)/1024;
 maxrt = max(max(rtmat));
 minrt = min(min(rtmat));

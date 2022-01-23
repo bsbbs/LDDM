@@ -111,6 +111,78 @@ else
     load(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)));
 end
 
+%% Example dynamics
+lwd = 1;
+mksz = 3;
+fontsize = 11;
+% a, w1, noise, scale, tauR, tauG, nLL
+params = [36.538884	0.134803	7.401239	284.382666	0.052278	0.231087	16675.6422];
+simname = sprintf('AsymW_a%2.1f_w%1.1f_noise2.1f_scl%2.1f_tau%1.3f_%1.3f',params);
+a = params(1)*eye(2);
+w1 = params(2);
+sgm =  params(3)/5;
+scale = params(4);
+ndt = .03; % sec, resort to the saccade side, the activities reaches peak 30ms before initiation of saccade, according to Roitman & Shadlen
+tgap = 0.09; % initial dip for 90ms after stimuli onset
+tauR = params(5);
+tauG = params(6);
+Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
+c1 = (1 + Cohr)';
+c2 = (1 - Cohr)';
+cplist = [c1, c2];
+mygray = flip(gray(length(cplist)));
+presentt = 0;
+triggert = 0;
+dur = 5;
+dt =.001;
+thresh = 70; %70.8399; % mean(max(m_mr1cD))+1; 
+stimdur = dur;
+stoprule = 1;
+w = [w1 1; 1 w1];
+Rstar = 32; % ~ 32 Hz according to Roitman and Shadlen's data, at the bottom of initial dip
+initialvals = [Rstar,Rstar; sum(w(1,:))*Rstar,sum(w(2,:))*Rstar;0, 0];
+Tau = [tauR tauG];
+h = figure; 
+% subplot(2,1,1); 
+hold on;
+filename = sprintf('%s',simname);
+randseed = 75245522;
+rng(randseed);
+for vi = 2:6
+    Vinput = cplist(vi,:)*scale;
+    [R, G, ~, ~, ~] = AsymW(Vinput, w, a, sgm, Tau,...
+        dur, dt, presentt, triggert, 1.5*thresh, initialvals, stimdur, stoprule);
+    lgd2(vi-1) = plot(R(:,2), 'k-.', 'Color', mygray(vi,:), 'LineWidth',lwd);
+    lgd1(vi-1) = plot(R(R(:,1)<=thresh,1), 'k-', 'Color', mygray(vi,:), 'LineWidth',lwd);
+end
+plot([.2, 1.2]/dt,[thresh,thresh], 'k-');
+text(600,thresh*1.1,'threshold');
+yticks([0,32,70]);
+yticklabels({'0','32','70'});
+% ylim([0,74]);
+ylabel('Activity (Hz)');
+xticks([0, 500, 1000, 1500]);
+xticklabels({'0','.5','1.0','1.5'});
+xlim([-50, 1200]);
+xlabel('Time (s)');
+savefigs(h, filename, plot_dir, fontsize, [2 1.5]);
+% 
+% subplot(2,1,2); hold on;
+% for vi = 2:6
+%     Vinput = cplist(vi,:);
+%     [R, G, ~, ~, ~] = AsymW(Vinput, w, a, sgm, Tau,...
+%         dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+%     lgd2(vi-1) = plot(diff(R(:,2)), 'k--', 'Color', mygray(vi+1,:), 'LineWidth',lwd);
+%     lgd1(vi-1) = plot(diff(R(:,1)), 'k-', 'Color', mygray(vi+1,:), 'LineWidth',lwd);
+% end
+% ylabel('Time derivative');
+% xticks([0, 500, 1000, 1500]);
+% xticklabels({'0','.5','1.0','1.5'});
+% xlim([-50, 1800]);
+% yticks([-.1,0,.3]);
+% ylim([-.1, .35]);
+% xlabel('Time (s)');
+% savefigs(h, filename, plot_dir, fontsize, [1.8 1.4]);
 %% plot time course
 % load('./Data/Data.mat');
 % m_mr1c = m_mr1c';

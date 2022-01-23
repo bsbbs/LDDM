@@ -38,7 +38,7 @@ choice = NaN;
 %% get initial values
 H = initialvals(1,:);
 S = initialvals(2,:);
-Inoise = randn(sizeVinput)*sgm;
+Inoise = zeros(sizeVinput); % randn(sizeVinput)*sgm;
 nu_wind = H;
 s_wind = S;
 %% simulation begin

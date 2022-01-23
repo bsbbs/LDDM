@@ -86,7 +86,7 @@ savefigs(h, filename, plotdir,fontsize, aspect1);
 boost = [1, 2];
 sims = 10000;
 sgmInput = 0; % 1/3
-sgm = 10; %6.8/2;
+sgm = 10; % 6.8/2;
 dt = .001; % second
 tauR = .1; % second
 tauG = .1; % second

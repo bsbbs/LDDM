@@ -1,4 +1,4 @@
-function [R, G, I, rt, choice] = AsymW(Vinput, w, a, b, sgm, Tau, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule)
+function [R, G, I, rt, choice] = AsymW(Vinput, w, a, sgm, Tau, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule)
 %%%%%%%%%%%%%%%%%%
 % The core function of local disinhibitory model
 % Created by Bo Shen, NYU, 2019
@@ -91,7 +91,6 @@ for ti = 2:total_time_steps
                 break;
             else
                 a = zeros(sizeVinput(2)); % reset 'a' after decision is made
-                b = zeros(sizeVinput(2)); % reset 'b' after decision is made
                 Vinput = zeros(sizeVinput); % reset 'Vinput' after decision is made
             end
         end

@@ -60,9 +60,12 @@ choice = NaN;
 G(1,:) = initialvals(2,:);
 R(1,:) = initialvals(1,:);
 I(1,:) = initialvals(3,:);
-InoiseG = randn(sizeVinput)*sgm;
-InoiseR = randn(sizeVinput)*sgm;
-InoiseI = randn(sizeVinput)*sgm;
+InoiseG = zeros(sizeVinput);
+InoiseR = zeros(sizeVinput);
+InoiseI = zeros(sizeVinput);
+% InoiseG = randn(sizeVinput).*sqrt(dt)*sgm;
+% InoiseR = randn(sizeVinput).*sqrt(dt)*sgm;
+% InoiseI = randn(sizeVinput).*sqrt(dt)*sgm;
 for ti = 1:total_time_steps
     % update R, G, I
     dR = (-R(ti,:)' + (Vinput'*(ti >= onset_of_stimuli & ti < onset_of_stimuli+stim_duration) + a*R(ti,:)')./(1+G(ti,:)'))/Tau(1)*dt;
