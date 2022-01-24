@@ -76,13 +76,13 @@ save(fullfile(out_dir,sprintf('CollectRslts%i.mat',t)),'Collect');
 %% hand tuning
 % addpath('../CoreFunctions/');
 % addpath('./SvrCode/');
-Homedir = 'C:\Users\Bo';
-% Homedir = '~';
+% Homedir = 'C:\Users\Bo';
+Homedir = '~';
 addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
 addpath(fullfile(Homedir,'Documents','LDDM','utils'));
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
-% cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
-cd('G:\My Drive\LDDM\Fit');
+cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
+% cd('G:\My Drive\LDDM\Fit');
 out_dir = './Rslts/WW06FitBhvr7ParamsII_QMLE_GPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
@@ -145,7 +145,9 @@ gamma = .641;
 tauS = params(6);   %.1; % sec
 tauAMPA = params(7); %.002; % sec
 unit = 1; % secs
-initialvals = [32 32; .6723, .6723]; %
+H0 = 32;
+S0 = H0*gamma*tauS/(H0*gamma*tauS+1);
+initialvals = [H0, H0;S0, S0]; % S = H*gamma*tauS./(H*gamma*tauS+1)
 h = figure; hold on;
 filename = sprintf('%s',simname);
 randseed = 75245522;
@@ -173,7 +175,7 @@ xlabel('Time (s)');
 %     'FontAngle','italic','NumColumns',1,'Box','off');
 % title(lgd, 'V_3');
 
-savefigs(h, filename, plot_dir, fontsize, [2, 1.5]);
+% savefigs(h, filename, plot_dir, fontsize, [2, 1.5]);
 
 %%%%%%%%%%%%
 

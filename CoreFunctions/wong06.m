@@ -19,7 +19,7 @@ unit = 1; % set as 1 if the unit of time related variables is second.
 % connectivity strength
 JAext = 5.2 * 10^-4; %nA/Hz
 
-%% preparation
+%% define parameters
 tauS = tauS/unit;
 tauAMPA = tauAMPA/unit;
 dt = dt/unit;
@@ -30,41 +30,53 @@ stimdur = stimdur/unit;
 time_wind = .050/dt/unit;  % Temporal window size for averaging, 50 msec
 % not used, slided at each step of dt. slide_wind = .005/dt/unit;  % Sliding step for window, 5 msec
 % time line
-total_time_steps = round(dur/dt);
+posttask_steps = round(dur/dt);
 onset_of_stimuli = round(presentt/dt);
 stim_duration = round(stimdur/dt);
+offset_of_stimuli = onset_of_stimuli + stim_duration;
 rt = NaN;
 choice = NaN;
-%% get initial values
-H = initialvals(1,:);
-S = initialvals(2,:);
-Inoise = zeros(sizeVinput); % randn(sizeVinput)*sgm;
-nu_wind = H;
-s_wind = S;
+%% stablizing noise for 200 ms
+Inoise = zeros(sizeVinput);
+stablizetime = round(.2/dt);
+for kk = 1:stablizetime
+    % update noise
+    dInoise = (-Inoise/tauAMPA*dt + randn(sizeVinput)*sqrt(dt/tauAMPA*sgm^2)); %
+    Inoise = Inoise + dInoise;
+end
+%% get initial values at ti = 0
+% drop in buffer to sliding window
+Hbuffer = repmat(initialvals(1,:),time_wind,1);
+Sbuffer = repmat(initialvals(2,:),time_wind,1);
+nu_wind(1,:) = mean(Hbuffer,1);
+s_wind(1,:) = mean(Sbuffer,1);
+S(1,:) = initialvals(2,:);
+H(1,:) = initialvals(1,:);
 %% simulation begin
-for ti = 1:total_time_steps
+t_stamp = 1;
+for ti = 0:posttask_steps
     % update nerual firing rates based on inputs
-    I = JAext*miu0*cp*(ti >= onset_of_stimuli & ti < onset_of_stimuli+stim_duration);
-    x = (JN*S(ti,:)')' + I0 + I + Inoise;
-    H(ti+1,:) = (a*x - b)./(1 - exp(-d*(a*x - b)));
+    I = JAext*miu0*cp*(ti >= onset_of_stimuli & ti < offset_of_stimuli);
+    x = (JN*S(ti+t_stamp,:)')' + I0 + I + Inoise;
+    H(ti+t_stamp+1,:) = (a*x - b)./(1 - exp(-d*(a*x - b)));
     % update synaptic activities based on firing rates
-    dS = (-S(ti,:)/tauS + (1-S(ti,:)).*H(ti,:)*unit*gamma)*dt;
-    S(ti+1,:) = S(ti,:) + dS;
+    dS = (-S(ti+t_stamp,:)/tauS + (1-S(ti+t_stamp,:)).*H(ti+t_stamp,:)*unit*gamma)*dt;
+    S(ti+t_stamp+1,:) = S(ti+t_stamp,:) + dS;
     % update noise
     dInoise = (-Inoise/tauAMPA*dt + randn(sizeVinput)*sqrt(dt/tauAMPA*sgm^2)); %
     Inoise = Inoise + dInoise;
     
     % To ensure firing rates are always positive (noise may cause negative)
-    H(ti+1,H(ti+1,:) < 0) = 0;
+    H(ti+t_stamp+1,H(ti+t_stamp+1,:) < 0) = 0;
     % drop in buffer to sliding window
     loci = mod(ti,time_wind) + (mod(ti,time_wind) == 0)*time_wind;
-    Hbuffer(loci,:) = H(ti,:);
-    Sbuffer(loci,:) = S(ti,:);
-    nu_wind(ti,:) = mean(Hbuffer,1);
-    s_wind(ti,:) = mean(Sbuffer,1);
+    Hbuffer(loci,:) = H(ti+t_stamp,:);
+    Sbuffer(loci,:) = S(ti+t_stamp,:);
+    nu_wind(ti+t_stamp,:) = mean(Hbuffer,1);
+    s_wind(ti+t_stamp,:) = mean(Sbuffer,1);
     % threshold detecting
     if ti >= onset_of_stimuli && isnan(rt)
-        postsynapFR = nu_wind(ti,:);
+        postsynapFR = nu_wind(ti+t_stamp,:);
         if max(postsynapFR) >= thresh
             rt = (ti - onset_of_stimuli)*dt;
             choice = find(postsynapFR == max(postsynapFR));

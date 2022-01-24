@@ -1,4 +1,5 @@
-function [R, G, I, rt, choice] = AsymW(Vinput, w, a, sgm, Tau, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule)
+function [R, G, rt, choice] = AsymW(Vprior, Vinput, w, a, sgm, Tau,...
+    predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule)
 %%%%%%%%%%%%%%%%%%
 % The core function of local disinhibitory model
 % Created by Bo Shen, NYU, 2019
@@ -47,46 +48,63 @@ function [R, G, I, rt, choice] = AsymW(Vinput, w, a, sgm, Tau, dur, dt, presentt
 % 	1 for to stop, 0 for to continue simulating until total duration set in dur. 
 %%%%%%%%%%%%%%%%%%%
 tauN =0.002; % time constant for Ornstein-Uhlenbeck process of noise
-%% preparation
-total_time_steps = round(dur/dt);
+%% define parameters
+pretask_steps = round(predur/dt);
+posttask_steps = round(dur/dt);
 onset_of_stimuli = round(presentt/dt);
-onset_of_trigger = round(triggert/dt);
 stim_duration = round(stimdur/dt);
+offset_of_stimuli = onset_of_stimuli + stim_duration;
+onset_of_trigger = round(triggert/dt);
 sizeVinput = size(Vinput);
 if sizeVinput(1) > 1 error('Error: the size of Vinput has to be 1xN'); end
 rt = NaN;
 choice = NaN;
-%% simulation begin
-G(1,:) = initialvals(2,:);
-R(1,:) = initialvals(1,:);
-I(1,:) = initialvals(3,:);
+%% stablizing noise for 200 ms
 InoiseG = zeros(sizeVinput);
 InoiseR = zeros(sizeVinput);
-% InoiseI = zeros(sizeVinput);
-for ti = 2:total_time_steps
-    % update R, G, I
-    dG = (-G(ti-1,:)' + w * R(ti-1,:)')/Tau(2)*dt;
-%     dI = (-I(ti-1,:)' + b*(ti >= onset_of_trigger)*R(ti-1,:)')/Tau(3)*dt;
-    dR = (-R(ti-1,:)' + (Vinput'*(ti >= onset_of_stimuli & ti < onset_of_stimuli+stim_duration) + a*(ti >= onset_of_stimuli)*R(ti-1,:)')./(1+G(ti-1,:)'))/Tau(1)*dt;
-    G(ti,:) = G(ti-1,:) + dG' + InoiseG(ti-1,:);
-%     I(ti,:) = I(ti-1,:) + dI' + InoiseI(ti-1,:);
-    R(ti,:) = R(ti-1,:) + dR' + InoiseR(ti-1,:);
+stablizetime = round(.2/dt);
+for kk = 1:stablizetime
     % update noise
-    dInoiseG = (-InoiseG(ti-1,:) + randn(sizeVinput).*sqrt(dt).*sgm)/tauN*dt;
-%     dInoiseI = (-InoiseI(ti-1,:) + randn(sizeVinput).*sqrt(dt).*sgm)/tauN*dt;
-    dInoiseR = (-InoiseR(ti-1,:) + randn(sizeVinput).*sqrt(dt).*sgm)/tauN*dt;
-    InoiseG(ti,:) = InoiseG(ti-1,:) + dInoiseG;
-%     InoiseI(ti,:) = InoiseI(ti-1,:) + dInoiseI;
-    InoiseR(ti,:) = InoiseR(ti-1,:) + dInoiseR;
+    InoiseG = InoiseG + (-InoiseG + randn(sizeVinput).*sqrt(dt).*sgm)/tauN*dt;
+    InoiseR = InoiseR + (-InoiseR + randn(sizeVinput).*sqrt(dt).*sgm)/tauN*dt;
+end
+G(1,:) = initialvals(2,:) + InoiseG;
+R(1,:) = initialvals(1,:) + InoiseR;
+%% simulation begin
+t_stamp = pretask_steps + 1;
+for ti = (-pretask_steps):posttask_steps % align the beginning of the task as ti = 0
+    % input values
+    if ti > -pretask_steps && ti < 0
+        V = Vprior;
+    elseif ti >= onset_of_stimuli && ti < offset_of_stimuli
+        V = Vinput;
+    else
+        V = 0;
+    end
+    if (ti >= onset_of_trigger)
+        wp = w;
+    else
+        wp = [1,1;1,1];
+    end
+    % update R, G, I
+    dG = (-G(ti+t_stamp,:)' + wp * R(ti+t_stamp,:)')/Tau(2)*dt;
+    dR = (-R(ti+t_stamp,:)' + (V' + a*R(ti+t_stamp,:)')./(1+G(ti+t_stamp,:)'))/Tau(1)*dt;
+    G(ti+t_stamp+1,:) = G(ti+t_stamp,:) + dG' + InoiseG;
+    R(ti+t_stamp+1,:) = R(ti+t_stamp,:) + dR' + InoiseR;
+    
+    % update noise
+    InoiseG = InoiseG + (-InoiseG + randn(sizeVinput).*sqrt(dt).*sgm)/tauN*dt;
+    InoiseR = InoiseR + (-InoiseR + randn(sizeVinput).*sqrt(dt).*sgm)/tauN*dt;
+    
     % setting lower boundary, forcing neural firing rates to be non-negative
-    G(ti,G(ti,:) < 0) = 0;
+    G(ti+t_stamp+1,G(ti+t_stamp+1,:) < 0) = 0;
 %     I(ti,I(ti,:) < 0) = 0;
-    R(ti,R(ti,:) < 0) = 0;
+    R(ti+t_stamp+1,R(ti+t_stamp+1,:) < 0) = 0;
     % threshold detecting
     if ti > onset_of_trigger && isnan(rt)
-        if max(R(ti,:)) >= thresh
+        if max(R(ti+t_stamp,:)) >= thresh
             rt = (ti-onset_of_trigger)*dt;
-            choice = find(R(ti,:) == max(R(ti,:)));
+            choice = find(R(ti+t_stamp,:) == max(R(ti+t_stamp,:)));
             if stoprule == 1
                 break;
             else

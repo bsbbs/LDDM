@@ -33,7 +33,7 @@ tauS = params(6);   %.1; % sec
 tauAMPA = params(7); %.002; % sec
 unit = 1; % secs
 initialvals = [32 32; .6723, .6723]; % H, firing rate at the initlal dip, according to Roitman&Shadlen's data
-% S is calculater accoording to S = H*gamma*tauS./(H*gamma*tauS+1), tauS
+% S is calculated accoording to S = H*gamma*tauS./(H*gamma*tauS+1), tauS
 % assumed at 100ms
 
 % simulation

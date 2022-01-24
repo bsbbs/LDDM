@@ -29,7 +29,7 @@ unit = 1; % set as 1 if the unit of time related variables is second.
 % change it to .001 if the unit of time related varibales is msec.
 JAext = 5.2 * 10^-4; %nA/Hz
 
-%% preparation
+%% define parameters
 I0Array = gpuArray(I0);
 JN11 = (JN(1,1));
 JN12 = (JN(1,2));
@@ -43,8 +43,8 @@ else
     cp1 = cp(:,1);
     cp2 = cp(:,2);
 end
-cp1Array = gpuArray(repmat(cp1,1,1,sims)/256);
-cp2Array = gpuArray(repmat(cp2,1,1,sims)/256);
+cp1Array = gpuArray(repmat(cp1,1,1,sims));
+cp2Array = gpuArray(repmat(cp2,1,1,sims));
 sizeVinput = size(cp1);
 sizeComput = [sizeVinput, sims];
 NComput = prod(sizeComput);
@@ -56,44 +56,43 @@ stimdur = stimdur/unit;
 time_wind = .050/dt/unit;  % Temporal window size for averaging, 50 msec
 % not used, slide_wind = .005/dt/unit;  % Sliding step for window, 5 msec
 % time line
-total_time_steps = gpuArray(round(dur/dt));
+posttask_steps = gpuArray(round(dur/dt));
 onset_of_stimuli = gpuArray(round(presentt/dt));
 stim_duration = gpuArray(round(stimdur/dt));
 offset_of_stimuli = onset_of_stimuli + stim_duration;
-%% get initial values
+%% stablizing noise for 200 ms
+Inoise1 = gpuArray(zeros(sizeComput));
+Inoise2 = gpuArray(zeros(sizeComput));
+stablizetime = round(.2/dt);
+for kk = 1:stablizetime
+    % update noise
+    Inoise1 = Inoise1 +(-Inoise1/tauAMPA*dt + gpuArray.randn(sizeComput).*sqrt(dt/tauAMPA*sgm^2));
+    Inoise2 = Inoise2 +(-Inoise2/tauAMPA*dt + gpuArray.randn(sizeComput).*sqrt(dt/tauAMPA*sgm^2));
+end
+%% get initial values at ti = 0
+% drop in buffer to sliding window
+H1buffer = gupArray(repmat(initialvals(1,1),[sizeComput,time_wind]));
+H2buffer = gupArray(repmat(initialvals(1,2),[sizeComput,time_wind]));
 H1new = gpuArray(ones(sizeComput)*initialvals(1,1));
 H2new = gpuArray(ones(sizeComput)*initialvals(1,2));
 S1 = gpuArray(ones(sizeComput)*initialvals(2,1));
 S2 = gpuArray(ones(sizeComput)*initialvals(2,2));
-% noise
-Inoise1 = gpuArray.randn(sizeComput).*sgm;
-Inoise2 = gpuArray.randn(sizeComput).*sgm;
 %% simulation begin
 rt = gpuArray(zeros(sizeComput));
 choice = gpuArray(zeros(sizeComput));
-c1Array = gpuArray(zeros(sizeComput)); % input values set as zeros before onset of stimuli
-c2Array = gpuArray(zeros(sizeComput));
-for ti = 1:(max(total_time_steps(:)))
-    if ti >= onset_of_stimuli
-        cp1Array = gpuArray(repmat(cp1,1,1,sims));
-        cp2Array = gpuArray(repmat(cp2,1,1,sims));
-    end
-    if numel(offset_of_stimuli) == 1
-        if ti >= offset_of_stimuli
-            c1Array = gpuArray(zeros(sizeComput));
-            c2Array = gpuArray(zeros(sizeComput));
-        end
-    elseif prod(size(offset_of_stimuli) == size(cp1))
-        offset_of_stimulimat = repmat(offset_of_stimuli,1,1,sims);
-        withdraw = offset_of_stimulimat >= ti;
-        c1Array(withdraw) = 0;
-        c2Array(withdraw) = 0;
+for ti = 0:posttask_steps
+    if ti >= onset_of_stimuli && ti < offset_of_stimuli
+        V1 = cp1Array;
+        V2 = cp2Array;
+    else
+        V1 = 0;
+        V2 = 0; 
     end
     % update nerual firing rates H
     H1 = H1new;
     H2 = H2new;
-    I1 = JAext*miu0*cp1Array;
-    I2 = JAext*miu0*cp2Array;
+    I1 = JAext*miu0*V1;
+    I2 = JAext*miu0*V2;
     x1 = JN11*S1 + JN12*S2 + I0Array + I1 + Inoise1;
     x2 = JN21*S1 + JN22*S2 + I0Array + I2 + Inoise2;
     H1new = (a*x1 - b)./(1 - exp(-d*(a*x1 - b)));

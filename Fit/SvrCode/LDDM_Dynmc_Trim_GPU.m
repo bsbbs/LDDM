@@ -62,7 +62,7 @@ function [rt, choice, argmaxR, m_mr1c, m_mr2c, m_mr1cD, m_mr2cD] = LDDM_Dynmc_Tr
 % indicated the task enters motion stage from premotion stage
 %%%%%%%%%%%%%%%%%%%
 tauN = 0.002; % time constant for Ornstein-Uhlenbeck process of noise
-%% preparation
+%% define parameters
 sgmArray = gpuArray(sgm);
 tauN = gpuArray(tauN);
 dtArray = gpuArray(dt);
@@ -98,20 +98,20 @@ end
 sizeVinput = size(V1mat);
 sizeComput = [sizeVinput, sims];
 NComput = prod(sizeComput);
-premotion_steps = round(predur/dt);
+pretask_steps = round(predur/dt);
 onset_of_stimuli = gpuArray(round(presentt/dt));
 onset_of_trigger = gpuArray(round(triggert/dt));
 if isequal(size(onset_of_trigger), size(V1mat))
     onset_of_trigger = gpuArray(repmat(onset_of_trigger,1,1,sims));
 end
-total_time_steps = gpuArray(round(dur/dt));
+posttask_steps = gpuArray(round(dur/dt));
 stim_duration = gpuArray(round(stimdur/dt));
 offset_of_stimuli = onset_of_stimuli + stim_duration;
 % dot_ax = [-100:20:1000];
 % sac_ax = [-1000:20:300];
 time_spc = 100; % ms, to exclude activity within 100 msecs of eye movement initiation in calculating mrc
 time_spcD = 200; % ms, to exclude activity within 200 msecs of motion onset in calculating mrcD
-%% stablizing noise
+%% stablizing noise for 200 ms
 InoiseR1 = gpuArray(zeros(sizeComput));
 InoiseG1 = gpuArray(zeros(sizeComput));
 InoiseI1 = gpuArray(zeros(sizeComput));
@@ -155,7 +155,7 @@ R2Out = gpuArray.nan(sizeComput);
 Continue = gpuArray(ones(sizeComput)); % to mark the trials that choices haven't made yet
 BetasUp = gpuArray(zeros(sizeComput)); % change from 0 to beta on the time of trigger
 tpafterward = gpuArray(zeros(sizeComput)); % time stamp intermediate variable after decision
-for ti = -premotion_steps:max(total_time_steps(:))
+for ti = -pretask_steps:max(posttask_steps(:))
     % sample mrc according to dot_ax
     if any(ti == dot_ax)
         rec_axi = find(ti == dot_ax);
