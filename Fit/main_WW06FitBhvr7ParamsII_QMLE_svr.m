@@ -76,13 +76,13 @@ save(fullfile(out_dir,sprintf('CollectRslts%i.mat',t)),'Collect');
 %% hand tuning
 % addpath('../CoreFunctions/');
 % addpath('./SvrCode/');
-% Homedir = 'C:\Users\Bo';
-Homedir = '~';
+Homedir = 'C:\Users\Bo';
+% Homedir = '~';
 addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
 addpath(fullfile(Homedir,'Documents','LDDM','utils'));
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
-cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
-% cd('G:\My Drive\LDDM\Fit');
+% cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
+cd('G:\My Drive\LDDM\Fit');
 out_dir = './Rslts/WW06FitBhvr7ParamsII_QMLE_GPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
@@ -175,7 +175,7 @@ xlabel('Time (s)');
 %     'FontAngle','italic','NumColumns',1,'Box','off');
 % title(lgd, 'V_3');
 
-% savefigs(h, filename, plot_dir, fontsize, [2, 1.5]);
+savefigs(h, filename, plot_dir, fontsize, [2, 1.5]);
 
 %%%%%%%%%%%%
 
@@ -185,7 +185,7 @@ xlabel('Time (s)');
 rate = length(rtmat)/1024;
 maxrt = max(max(rtmat));
 minrt = min(min(rtmat));
-%segrt = maxrt - minrt;
+% segrt = maxrt - minrt;
 bank1 = [];
 bank2 = [];
 acc = [];

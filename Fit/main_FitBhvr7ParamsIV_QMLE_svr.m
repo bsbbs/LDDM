@@ -74,13 +74,13 @@ t = datenum(clock)*10^10 - floor(datenum(clock)*100)*10^8 + sortNum*10^7 + i*10^
 save(fullfile(out_dir,sprintf('CollectRslts%i.mat',t)),'Collect');
 
 %% hand tuning
-% Homedir = 'C:\Users\Bo';
-Homedir = '~';
+Homedir = 'C:\Users\Bo';
+% Homedir = '~';
 addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
 addpath(fullfile(Homedir,'Documents','LDDM','utils'));
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
-% cd('G:\My Drive\LDDM\Fit');
-cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
+cd('G:\My Drive\LDDM\Fit');
+% cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
 out_dir = './Rslts/FitBhvr7ParamsIV_QMLE_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
@@ -95,11 +95,11 @@ randseed = 69094639;
 rng(randseed);
 % a, b, noise, scale, tauRGI, nLL
 params = [0	1.433631	25.35945	3251.289056	0.185325	0.224459	0.323132	16539.138186];
-name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f_nLL%4.0f',params);
+name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f_sim1024',params(1:7));
 if ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
     tic;
     [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDMFitBhvr7ParamsIV_QMLE_GPU(params,dataDynmc, dataBhvr);
-    %sm_mr1c = gather(sm_mr1c);
+    % sm_mr1c = gather(sm_mr1c);
     save(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),...
         'rtmat','choicemat','sm_mr1c','sm_mr2c','sm_mr1cD','sm_mr2cD','params');
     toc

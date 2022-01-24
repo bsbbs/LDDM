@@ -71,8 +71,8 @@ for kk = 1:stablizetime
 end
 %% get initial values at ti = 0
 % drop in buffer to sliding window
-H1buffer = gupArray(repmat(initialvals(1,1),[sizeComput,time_wind]));
-H2buffer = gupArray(repmat(initialvals(1,2),[sizeComput,time_wind]));
+H1buffer = gpuArray(repmat(initialvals(1,1),[sizeComput,time_wind]));
+H2buffer = gpuArray(repmat(initialvals(1,2),[sizeComput,time_wind]));
 H1new = gpuArray(ones(sizeComput)*initialvals(1,1));
 H2new = gpuArray(ones(sizeComput)*initialvals(1,2));
 S1 = gpuArray(ones(sizeComput)*initialvals(2,1));

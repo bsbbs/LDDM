@@ -22,6 +22,7 @@ sims = 1024/deduction;
 Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
 presentt = 0;
 triggert = 0;
+predur = 0;
 dur = 5;
 dt =.001;
 thresh = 70; %70.8399; % mean(max(m_mr1cD))+1; 
@@ -30,7 +31,8 @@ stoprule = 1;
 w = [w1 1; 1 w1];
 Rstar = 32; % ~ 32 Hz according to Roitman and Shadlen's data, at the bottom of initial dip
 initialvals = [Rstar,Rstar; sum(w(1,:))*Rstar,sum(w(2,:))*Rstar];
-% Vprior = ones(6,2)*((1-a(1,1))*Rstar + 2*Rstar^2);
+eqlb = Rstar; % set equilibrium value before task as R^*
+Vprior = [1, 1]*(2*mean(w,'all')*eqlb.^2 + (1-a(1)).*eqlb);
 
 Tau = [tauR tauG];
 % simulation
@@ -39,7 +41,7 @@ V1 = (1 + Cohr)';
 V2 = (1 - Cohr)';
 Vinput = [V1, V2]*scale;
 % tic;
-[rtmat, choicemat, ~] = AsymW_GPU(Vinput, w, a, sgm, Tau, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims);
+[rtmat, choicemat, ~] = AsymW_GPU(Vprior, Vinput, w, a, sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims);
 rtmat = squeeze(rtmat)' + ndt + tgap;
 choicemat = squeeze(choicemat)';
 % toc;

@@ -108,10 +108,10 @@ if isequal(size(offset_of_stimuli), size(V1mat))
     offset_of_stimuli = gpuArray(repmat(offset_of_stimuli,1,1,sims));
 end
 %% stablizing noise for 200 ms
-InoiseR1=gpuArray(X*0);
-InoiseG1=gpuArray(X*0);
-InoiseR2=gpuArray(X*0);
-InoiseG2=gpuArray(X*0);
+InoiseR1 = gpuArray.zeros(sizeComput);
+InoiseG1 = gpuArray.zeros(sizeComput);
+InoiseR2 = gpuArray.zeros(sizeComput);
+InoiseG2 = gpuArray.zeros(sizeComput);
 stablizetime = round(.2/dt);
 for kk = 1:stablizetime
     InoiseR1 = InoiseR1 + (-InoiseR1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
@@ -120,15 +120,16 @@ for kk = 1:stablizetime
     InoiseG2 = InoiseG2 + (-InoiseG2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
 end
 %% initialize variables
+X = gpuArray(ones(sizeComput));
 R1 = gpuArray(X*initialvals(1,1)) + InoiseR1;
 R2 = gpuArray(X*initialvals(1,2)) + InoiseR2;
 G1 = gpuArray(X*initialvals(2,1)) + InoiseG1;
 G2 = gpuArray(X*initialvals(2,2)) + InoiseG2;
 %% simulation
-R1Out = gpuArray(zeros(sizeComput));
-R2Out = gpuArray(zeros(sizeComput));
-rt = gpuArray(zeros(sizeComput));
-choice = gpuArray(zeros(sizeComput));
+R1Out = gpuArray.zeros(sizeComput);
+R2Out = gpuArray.zeros(sizeComput);
+rt = gpuArray.zeros(sizeComput);
+choice = gpuArray.zeros(sizeComput);
 Continue = gpuArray(ones(sizeComput));
 for ti = -pretask_steps:max(posttask_steps(:))
     if stoprule == 1

@@ -32,9 +32,9 @@ gamma = .641;
 tauS = params(6);   %.1; % sec
 tauAMPA = params(7); %.002; % sec
 unit = 1; % secs
-initialvals = [32 32; .6723, .6723]; % H, firing rate at the initlal dip, according to Roitman&Shadlen's data
-% S is calculated accoording to S = H*gamma*tauS./(H*gamma*tauS+1), tauS
-% assumed at 100ms
+H0 = 32;
+S0 = H0*gamma*tauS/(H0*gamma*tauS+1);
+initialvals = [H0, H0;S0, S0]; % S = H*gamma*tauS./(H*gamma*tauS+1)
 
 % simulation
 % fprintf('GPU Simulations %i chains ...\t', sims);
