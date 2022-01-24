@@ -125,12 +125,13 @@ R1 = gpuArray(X*initialvals(1,1)) + InoiseR1;
 R2 = gpuArray(X*initialvals(1,2)) + InoiseR2;
 G1 = gpuArray(X*initialvals(2,1)) + InoiseG1;
 G2 = gpuArray(X*initialvals(2,2)) + InoiseG2;
-%% simulation
-R1Out = gpuArray.zeros(sizeComput);
-R2Out = gpuArray.zeros(sizeComput);
+%% initialize variables
 rt = gpuArray.zeros(sizeComput);
 choice = gpuArray.zeros(sizeComput);
-Continue = gpuArray(ones(sizeComput));
+R1Out = gpuArray.nan(sizeComput); % records the values at decision, or the end of simulation if choice was not made
+R2Out = gpuArray.nan(sizeComput);
+Continue = gpuArray(ones(sizeComput)); % to mark the trials that choices haven't made yet
+%% simulation
 for ti = -pretask_steps:max(posttask_steps(:))
     if stoprule == 1
         if NComput == 0
@@ -143,31 +144,24 @@ for ti = -pretask_steps:max(posttask_steps(:))
             V1Array = V1inputArray;
             V2Array = V2inputArray;
         else
-            V1Array = 0; %gpuArray(zeros(sizeComput));
-            V2Array = 0; %gpuArray(zeros(sizeComput));
+            V1Array = 0;
+            V2Array = 0;
         end
     elseif isequal(size(onset_of_stimuli), sizeComput)
         flip = ti >= onset_of_stimuli;
-        V1Array = V1inputArray.*flip; %gpuArray(repmat(V1mat.*flip,1,1,sims));
-        V2Array = V2inputArray.*flip; %gpuArray(repmat(V2mat.*flip,1,1,sims));
+        V1Array = V1inputArray.*flip;
+        V2Array = V2inputArray.*flip;
     end
     
     if numel(unique(offset_of_stimuli)) == 1
         if ti >= offset_of_stimuli(1)
-            V1Array = 0; %gpuArray(zeros(sizeComput));
-            V2Array = 0; %gpuArray(zeros(sizeComput));
-            if ti == offset_of_stimuli(1)
-                R1Out = R1;
-                R2Out = R2;
-            end
+            V1Array = 0;
+            V2Array = 0;
         end
     elseif isequal(size(offset_of_stimuli), sizeComput)
         flip = ti >= offset_of_stimuli;
         V1Array(flip,:) = 0;
         V2Array(flip,:) = 0;
-        flip = offset_of_stimuli == ti;
-        R1Out(flip) = R1(flip);
-        R2Out(flip) = R2(flip);
     end
     
     
@@ -183,8 +177,8 @@ for ti = -pretask_steps:max(posttask_steps(:))
         w11p = gpuArray(onese(sizeComput)*w12);
         w22p = gpuArray(onese(sizeComput)*w21);
         flip = ti >= onset_of_trigger;
-        w11p(flip,:) = w11;
-        w22p(flip,:) = w22;
+        w11p(flip) = w11;
+        w22p(flip) = w22;
     end
     
     % update R, G
@@ -214,12 +208,19 @@ for ti = -pretask_steps:max(posttask_steps(:))
     rt = rt + gpuArray(ti-onset_of_trigger).*flip*dtArray;
     choice = choice + ((R2 > R1) - (R1 > R2) +3) .* flip; % 2 choose R1, 4 choose R2, 3 R1 = R2, 0 choice is not made
     Continue = choice == 0;
+    R1Out(flip) = R1(flip); % update the values at choice, keep others as nan
+    R2Out(flip) = R2(flip);
 end
+% for those trials that choices were not made
+R1Out(choice == 0) = R1(choice == 0);
+R2Out(choice == 0) = R2(choice == 0);
+%% calculate
 choice = choice/2; %1 choose R1, 2 choose R2, 1.5 R1 = R2, 0 choice is not made
-rt(rt==0) = NaN;
 choice(choice == 0) = NaN; %1 choose R1, 2 choose R2, 1.5 R1 = R2, NaN choice is not made
+rt(rt==0) = NaN;
 inside = R1Out < R2Out;
 inside = inside + (R1Out == R2Out)/2;% R1 < R2 recorded as 1, R1 > R2 recorded as 0, R1 == R2 recorded as .5;
 argmaxR = inside + 1; % keep consistant as other models, 1 for choose R1, 2 for choose R2, and 1.5 for equal
 rt = gather(rt);
 choice = gather(choice);
+argmaxR = gather(argmaxR);
