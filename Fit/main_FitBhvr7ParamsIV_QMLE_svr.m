@@ -1,21 +1,20 @@
-addpath('../');
+addpath('../RecurrentModel');
 numNode = 1;
 [sortNum, myCluster] = RndCtrl(numNode);
 mypool = parpool(myCluster, myCluster.NumWorkers);
 
 %% Model fitting with Bayesian Adaptive Direct Search (BADS) optimization algorithm
-addpath(genpath('../bads/bads-master'));
-addpath(genpath('G:\My Drive\LDDM\Fit\bads-master'));
+addpath(genpath('../RecurrentModel/bads/bads-master'));
 addpath('../CoreFunctions/');
 addpath('./SvrCode/');
-out_dir = './Rslts/FitBhvr7ParamsIV_QMLE_SvrGPU';
+out_dir = '../RecurrentModel/Fit/Rslts/FitBhvr7ParamsIV_QMLE_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
 %%
 % Take data from Roitman & Shadlen, 2002
-dataDynmc = load('./Data/Data.mat');
-dataBhvr = LoadRoitmanData('../RoitmanDataCode');
+dataDynmc = load('../RecurrentModel/Fit/Data/Data.mat');
+dataBhvr = LoadRoitmanData('../RecurrentModel/RoitmanDataCode');
 % Fix random seed for reproducibility
 % rng(1);
 % change random seed
@@ -39,7 +38,7 @@ nLLfun = @(params) LDDMFitBhvr7ParamsIV_QMLE_GPU(params, dataBhvr);
 fprintf('test succeeded\n');
 % change starting points
 Collect = [];
-parfor i = 1:myCluster.NumWorkers*4
+parfor i = 1:myCluster.NumWorkers*8
     !ping -t 1 www.amazon.com
     t = datenum(clock)*10^10 - floor(datenum(clock)*100)*10^8 + sortNum*10^7 + i*10^5;
     %num2str(t);
@@ -74,6 +73,8 @@ end
 t = datenum(clock)*10^10 - floor(datenum(clock)*100)*10^8 + sortNum*10^7 + i*10^5;
 save(fullfile(out_dir,sprintf('CollectRslts%i.mat',t)),'Collect');
 
+
+if 0
 %% hand tuning
 Homedir = 'C:\Users\Bo';
 % Homedir = '~';
@@ -588,3 +589,4 @@ end
 h.PaperUnits = 'inches';
 h.PaperPosition = [0 0 5.3 4];
 saveas(h,fullfile(plot_dir,sprintf('FittedParamsDistribution.eps')),'epsc2');
+end
