@@ -160,10 +160,9 @@ for ti = -pretask_steps:max(posttask_steps(:))
         end
     elseif isequal(size(offset_of_stimuli), sizeComput)
         flip = ti >= offset_of_stimuli;
-        V1Array(flip,:) = 0;
-        V2Array(flip,:) = 0;
+        V1Array(flip) = 0;
+        V2Array(flip) = 0;
     end
-    
     
     if numel(unique(onset_of_trigger)) == 1
         if ti >= onset_of_trigger(1)
@@ -203,7 +202,7 @@ for ti = -pretask_steps:max(posttask_steps(:))
     R2 = R2 .* inside;
     % threshold detecting
     inside = (R1 >= threshArray) + (R2 >= threshArray);
-    flip = (inside > 0) .* (rt == 0) .* (ti > onset_of_trigger);
+    flip = (inside > 0) & (choice == 0) & (ti > onset_of_trigger);
     NComput = NComput - sum(flip(:));
     rt = rt + gpuArray(ti-onset_of_trigger).*flip*dtArray;
     choice = choice + ((R2 > R1) - (R1 > R2) +3) .* flip; % 2 choose R1, 4 choose R2, 3 R1 = R2, 0 choice is not made

@@ -1,5 +1,7 @@
-function [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsIV_QMLE_GPU(params, dataBhvr)
+function [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDMFitBhvr7ParamsIV_QMLE_GPU(params,dataDynmc, dataBhvr)
 % reload Roitman's data, processed
+dot_ax = dataDynmc.dot_ax';
+sac_ax = dataDynmc.sac_ax';
 q = dataBhvr.q;
 On = dataBhvr.On;
 ON = dataBhvr.ON;
@@ -31,7 +33,7 @@ stoprule = 1;
 w = [1 1; 1 1];
 Rstar = 32; % ~ 32 Hz at the bottom of initial fip, according to Roitman and Shadlen's data
 initialvals = [Rstar,Rstar; sum(w(1,:))*Rstar,sum(w(2,:))*Rstar; 0,0];
-eqlb = Rstar; % set equilibrium value before task as R^*
+Vprior = ones(6,2)*((1-a(1,1))*Rstar + 2*Rstar^2);
 
 Tau = [tauR tauG tauI];
 % simulation
@@ -39,10 +41,9 @@ Tau = [tauR tauG tauI];
 V1 = (1 + Cohr)';
 V2 = (1 - Cohr)';
 Vinput = [V1, V2]*scale;
-Vprior = ones(size(Vinput))*(2*mean(w,'all')*eqlb.^2 + (1-a(1)).*eqlb);
-% tic
-[rtmat, choicemat, ~] = LDDM_GPU(Vprior, Vinput, w, a, b,...
-    sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims);
+% tic;
+[rtmat, choicemat, ~, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDM_Dynmc_Trim_GPU(Vprior, Vinput, w, a, b,...
+    sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims, dot_ax, sac_ax);
 rtmat = squeeze(rtmat)'+ndt;
 choicemat = squeeze(choicemat)';
 % toc;

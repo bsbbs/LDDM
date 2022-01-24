@@ -25,21 +25,21 @@ rng(t);
 %     a,    w1,  noise, scale, tauR, tauG
 LB = [0    0.001   .1    .1*256, [.001,.001]];
 UB = [70   1	100  20*256, [1, 1]];
-PLB = [15  .1	5    1*256, [.01 .01]];
-PUB = [60   .4	40   8*256, [.2 .2]];
+PLB = [15  .1	2    .5*256, [.01 .01]];
+PUB = [60   .4	20   8*256, [.2 .2]];
 
 % Randomize initial starting point inside plausible box
 x0 = rand(1,numel(LB)) .* (PUB - PLB) + PLB;
 
 % likelihood function
 % parpool(6);
-nLLfun = @(params) AsymWFitBhvr6Params_QMLE_GPU(params, dataDynmc, dataBhvr);
+nLLfun = @(params) AsymWFitBhvr6Params_QMLE_GPU(params, dataBhvr);
 [fvalbest,~,~] = nLLfun(x0)
 fprintf('test succeeded\n');
 % change starting points
 Collect = [];
 parfor i = 1:myCluster.NumWorkers*4
-    !ping -c 1 www.amazon.com
+    !ping -r 1 www.amazon.com
     t = datenum(clock)*10^10 - floor(datenum(clock)*100)*10^8 + sortNum*10^7 + i*10^5;
     %num2str(t);
     rng(t);
@@ -103,7 +103,7 @@ name = sprintf('a%2.1f_w%1.1f_noise%2.1f_scl%2.1f_tau%1.3f_%1.3f_sim1024',params
 % simulation
 if ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
     tic;
-    [nLL, Chi2, BIC, AIC, rtmat, choicemat] = AsymWFitBhvr6Params_QMLE_GPU(params,dataDynmc, dataBhvr);
+    [nLL, Chi2, BIC, AIC, rtmat, choicemat] = AsymWFitBhvr6Params_QMLE_GPU(params, dataBhvr);
     save(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),...
         'rtmat','choicemat','params','nLL','Chi2','AIC','BIC');
     toc

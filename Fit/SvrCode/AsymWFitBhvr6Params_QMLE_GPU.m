@@ -1,7 +1,5 @@
-function [nLL, Chi2, BIC, AIC, rtmat, choicemat] = AsymWFitBhvr6Params_QMLE_GPU(params,dataDynmc, dataBhvr)
+function [nLL, Chi2, BIC, AIC, rtmat, choicemat] = AsymWFitBhvr6Params_QMLE_GPU(params, dataBhvr)
 % reload Roitman's data, processed
-dot_ax = dataDynmc.dot_ax';
-sac_ax = dataDynmc.sac_ax';
 q = dataBhvr.q;
 On = dataBhvr.On;
 ON = dataBhvr.ON;
@@ -32,7 +30,6 @@ w = [w1 1; 1 w1];
 Rstar = 32; % ~ 32 Hz according to Roitman and Shadlen's data, at the bottom of initial dip
 initialvals = [Rstar,Rstar; sum(w(1,:))*Rstar,sum(w(2,:))*Rstar];
 eqlb = Rstar; % set equilibrium value before task as R^*
-Vprior = [1, 1]*(2*mean(w,'all')*eqlb.^2 + (1-a(1)).*eqlb);
 
 Tau = [tauR tauG];
 % simulation
@@ -40,6 +37,7 @@ Tau = [tauR tauG];
 V1 = (1 + Cohr)';
 V2 = (1 - Cohr)';
 Vinput = [V1, V2]*scale;
+Vprior = ones(size(Vinput))*(2*mean(w,'all')*eqlb.^2 + (1-a(1)).*eqlb);
 % tic;
 [rtmat, choicemat, ~] = AsymW_GPU(Vprior, Vinput, w, a, sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims);
 rtmat = squeeze(rtmat)' + ndt + tgap;
