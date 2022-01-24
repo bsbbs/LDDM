@@ -159,6 +159,7 @@ for vi = 2:6
     lgd2(vi-1) = plot(R(:,2), 'k-.', 'Color', mygray(vi,:), 'LineWidth',lwd);
     lgd1(vi-1) = plot(R(R(:,1)<=thresh,1), 'k-', 'Color', mygray(vi,:), 'LineWidth',lwd);
 end
+legend()
 plot([.2, 1.2]/dt,[thresh,thresh], 'k-');
 text(600,thresh*1.1,'threshold');
 yticks([0,32,70]);
@@ -349,8 +350,8 @@ h = figure; hold on;
 for vi = 1:length(x)
     xc = x(vi)*ones(size(y(:,1,vi)));
     xw = 1 - x(vi)*ones(size(y(:,2,vi)));
-    plot(xc,y(:,1,vi),'gx','MarkerSize',mksz+1,'LineWidth',lwd);
-    plot(xw,y(:,2,vi),'rx','MarkerSize',mksz+1,'LineWidth',lwd);
+    lgc = plot(xc,y(:,1,vi),'gx','MarkerSize',mksz+1,'LineWidth',lwd);
+    lge = plot(xw,y(:,2,vi),'rx','MarkerSize',mksz+1,'LineWidth',lwd);
     % fitted value
     En(vi) = numel(rtmat(:,vi));
     RT_corr = rtmat(choicemat(:,vi) == 1,vi);
@@ -358,12 +359,13 @@ for vi = 1:length(x)
     xr = numel(RT_corr)/(numel(RT_corr) + numel(RT_wro));
     q(:,1,vi) = quantile(RT_corr,qntls); % RT value on quantiles, correct trial
     q(:,2,vi) = quantile(RT_wro,qntls); % RT value on quantiles, error trial
-    
 end
 for qi = 1:size(q,1)
     xq = [flip(1-x), x]';
     plot(xq,[squeeze(flip(q(qi,2,:)));squeeze(q(qi,1,:))],'k-o','MarkerSize',mksz,'LineWidth',lwd/2);
 end
+legend([lge,lgc],{'error','correct'},"NumColumns",2,'Location','northeast','FontSize',fontsize-2);
+legend('box','off');
 xlim([-.05 1.05]);
 ylim([.2, 1.4]);
 yticks([.2:.4:1.4]);
