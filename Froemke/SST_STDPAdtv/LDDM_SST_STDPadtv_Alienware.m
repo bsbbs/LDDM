@@ -3,8 +3,8 @@ Homedir = 'C:\Users\Bo';
 % Homedir = '~';
 addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
 addpath(fullfile(Homedir,'Documents','LDDM','utils'));
-addpath(fullfile(Homedir,'Documents','LDDM','Froemke/SST_STDP/'));
-cd('G:\My Drive\LDDM\Froemke\SST_STDP');
+addpath(fullfile(Homedir,'Documents','LDDM','Froemke/SST_STDPadtv/'));
+cd('G:\My Drive\LDDM\Froemke\SST_STDPadtv');
 % cd('/Volumes/GoogleDrive/My Drive/LDDM/Froemke');
 plotdir = fullfile('./Graphics');
 if ~exist(plotdir,'dir')
@@ -35,7 +35,7 @@ b0 = 2.8;
 predur = 0;
 presentt = dt*200;
 stimdur = Inf;
-triggert = presentt + dt + .8;
+triggert = presentt + dt;% + .8;
 dur = 4.5; % second
 
 thresh = 70; % Hz
@@ -49,7 +49,7 @@ c1 = [1 + c];
 c2 = [1 - c];
 Vprior = [1,1]*scale;
 
-boost = [1, 2];
+boost = [0, 36];
 %% Dynamics
 sgm = 0;
 h = figure;
@@ -61,30 +61,30 @@ for level = 1:length(boost)
     b = b0;
     w = w0;%*boost(level);
     iSTDP = boost(level);
-    initialvals = (a-1)/iSTDP./sum(w,2)'.*[1,1; sum(w,2)'; 0, 0]; % for R, G, and I variables, will be further scaled
+    initialvals = (a-1-iSTDP)./sum(w,2)'.*[1,1; sum(w,2)'; 0, 0]; % for R, G, and I variables, will be further scaled
 %     [choice, rt, R, G, I] = LDDM(Vinput, w, a, b, sgm, Tau, dur,...
 %         dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-    [choice, rt, R, G, I] = LDDM_STDP(Vprior, Vinput, iSTDP, w, a, b,...
+    [choice, rt, R, G, I] = LDDM_STDPadtv(Vprior, Vinput, iSTDP, w, a, b,...
     sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-%     plot(R(:,1), 'LineWidth', lwd, 'Color',mycl(5+(level-1)*10,:));
-%     plot(R(:,2), '--', 'LineWidth', lwd, 'Color',mycl(5+(level-1)*10,:));
+    plot(R(:,1), 'LineWidth', lwd, 'Color',mycl(5+(level-1)*10,:));
+    plot(R(:,2), '--', 'LineWidth', lwd, 'Color',mycl(5+(level-1)*10,:));
 % plot(G(:,1), 'LineWidth', lwd, 'Color',mycl(5+(level-1)*10,:));
 % plot(G(:,2), '--', 'LineWidth', lwd, 'Color',mycl(5+(level-1)*10,:));
-    plot(I(:,1), 'LineWidth', lwd, 'Color',mycl(5+(level-1)*10,:));
-    plot(I(:,2), '--', 'LineWidth', lwd, 'Color',mycl(5+(level-1)*10,:));
+% plot(I(:,1), 'LineWidth', lwd, 'Color',mycl(5+(level-1)*10,:));
+% plot(I(:,2), '--', 'LineWidth', lwd, 'Color',mycl(5+(level-1)*10,:));
 end
 ylim([0,100]);
 xlabel('Time (a.u.)');
 xticks([presentt/dt]);
 xticklabels({'stimuli','action'});
 ylabel('Firing Rates (Hz)');
-lgd = legend(' ', ' ', 'G1', 'G2',...
+lgd = legend(' ', ' ', 'R1', 'R2',...
     'Location','Northeast','NumColumns',2, 'FontSize', fontsize-8, 'Box','off');
 title(lgd, "Baseline                  iSTDP      .");
-filename = sprintf('timeCourse_FD_I_%1.1f_%1.1f_sgm%2.2f',boost, sgm);
+filename = sprintf('timeCourse_RT_R_%1.1f_%1.1f_sgm%2.2f',boost, sgm);
 savefigs(h, filename, plotdir,fontsize, aspect1);
 %% behavior at two levels of boost
-boost = [1, 2];
+boost = [0, 35];
 sims = 10000;
 sgmInput = 0; % 1/3
 sgm = 10; % 6.8/2;
@@ -151,7 +151,7 @@ savefigs(h, filename, plotdir,fontsize, flip(aspect1));
 
 
 %% change iSTDP level
-boost = 1:.4:4;
+boost = 0:5:40;
 sims = 10000;
 sgmInput = 0; % 1/3
 sgm = 10; %6.8/2;
@@ -192,7 +192,7 @@ if ~exist(output,'file')
         Vinput.V2 = V2;
         Vprior.V1 = ones(size(V1))*scale;
         Vprior.V2 = ones(size(V2))*scale;
-        [rt, choice, ~] = LDDM_STDP_GPU(Vprior, Vinput, iSTDP, w, a, b,...
+        [rt, choice, ~] = LDDM_STDPadtv_GPU(Vprior, Vinput, iSTDP, w, a, b,...
     sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims);
         ACC = gather(mean(2-squeeze(choice),3,'omitnan'));
         meanRT = gather(mean(squeeze(rt),3,'omitnan'));

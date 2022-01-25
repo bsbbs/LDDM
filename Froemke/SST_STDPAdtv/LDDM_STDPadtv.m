@@ -1,4 +1,5 @@
-function [choice, rt, R, G, I] = LDDM_SST(Vinput, iSTPD, w, a, b, sgm, Tau, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule)
+function [choice, rt, R, G, I] = LDDM_STDPadtv(Vprior, Vinput, iSTDP, w, a, b,...
+    sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule)
 %%%%%%%%%%%%%%%%%%
 % The core function of local disinhibition decision model (LDDM)
 % Created by Bo Shen, NYU, 2019
@@ -47,53 +48,71 @@ function [choice, rt, R, G, I] = LDDM_SST(Vinput, iSTPD, w, a, b, sgm, Tau, dur,
 % 	1 for to stop, 0 for to continue simulating until total duration set in dur. 
 %%%%%%%%%%%%%%%%%%%
 tauN =0.002; % time constant for Ornstein-Uhlenbeck process of noise
-%% preparation
-total_time_steps = round(dur/dt);
-onset_of_stimuli = round(presentt/dt);
-onset_of_trigger = round(triggert/dt);
+%% define parameters
+pretask_steps = round(predur/dt);
+onset_of_stimuli = round(presentt/dt); % align to the beginning of task as t = 0.
 stim_duration = round(stimdur/dt);
+offset_of_stimuli = onset_of_stimuli + stim_duration;
+onset_of_trigger = round(triggert/dt);
+posttask_steps = round(dur/dt);
 sizeVinput = size(Vinput);
 if sizeVinput(1) > 1 error('Error: the size of Vinput has to be 1xN'); end
 rt = NaN;
 choice = NaN;
+%% stablizing noise for 200 ms
+InoiseG = zeros(sizeVinput);
+InoiseR = zeros(sizeVinput);
+InoiseI = zeros(sizeVinput);
+stablizetime = round(.2/dt);
+for kk = 1:stablizetime
+    % update noise
+    InoiseG = InoiseG + (-InoiseG + randn(sizeVinput).*sqrt(dt).*sgm)/tauN*dt;
+    InoiseI = InoiseI + (-InoiseI + randn(sizeVinput).*sqrt(dt).*sgm)/tauN*dt;
+    InoiseR = InoiseR + (-InoiseR + randn(sizeVinput).*sqrt(dt).*sgm)/tauN*dt;
+end
+G = initialvals(2,:) + InoiseG;
+R = initialvals(1,:) + InoiseR;
+I = initialvals(3,:) + InoiseI;
 %% simulation begin
-G(1,:) = initialvals(2,:);
-R(1,:) = initialvals(1,:);
-I(1,:) = initialvals(3,:);
-InoiseG = randn(sizeVinput)*sgm;
-InoiseR = randn(sizeVinput)*sgm;
-InoiseI = randn(sizeVinput)*sgm;
-for ti = 1:total_time_steps
+t_stamp = pretask_steps + 1;
+for ti = (-pretask_steps):posttask_steps % align the beginning of the task as ti = 0
+    % input values
+    if ti > -pretask_steps && ti < 0
+        V = Vprior;
+    elseif ti >= onset_of_stimuli && ti < offset_of_stimuli
+        V = Vinput;
+    else
+        V = 0;
+        
+    end
+    
     % update R, G, I
-    dR = (-R(ti,:)' + (Vinput'*(ti >= onset_of_stimuli & ti < onset_of_stimuli+stim_duration) + a*R(ti,:)')./(1+iSTPD*G(ti,:)'))/Tau(1)*dt;
-    dG = (-G(ti,:)' + w * R(ti,:)' - I(ti,:)')/Tau(2)*dt;
-    dI = (-I(ti,:)' + b*(ti >= onset_of_trigger)*R(ti,:)')/Tau(3)*dt;
-    R(ti+1,:) = R(ti,:) + dR' + InoiseR(ti,:);
-    G(ti+1,:) = G(ti,:) + dG' + InoiseG(ti,:);
-    I(ti+1,:) = I(ti,:) + dI' + InoiseI(ti,:);
+    dR = (-R(ti+t_stamp,:)' + (V' + a*R(ti+t_stamp,:)')./(1+iSTDP+G(ti+t_stamp,:)'))/Tau(1)*dt;
+    dG = (-G(ti+t_stamp,:)' + w * R(ti+t_stamp,:)' - I(ti+t_stamp,:)')/Tau(2)*dt;
+    dI = (-I(ti+t_stamp,:)' + b*(ti >= onset_of_trigger)*R(ti+t_stamp,:)')/Tau(3)*dt;
+    R(ti+t_stamp+1,:) = R(ti+t_stamp,:) + dR' + InoiseR;
+    G(ti+t_stamp+1,:) = G(ti+t_stamp,:) + dG' + InoiseG;
+    I(ti+t_stamp+1,:) = I(ti+t_stamp,:) + dI' + InoiseI;
     
     % update noise
-    dInoiseG = (-InoiseG(ti,:) + randn(sizeVinput).*sqrt(dt).*sgm)/tauN*dt;
-    dInoiseI = (-InoiseI(ti,:) + randn(sizeVinput).*sqrt(dt).*sgm)/tauN*dt;
-    dInoiseR = (-InoiseR(ti,:) + randn(sizeVinput).*sqrt(dt).*sgm)/tauN*dt;
-    InoiseG(ti+1,:) = InoiseG(ti,:) + dInoiseG;
-    InoiseI(ti+1,:) = InoiseI(ti,:) + dInoiseI;
-    InoiseR(ti+1,:) = InoiseR(ti,:) + dInoiseR;
+    InoiseG = InoiseG + (-InoiseG + randn(sizeVinput).*sqrt(dt).*sgm)/tauN*dt;
+    InoiseI = InoiseI + (-InoiseI + randn(sizeVinput).*sqrt(dt).*sgm)/tauN*dt;
+    InoiseR = InoiseR + (-InoiseR + randn(sizeVinput).*sqrt(dt).*sgm)/tauN*dt;
     % setting lower boundary, forcing neural firing rates to be non-negative
-    G(ti+1,G(ti+1,:) < 0) = 0;
-    I(ti+1,I(ti+1,:) < 0) = 0;
-    R(ti+1,R(ti+1,:) < 0) = 0;
+    G(ti+t_stamp+1,G(ti+t_stamp+1,:) < 0) = 0;
+    I(ti+t_stamp+1,I(ti+t_stamp+1,:) < 0) = 0;
+    R(ti+t_stamp+1,R(ti+t_stamp+1,:) < 0) = 0;
     % threshold detecting
     if ti > onset_of_trigger && isnan(rt)
-        if max(R(ti,:)) >= thresh
+        if max(R(ti+t_stamp,:)) >= thresh
             rt = (ti-onset_of_trigger)*dt;
-            choice = find(R(ti,:) == max(R(ti,:)));
+            choice = find(R(ti+t_stamp,:) == max(R(ti+t_stamp,:)));
             if stoprule == 1
                 break;
             else
-                a = zeros(sizeVinput(2)); % reset 'a' after decision is made
-                b = zeros(sizeVinput(2)); % reset 'b' after decision is made
-                Vinput = zeros(sizeVinput); % reset 'Vinput' after decision is made
+                a = zeros(sizeVinput(2)); % reset 'a' after decision was made
+                b = zeros(sizeVinput(2)); % reset 'b' after decision was made
+                Vinput = zeros(sizeVinput); % reset 'Vinput' after decision was made
             end
         end
     end
