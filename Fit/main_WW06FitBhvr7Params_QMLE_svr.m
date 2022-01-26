@@ -24,9 +24,9 @@ rng(t);
 % Define optimization starting point and bounds
 %    JNp, JNn, I0, noise, miu0, tauNMDA, tauAMPA
 LB = [0    0     0      0       0   .001   .001];
-UB = [1    1     1      .1      60  1   .2];
-PLB = [.04  .04	.2      .01     20  .01 .01];
-PUB = [.3   .3	.6      .04     40  .2  .04];
+UB = [1    1     1      .1      120  1   .2];
+PLB = [.04  .04	.2      .01     20  .01 .001];
+PUB = [.3   .3	.6      .04     60  .2  .04];
 
 % Randomize initial starting point inside plausible box
 x0 = rand(1,numel(LB)) .* (PUB - PLB) + PLB;
