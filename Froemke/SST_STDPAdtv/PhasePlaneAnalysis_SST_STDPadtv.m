@@ -1,11 +1,12 @@
 %% Phase-plane analysis
 %% define paths
-% Homedir = '~';
-Homedir = 'C:\Users\Bo';
+Homedir = '~';
+% Homedir = 'C:\Users\Bo';
 addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
 addpath(fullfile(Homedir,'Documents','LDDM','utils'));
-cd('G:\My Drive\LDDM\Froemke\SST_STDP');
-% cd('/Volumes/GoogleDrive/My Drive/LDDM/Froemke');
+addpath(fullfile(Homedir,'Documents','LDDM','Froemke','SST_STDPadtv'));
+% cd('G:\My Drive\LDDM\Froemke\SST_STDPadtv');
+cd('/Volumes/GoogleDrive/My Drive/LDDM/Froemke/SST_STDPadtv');
 plotdir = fullfile('./Graphics');
 if ~exist(plotdir,'dir')
     mkdir(plotdir);
@@ -27,18 +28,18 @@ aspect3 = [2.8 2.54];
 rng('default'); rng(2);
 c = .8; % .872;
 a0 = 10;
-b0 = 0;%.7;
+b0 = 1.2;%.7;
 w0 = 1;
 v0 = 1;
 % - time couse R1 & R2
 dt = .001;Tau = [.1,.1,.1];
 sgm = .1; dur = 2;
-presentt = dt; triggert = presentt; thresh = Inf;
+predur = 0; presentt = dt; triggert = presentt; thresh = Inf;
 initialvals = [4,4;8,8;0,0]/15; stimdur = dur; stoprule = 0;
 % - Nullclines R1*-R2* space
 h = figure; hold on;
 filename = 'PhasePlane_Represent';
-boost = [1,2];
+boost = [0,15];
 mycl = jet(length(boost)*10);
 for level = 1:2
     V = 30*[1+c, 1-c]; %*boost(level);
@@ -48,18 +49,18 @@ for level = 1:2
     v = v0;%*boost(level);
     iSTDP = boost(level);
     R2 = linspace(.1,35,200);
-    R1 = (V(2)./R2 - iSTDP*(w - b)*R2 - (1-a))/v/iSTDP; % dR2/dt = 0
+    R1 = (V(2)./R2 - (w - b)*R2 - (1+iSTDP-a))/v; % dR2/dt = 0
     lgd2(level) = plot(R1,R2,'--', 'Color',mycl(5+(level-1)*10,:),'LineWidth',lwd); % dR2/dt = 0
-    plot([V(1)/(1-a), V(1)/(1-a)],[min(R2), V(2)/(1-a)],'--k','LineWidth',1);
+    plot([V(1)/(1+iSTDP-a), V(1)/(1+iSTDP-a)],[min(R2), V(2)/(1+iSTDP-a)],'--k','LineWidth',1);
     Line1 = [R1' R2'];
     R1 = linspace(.1,35,200);
-    R2 = (V(1)./R1 - iSTDP*(w - b)*R1 - (1-a))/v/iSTDP; % dR1/dt = 0
+    R2 = (V(1)./R1 - (w - b)*R1 - (1+iSTDP-a))/v; % dR1/dt = 0
     lgd1(level) = plot(R1,R2,'-', 'Color',mycl(5+(level-1)*10,:),'LineWidth',lwd); % dR1/dt = 0
-    plot([min(R1), V(1)/(1-a)],[V(2)/(1-a), V(2)/(1-a)],'--k','LineWidth',1);
+    plot([min(R1), V(1)/(1+iSTDP-a)],[V(2)/(1+iSTDP-a), V(2)/(1+iSTDP-a)],'--k','LineWidth',1);
     Line2 = [R1' R2'];
     if 1
-        [choice, rt, R, G, I] = LDDM_SST(V, iSTDP, [w,v;v,w], a, b, sgm, Tau, dur,...
-        dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+        [choice, rt, R, G, I] = LDDM_STDPadtv(V, V, iSTDP, [w,v;v,w], a*eye(2), b*eye(2),...
+    sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
         
 %         [R, G, I, ~, ~] = LcDsInhbt(V, [w,v;v,w], a*eye(2), b*eye(2),...
 %             sgm, Tau, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
@@ -72,8 +73,8 @@ for level = 1:2
         plot([0.1,1000],[0.1,1000],'--k');
     end
     syms R1 R2
-    eqns = [(V(1)/R1 - iSTDP*(w - b)*R1 - (1-a))/v/iSTDP == R2, ... % dR1/dt = 0
-        (V(2)/R2 - iSTDP*(w - b)*R2 - (1-a))/v/iSTDP == R1];% dR2/dt = 0
+    eqns = [(V(1)/R1 - (w - b)*R1 - (1+iSTDP-a))/v == R2, ... % dR1/dt = 0
+        (V(2)/R2 - (w - b)*R2 - (1+iSTDP-a))/v == R1];% dR2/dt = 0
     vars = [R1 R2];
     [AnswR1,AnswR2] = solve(eqns, vars);
     AnswI1 = b*AnswR1;
@@ -88,10 +89,10 @@ for level = 1:2
         R2star = double(AnswR2(i));
         G1star = double(AnswG1(i));
         G2star = double(AnswG2(i));
-        JMat = [-1 + a/(1+iSTDP*G1star), -iSTDP*(V(1)+a*R1star)/(1+iSTDP*G1star)^2, 0, 0, 0, 0
+        JMat = [-1 + a/(1+iSTDP+G1star), -(V(1)+a*R1star)/(1+iSTDP+G1star)^2, 0, 0, 0, 0
             w, -1, -1, v, 0, 0
             b, 0, -1, 0, 0, 0
-            0, 0, 0, -1+a/(1+iSTDP*G2star),   -iSTDP*(V(2)+a*R2star)/(1+iSTDP*G2star)^2, 0
+            0, 0, 0, -1+a/(1+iSTDP+G2star),   -(V(2)+a*R2star)/(1+iSTDP+G2star)^2, 0
             v, 0, 0, w, -1, -1
             0, 0, 0, b, 0, -1];
         A = eig(JMat);
