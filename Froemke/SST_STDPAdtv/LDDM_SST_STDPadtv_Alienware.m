@@ -33,9 +33,9 @@ w0 = ones(2);
 a0 = 15;
 b0 = 2.8;
 predur = 0;
-presentt = dt*200;
+presentt = 0;% dt*200;
 stimdur = Inf;
-triggert = presentt + dt;% + .8;
+triggert = presentt;% + dt;% + .8;
 dur = 4.5; % second
 
 thresh = 70; % Hz
@@ -61,9 +61,8 @@ for level = 1:length(boost)
     b = b0;
     w = w0;%*boost(level);
     iSTDP = boost(level);
-    initialvals = (a-1-iSTDP)./sum(w,2)'.*[1,1; sum(w,2)'; 0, 0]; % for R, G, and I variables, will be further scaled
-%     [choice, rt, R, G, I] = LDDM(Vinput, w, a, b, sgm, Tau, dur,...
-%         dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+    % initialvals = (a-1-iSTDP)./sum(w,2)'.*[1,1; sum(w,2)'; 0, 0]; % for R, G, and I variables, will be further scaled
+    initialvals = (a-1)./sum(w,2)'.*[1,1; sum(w,2)'; 0, 0];
     [choice, rt, R, G, I] = LDDM_STDPadtv(Vprior, Vinput, iSTDP, w, a, b,...
     sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
     plot(R(:,1), 'LineWidth', lwd, 'Color',mycl(5+(level-1)*10,:));

@@ -84,7 +84,7 @@ addpath(fullfile(Homedir,'Documents','LDDM','utils'));
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
 % cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
 cd('G:\My Drive\LDDM\Fit');
-out_dir = './Rslts/WW06FitBhvr7Params_QMLE_GPU';
+out_dir = './Rslts/WW06FitBhvr7Params_QMLE_GPU_miu0hitupperbound';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -95,13 +95,13 @@ end
 dataDynmc = load('./Data/Data.mat');
 dataBhvr = LoadRoitmanData('../RoitmanDataCode');
 
-randseed = 75245527;
+% randseed = 12391438;
+randseed = 90995481;
 rng(randseed);
 %    JNp, JNn, I0, noise, miu0, tauS, tauAMPA, nLL
-params = [0.475556	0.12605	0.162363	0.099998	119.982527	0.158728	0.004346	16638.810193];
-%[0.428032	0.1131	0.350868	0.022471	105.691412	0.042461	0.014988	16877.754482];
-name = sprintf('JNp%2.1f_JNn%1.2f_I0%1.2f_noise%1.2f_miu0%2.2f_tauS%0.2f_tauAMPA%.4f_sim1024',params(1:7));
-
+% params = [0.165707	0	0.255055	0.0202	75.157252	0.732425	0.04053	16544.66984];
+params = [0.199222	0.003488	0.289101	0.042273	59.999701	0.17682	0.006275	16525.84855];
+name = sprintf('JNp%2.1f_JNn%1.2f_I0%1.2f_noise%1.2f_miu0%2.2f_tauS%0.2f_tauAMPA%.4f_sim10240',params(1:7));
 % simulation
 if  ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
     tic;
@@ -120,8 +120,8 @@ lwd = 1;
 mksz = 3;
 fontsize = 11;
 %    JNp, JNn, I0, noise, miu0, tauS, tauAMPA, nLL
-params = [0.475556	0.12605	0.162363	0.099998	119.982527	0.158728	0.004346	16638.810193];
-%[0.428032	0.1131	0.350868	0.022471	105.691412	0.042461	0.014988	16877.754482];
+% params = [0.165707	0	0.255055	0.0202	75.157252	0.732425	0.04053	16544.66984];
+params = [0.199222	0.003488	0.289101	0.042273	59.999701	0.17682	0.006275	16525.84855];
 simname = sprintf('WW06Dynmc_JNp%2.1f_JNn%1.2f_I0%1.2f_noise%1.2f_miu0%2.2f_tauS%0.2f_tauAMPA%.4f',params(1:7));
 Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
 c1 = (1 + Cohr)';
@@ -131,14 +131,14 @@ mygray = flip(gray(length(cplist)));
 JNp = params(1);
 JNn = params(2);
 I0 = params(3);
-sgm = params(4)/5;
+sgm = params(4);
 miu0 = params(5);
 ndt = .03 + .09; % sec, initial dip for 90ms after stimuli onset, resort to the saccade side, the activities reaches peak 30ms before initiation of saccade, according to Roitman & Shadlen
 presentt = 0;
 triggert = 0;
 dur = 5;
 dt =.001;
-thresh = 70; % to match the data in Roitman&Shadlen and most of the other evidence
+thresh = 15; % to match the data in Roitman&Shadlen and most of the other evidence
 stimdur = dur;
 stoprule = 1;
 JN = [JNp -JNn; -JNn JNp];
@@ -146,12 +146,12 @@ gamma = .641;
 tauS = params(6);   %.1; % sec
 tauAMPA = params(7); %.002; % sec
 unit = 1; % secs
-H0 = 32;
+H0 = 2;
 S0 = H0*gamma*tauS/(H0*gamma*tauS+1);
 initialvals = [H0, H0;S0, S0]; % S = H*gamma*tauS./(H*gamma*tauS+1)
 h = figure; hold on;
 filename = sprintf('%s',simname);
-randseed = 75245522;
+randseed = 12391438;
 rng(randseed);
 for vi = 2:6
     cp = cplist(vi,:);
@@ -170,17 +170,11 @@ xticks([0, 500, 1000, 1500]);
 xticklabels({'0','.5','1.0','1.5'});
 xlim([-50, 1200]);
 xlabel('Time (s)');
-
 % lgd = legend(lgd3,cellstr(num2str(c3)),...
 %     'Location','best','FontSize',fontsize-5, 'FontName','Times New Roman',...
 %     'FontAngle','italic','NumColumns',1,'Box','off');
 % title(lgd, 'V_3');
-
 savefigs(h, filename, plot_dir, fontsize, [2, 1.5]);
-
-%%%%%%%%%%%%
-
-
 
 %% plot RT distribution - fitted
 rate = length(rtmat)/1024;
