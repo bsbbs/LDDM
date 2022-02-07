@@ -1,11 +1,12 @@
 %% Phase-plane analysis
 %% define paths
-% Homedir = '~';
-Homedir = 'C:\Users\Bo';
+Homedir = '~';
+% Homedir = 'C:\Users\Bo';
 addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
 addpath(fullfile(Homedir,'Documents','LDDM','utils'));
-cd('G:\My Drive\LDDM\Froemke\SST_STDP');
-% cd('/Volumes/GoogleDrive/My Drive/LDDM/Froemke');
+addpath(fullfile(Homedir,'Documents','LDDM','Froemke','SST_STDP'));
+% cd('G:\My Drive\LDDM\Froemke\SST_STDP');
+cd('/Volumes/GoogleDrive/My Drive/LDDM/Froemke/SST_STDP');
 plotdir = fullfile('./Graphics');
 if ~exist(plotdir,'dir')
     mkdir(plotdir);
@@ -27,13 +28,13 @@ aspect3 = [2.8 2.54];
 rng('default'); rng(2);
 c = .8; % .872;
 a0 = 10;
-b0 = 0;%.7;
+b0 = .7;%.7;
 w0 = 1;
 v0 = 1;
 % - time couse R1 & R2
 dt = .001;Tau = [.1,.1,.1];
 sgm = .1; dur = 2;
-presentt = dt; triggert = presentt; thresh = Inf;
+predur = 0; presentt = dt; triggert = presentt; thresh = Inf;
 initialvals = [4,4;8,8;0,0]/15; stimdur = dur; stoprule = 0;
 % - Nullclines R1*-R2* space
 h = figure; hold on;
@@ -58,9 +59,9 @@ for level = 1:2
     plot([min(R1), V(1)/(1-a)],[V(2)/(1-a), V(2)/(1-a)],'--k','LineWidth',1);
     Line2 = [R1' R2'];
     if 1
-        [choice, rt, R, G, I] = LDDM_SST(V, iSTDP, [w,v;v,w], a, b, sgm, Tau, dur,...
-        dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-        
+        [choice, rt, R, G, I] = LDDM_STDP(V, V, iSTDP, [w,v;v,w], a*eye(2), b*eye(2),...
+            sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+    
 %         [R, G, I, ~, ~] = LcDsInhbt(V, [w,v;v,w], a*eye(2), b*eye(2),...
 %             sgm, Tau, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
         ldgtrc(level) = plot(R(round(presentt/dt):end,1), R(round(presentt/dt):end,2),'-','Color',mycl(5+(level-1)*10,:),'LineWidth',lwd/2); % '#ef476f'

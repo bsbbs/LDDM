@@ -18,7 +18,7 @@ scale = params(4);
 
 % other fixed parameters
 % sims = 1024;
-deduction = 1;
+deduction = .1;
 sims = 1024/deduction;
 Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
 predur = 0;

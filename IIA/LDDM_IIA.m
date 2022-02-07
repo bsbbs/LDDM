@@ -2,6 +2,7 @@
 % independence of irrelevant alternatives (I.I.A.)
 
 %% including packages and dircetories
+
 addpath(genpath('../CoreFunctions'));
 addpath(genpath('../utils'));
 
@@ -87,31 +88,29 @@ x = cp.cp1 - cp.cp2;
 subplot(2,2,1);
 hold on;
 mycol = colormap(jet(41));
-for i = 1:size(x,1)
+for i = 1:3 %size(x,1)
     plot(x(i,:),cndratio(i,:),'.-','color',mycol(1+(i-1)*10,:),'LineWidth',lwd-1,'MarkerSize',mksz*3);
 end
 xlabel('V_1 - V_2');
 ylabel({'Conditional choice probability';'Opt. 1 vs. Opt. 2'});
-lgd = legend(string(num2cell(c3)), 'FontSize', fontsize - 6, 'Location','best', 'box','off');
+lgd = legend(string(num2cell(c3(1:3))), 'FontSize', fontsize - 6, 'Location','best', 'box','off');
 title(lgd, 'V_3');
 savefigs(h, figname, outdir, fontsize, aspect);
 % plot RT as a functon of V1 - V2
 subplot(2,2,3);
 hold on;
 mycol = colormap(jet(41));
-rtmean = mean(rt,3,'omitnan');
-for i = 1:size(x,1)
+rtmean = [];
+for i = 1:3%size(x,1)
+    for j = 1:size(x,2)
+        rtmean(i,j) = mean(rt(i,j,choice(i,j,:) ~= 3));
+    end
     plot(x(i,:),rtmean(i,:),'.-','color',mycol(1+(i-1)*10,:),'LineWidth',lwd-1,'MarkerSize',mksz*3);
 end
 xlabel('V_1 - V_2');
 ylabel({'RT (s)'});
 savefigs(h, figname, outdir, fontsize, aspect);
-% plot simulation settings
-subplot(2,2,4); hold on;
-y = 3*ones(size(c2));
-plot(c2, y,'.k','MarkerSize',mksz*3);
-y = 3.1*ones(size(c1));
-plot(c1, y, '.k','MarkerSize',mksz*3);
+
 % plot conditional ratio as a function of V3
 if strcmp(task,'FD')
     c = [.256]';
@@ -155,10 +154,28 @@ elseif strcmp(task,'RT')
     % ylim([.75,.95]);
 end
 xlabel('V_3');
+xlim([0,1]);
 ylabel({'Conditional choice probability';'Opt. 1 vs. Opt. 2'});
 savefigs(h, figname, outdir, fontsize, aspect);
-% plot simulation settings
+% plot RT as a function of V3
+meanrt = [];
 subplot(2,2,4); hold on;
+for i = 1:length(c3)
+    meanrt(i,1) = mean(rt(i,1,choice(i,1,:) ~= 3));
+    plot(cp.cp3(i,1), meanrt(i,1),'.','color',mycol(i,:),'LineWidth',lwd,'MarkerSize',mksz*3);
+end
+xlabel('V_3');
+xlim([0,1]);
+ylabel({'RT (secs)';'Opt. 1 or. Opt. 2'});
+savefigs(h, figname, outdir, fontsize, aspect);
+
+%% plot simulation settings
+h = figure; hold on;
+figname = 'ValueSettings';
+y = 3*ones(size(c2));
+plot(c2, y,'.k','MarkerSize',mksz*3);
+y = 3.1*ones(size(c1));
+plot(c1, y, '.k','MarkerSize',mksz*3);
 y = 2.9*ones(size(c3));
 for i = 1:length(c3)
     plot(c3(i),y(i),'.','color',mycol(i,:),'MarkerSize',mksz*3);
