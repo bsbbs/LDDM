@@ -1,20 +1,21 @@
-addpath('../');
+addpath('../../RecurrentModel');
 numNode = 1;
 [sortNum, myCluster] = RndCtrl(numNode);
 mypool = parpool(myCluster, myCluster.NumWorkers);
 
 %% Model fitting with Bayesian Adaptive Direct Search (BADS) optimization algorithm
-addpath(genpath('../bads/bads-master'));
+addpath(genpath('../../RecurrentModel/bads/bads-master'));
 addpath('../CoreFunctions/');
 addpath('./SvrCode/');
-out_dir = './Rslts/WW06FitBhvr7ParamsII_QMLE_GPU';
+out_dir = '../../RecurrentModel/Fit/Rslts/WW06FitBhvr7ParamsII_QMLE_GPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
+
 %%
 % Take data from Roitman & Shadlen, 2002
-dataDynmc = load('./Data/Data.mat');
-dataBhvr = LoadRoitmanData('../RoitmanDataCode');
+dataDynmc = load('../../RecurrentModel/Fit/Data/Data.mat');
+dataBhvr = LoadRoitmanData('../../RecurrentModel/RoitmanDataCode');
 % Fix random seed for reproducibility
 % rng(1);
 % change random seed
@@ -23,17 +24,17 @@ num2str(t);
 rng(t);
 % Define optimization starting point and bounds
 %    JNp, JNn, I0, noise, miu0, tauNMDA, tauAMPA
-LB = [0    0     0      0       0   .001   .001];
-UB = [1    1     1      .1      120  1   .2];
-PLB = [.1  .01	.1      .01     20  .01 .01];
-PUB = [.3   .1	.4      .04     80  .2  .04];
+LB = [0    0     0      0       1   .001   .001];
+UB = [1    1     1      .1      240  1   .2];
+PLB = [.1  .01	.1      .01     60  .01 .01];
+PUB = [.3   .1	.4      .04     120  .2  .04];
 
 % Randomize initial starting point inside plausible box
 x0 = rand(1,numel(LB)) .* (PUB - PLB) + PLB;
 
 % likelihood function
 % parpool(6);
-nLLfun = @(params) WW06FitBhvr7ParamsII_QMLE_GPU(params, dataDynmc, dataBhvr);
+nLLfun = @(params) WW06FitBhvr7ParamsII_QMLE_GPU(params, dataBhvr);
 [fvalbest,~,~] = nLLfun(x0)
 fprintf('test succeeded\n');
 % change starting points
@@ -73,6 +74,7 @@ end
 t = datenum(clock)*10^10 - floor(datenum(clock)*100)*10^8 + sortNum*10^7 + i*10^5;
 save(fullfile(out_dir,sprintf('CollectRslts%i.mat',t)),'Collect');
 
+if 0
 %% hand tuning
 % addpath('../CoreFunctions/');
 % addpath('./SvrCode/');
@@ -429,3 +431,4 @@ for vi = 1:length(acc)
 end
 saveas(h,fullfile(plot_dir,sprintf('Proportion_Plot_%s.eps',name)),'epsc2');
 
+end

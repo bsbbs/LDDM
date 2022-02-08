@@ -1,7 +1,5 @@
-function [nLL, Chi2, BIC, AIC, rtmat, choicemat] = WW06FitBhvr7ParamsII_QMLE_GPU(params,dataDynmc, dataBhvr)
+function [nLL, Chi2, BIC, AIC, rtmat, choicemat] = WW06FitBhvr7ParamsII_QMLE_GPU(params, dataBhvr)
 % reload Roitman's data, processed
-dot_ax = dataDynmc.dot_ax';
-sac_ax = dataDynmc.sac_ax';
 q = dataBhvr.q;
 On = dataBhvr.On;
 ON = dataBhvr.ON;
