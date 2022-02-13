@@ -164,13 +164,14 @@ for ti = -pretask_steps:max(posttask_steps(:))
         mr2c(rec_axi,stllgo) = R2(stllgo);
     end
 
-    % update the values
+    % when all of the channel hit the decision boundary or timed out, stop simulation
     if stoprule == 1
         if NComput == 0 && all(tpafterward(:) > sum(sac_ax>0))
             break;
         end
     end
-
+    
+    % update the input values
     if numel(unique(onset_of_stimuli)) == 1
         if ti >= onset_of_stimuli(1)
             V1Array = gpuArray(repmat(V1mat,1,1,sims));
