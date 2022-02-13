@@ -96,17 +96,18 @@ end
 dataDynmc = load('./Data/Data.mat');
 dataBhvr = LoadRoitmanData('../RoitmanDataCode');
 
-randseed = 75245527;
+randseed = 104217658; %75245527;
 rng(randseed);
 %    JNp, JNn, I0, noise, miu0, tauS, tauAMPA, nLL
-params = [0.475556	0.12605	0.162363	0.099998	119.982527	0.158728	0.004346	16638.810193];
+params = [0.499261	0.455676	0.180648	0.09993	354.135714	0.759087	0.044829	16500.7768];
+% params = [0.475556	0.12605	0.162363	0.099998	119.982527	0.158728	0.004346	16638.810193];
 %[0.428032	0.1131	0.350868	0.022471	105.691412	0.042461	0.014988	16877.754482];
-name = sprintf('JNp%2.1f_JNn%1.2f_I0%1.2f_noise%1.2f_miu0%2.2f_tauS%0.2f_tauAMPA%.4f_sim1024',params(1:7));
+name = sprintf('JNp%2.1f_JNn%1.2f_I0%1.2f_noise%1.2f_miu0%2.2f_tauS%0.2f_tauAMPA%.4f',params(1:7));
 
 % simulation
 if  ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
     tic;
-    [nLL, Chi2, BIC, AIC, rtmat, choicemat] = WW06FitBhvr7ParamsII_QMLE_GPU(params,dataDynmc, dataBhvr);
+    [nLL, Chi2, BIC, AIC, rtmat, choicemat] = WW06FitBhvr7ParamsII_QMLE_GPU(params, dataBhvr);
     num2str(nLL)
     num2str(AIC)
     num2str(BIC)
@@ -120,9 +121,6 @@ end
 lwd = 1;
 mksz = 3;
 fontsize = 11;
-%    JNp, JNn, I0, noise, miu0, tauS, tauAMPA, nLL
-params = [0.475556	0.12605	0.162363	0.099998	119.982527	0.158728	0.004346	16638.810193];
-%[0.428032	0.1131	0.350868	0.022471	105.691412	0.042461	0.014988	16877.754482];
 simname = sprintf('WW06Dynmc_JNp%2.1f_JNn%1.2f_I0%1.2f_noise%1.2f_miu0%2.2f_tauS%0.2f_tauAMPA%.4f',params(1:7));
 Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
 c1 = (1 + Cohr)';
