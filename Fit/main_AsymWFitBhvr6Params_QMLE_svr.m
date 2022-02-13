@@ -95,11 +95,12 @@ end
 dataDynmc = load('./Data/Data.mat');
 dataBhvr = LoadRoitmanData('../RoitmanDataCode');
 
-randseed = 105874882;
+randseed = 105874882; % 110234755;%
 rng(randseed);
 % a, w1, noise, scale, tauR, tauG, nLL
+% params = [25.350783	0.401201	4.272408	99.838832	0.001936	0.160071	16566.43769];
 params = [36.538884	0.134803	7.401239	284.382666	0.052278	0.231087	16675.6422];
-name = sprintf('a%2.1f_w%1.1f_noise%2.1f_scl%2.1f_tau%1.3f_%1.3f_sim1024',params(1:6));
+name = sprintf('a%2.1f_w%1.1f_noise%2.1f_scl%2.1f_tau%1.3f_%1.3f',params(1:6));
 
 % simulation
 if ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
@@ -117,6 +118,7 @@ lwd = 1;
 mksz = 3;
 fontsize = 11;
 % a, w1, noise, scale, tauR, tauG, nLL
+% params = [25.350783	0.401201	4.272408	99.838832	0.001936	0.160071	16566.43769];
 params = [36.538884	0.134803	7.401239	284.382666	0.052278	0.231087	16675.6422];
 simname = sprintf('AsymW_a%2.1f_w%1.1f_noise%2.1f_scl%2.1f_tau%1.3f_%1.3f',params(1:6));
 a = params(1)*eye(2);
