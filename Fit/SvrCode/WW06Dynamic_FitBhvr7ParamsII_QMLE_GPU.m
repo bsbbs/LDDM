@@ -1,4 +1,4 @@
-function [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDMDynamic_FitBhvr7ParamsIV_QMLE_GPU(params,dataDynmc, dataBhvr)
+function [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = WW06Dynamic_FitBhvr7ParamsII_QMLE_GPU(params, dataDynmc, dataBhvr)
 % reload Roitman's data, processed
 dot_ax = dataDynmc.dot_ax';
 sac_ax = dataDynmc.sac_ax';
@@ -7,44 +7,48 @@ On = dataBhvr.On;
 ON = dataBhvr.ON;
 OP = dataBhvr.OP;
 % parameters to fit
-a = params(1)*eye(2);
-b = params(2)*eye(2);
-sgm = params(3);
-tauR = params(5);
-tauG = params(6);
-tauI = params(7);
-ndt = .09 + .03; % sec, 90ms after stimuli onset, resort to the saccade side,
-% the activities reaches peak 30ms before initiation of saccade, according to Roitman & Shadlen
-presentt = 0; % changed for this version to move the fitting begin after the time point of recovery
-scale = params(4);
+JNp = params(1);
+JNn = params(2);
+I0 = params(3);
+sgm = params(4);
+miu0 = params(5);
+ndt = .03 + .09; % sec, initial dip for 90ms after stimuli onset, resort to the saccade side, the activities reaches peak 30ms before initiation of saccade, according to Roitman & Shadlen
+tgap = 0; % tgap is not assumed for the simulation of WW06 
 
 % other fixed parameters
 % sims = 1024;
 deduction = 1;
 sims = 1024/deduction;
 Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
-predur = 0;
+presentt = 0;
 triggert = 0;
 dur = 5;
 dt =.001;
-thresh = 70; %70.8399; % mean(max(m_mr1cD))+1; 
+thresh = 70; % to match the data in Roitman&Shadlen and most of the other evidence
 stimdur = dur;
 stoprule = 1;
-w = [1 1; 1 1];
-Rstar = 32; % ~ 32 Hz at the bottom of initial fip, according to Roitman and Shadlen's data
-initialvals = [Rstar,Rstar; sum(w(1,:))*Rstar,sum(w(2,:))*Rstar; 0,0];
-Vprior = ones(6,2)*((1-a(1,1))*Rstar + 2*Rstar^2);
+JN = [JNp -JNn; -JNn JNp];
+gamma = .641;
+tauS = params(6);   %.1; % sec
+tauAMPA = params(7); %.002; % sec
+unit = 1; % secs
+H0 = 32;
+S0 = H0*gamma*tauS/(H0*gamma*tauS+1);
+initialvals = [H0, H0;S0, S0]; % S = H*gamma*tauS./(H*gamma*tauS+1)
 
-Tau = [tauR tauG tauI];
 % simulation
 % fprintf('GPU Simulations %i chains ...\t', sims);
-V1 = (1 + Cohr)';
-V2 = (1 - Cohr)';
-Vinput = [V1, V2]*scale;
+c1 = (1 + Cohr)';
+c2 = (1 - Cohr)';
+cp = [c1, c2];
 % tic;
-[rtmat, choicemat, ~, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDM_Dynmc_Trim_GPU(Vprior, Vinput, w, a, b,...
-    sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims, dot_ax, sac_ax);
-rtmat = squeeze(rtmat)'+ndt;
+[rtmat, choicemat, ~, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = wong06_Dynamic_Trim_GPU(cp,miu0,sgm,I0,JN,...
+    gamma, tauS, tauAMPA, dur, dt, presentt, stimdur, thresh, initialvals, stoprule, sims, dot_ax, sac_ax);
+% [rtmat, choicemat, ~, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDM_Dynmc_Trim_GPU(Vprior, Vinput, w, a, b,...
+%     sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims, dot_ax, sac_ax);
+% [choicemat, rtmat] = wong06_GPU(cp,miu0,sgm,I0,JN,...
+%     gamma, tauS, tauAMPA, dur, dt, presentt, stimdur, thresh, initialvals, stoprule, sims);
+rtmat = squeeze(rtmat)' + ndt;
 choicemat = squeeze(choicemat)';
 % toc;
 

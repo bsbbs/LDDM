@@ -460,7 +460,7 @@ saveas(h,fullfile(plot_dir,sprintf('Proportion_Plot_%s.eps',name)),'epsc2');
 %% plot time course
 if ~exist(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),'file')
     tic;
-    [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LcDFitBhvr7ParamsIV_QMLE_GPU(params, dataDynmc, dataBhvr);
+    [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDMDynamic_FitBhvr7ParamsIV_QMLE_GPU(params, dataDynmc, dataBhvr);
     %sm_mr1c = gather(sm_mr1c);
     save(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),...
         'rtmat','choicemat','sm_mr1c','sm_mr2c','sm_mr1cD','sm_mr2cD','params');
@@ -476,7 +476,7 @@ m_mr2cD = m_mr2cD';
 dot_ax = dot_ax';
 sac_ax = sac_ax';
 h = figure;
-aspect = [5, 2.5];
+aspect = [3, 2.5];
 fontsize = 10;
 lwd = 1;
 filename = sprintf('FittedTimeCourse_%s',name);

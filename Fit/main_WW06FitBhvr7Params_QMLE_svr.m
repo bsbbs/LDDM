@@ -84,7 +84,7 @@ addpath(fullfile(Homedir,'Documents','LDDM','utils'));
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
 % cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
 cd('G:\My Drive\LDDM\Fit');
-out_dir = './Rslts/WW06FitBhvr7Params_QMLE_GPU_miu0hitupperbound';
+out_dir = './Rslts/WW06FitBhvr7Params_QMLE_GPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -99,8 +99,9 @@ dataBhvr = LoadRoitmanData('../RoitmanDataCode');
 randseed = 90995481;
 rng(randseed);
 %    JNp, JNn, I0, noise, miu0, tauS, tauAMPA, nLL
-% params = [0.165707	0	0.255055	0.0202	75.157252	0.732425	0.04053	16544.66984];
-params = [0.199222	0.003488	0.289101	0.042273	59.999701	0.17682	0.006275	16525.84855];
+% params = [.2609, .0497, .3255, .02, 30, .1, .002]; % in the paper ww06
+params = [0.165707	0	0.255055	0.0202	75.157252	0.732425	0.04053	16544.66984];
+% params = [0.199222	0.003488	0.289101	0.042273	59.999701	0.17682	0.006275	16525.84855];
 name = sprintf('JNp%2.1f_JNn%1.2f_I0%1.2f_noise%1.2f_miu0%2.2f_tauS%0.2f_tauAMPA%.4f_sim10240',params(1:7));
 % simulation
 if  ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
@@ -121,7 +122,7 @@ mksz = 3;
 fontsize = 11;
 %    JNp, JNn, I0, noise, miu0, tauS, tauAMPA, nLL
 % params = [0.165707	0	0.255055	0.0202	75.157252	0.732425	0.04053	16544.66984];
-params = [0.199222	0.003488	0.289101	0.042273	59.999701	0.17682	0.006275	16525.84855];
+% params = [0.199222	0.003488	0.289101	0.042273	59.999701	0.17682	0.006275	16525.84855];
 simname = sprintf('WW06Dynmc_JNp%2.1f_JNn%1.2f_I0%1.2f_noise%1.2f_miu0%2.2f_tauS%0.2f_tauAMPA%.4f',params(1:7));
 Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
 c1 = (1 + Cohr)';
@@ -423,4 +424,63 @@ for vi = 1:length(acc)
     ylim([-.1, .2]);
 end
 saveas(h,fullfile(plot_dir,sprintf('Proportion_Plot_%s.eps',name)),'epsc2');
+%% plot time course
+if ~exist(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),'file')
+    tic;
+    [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = WW06Dynamic_FitBhvr7Params_QMLE_GPU(params, dataDynmc, dataBhvr);
+    % [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDMDynamic_FitBhvr7ParamsIV_QMLE_GPU(params, dataDynmc, dataBhvr);
+    %sm_mr1c = gather(sm_mr1c);
+    save(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),...
+        'rtmat','choicemat','sm_mr1c','sm_mr2c','sm_mr1cD','sm_mr2cD','params');
+    toc
+else
+    load(fullfile(plot_dir, sprintf('PlotDynamic_%s.mat',name)));
+end
+load('./Data/Data.mat');
+m_mr1c = m_mr1c';
+m_mr2c = m_mr2c';
+m_mr1cD = m_mr1cD';
+m_mr2cD = m_mr2cD';
+dot_ax = dot_ax';
+sac_ax = sac_ax';
+h = figure;
+aspect = [3, 2.5];
+fontsize = 10;
+lwd = 1;
+filename = sprintf('FittedTimeCourse_%s',name);
+subplot(1,2,1);hold on;
+clear flip;
+colvec = flip({[218,166,109]/256,[155 110 139]/256,'#32716d','#af554d','#708d57','#3b5d64'});
+for ci = 1:6
+    lg(ci) = plot(dot_ax/1000, sm_mr1c(:,ci),'Color',colvec{ci},'LineWidth',lwd);
+    plot(dot_ax/1000, sm_mr2c(:,ci),'--','Color',colvec{ci},'LineWidth',lwd);
+end
+set(gca,'TickDir','out');
+H = gca;
+H.LineWidth = 1;
+% ylim([20,60]);
+ylim([0,17.5]);
+ylabel('Firing rate (sp/s)');
+xlabel('Time (secs)');
+xlim([-.05, .8]);
+xticks([0:.2:.8]);
+% set(gca,'FontSize',16);
+savefigs(h,filename,plot_dir,fontsize,aspect);
+subplot(1,2,2);hold on;
+plot([0,0],[20,71],'-k');
+for ci = 1:6
+    lg(ci) = plot(sac_ax/1000, sm_mr1cD(:,ci),'Color',colvec{ci},'LineWidth',lwd);
+    plot(sac_ax/1000, sm_mr2cD(:,ci),'--','Color',colvec{ci},'LineWidth',lwd);
+end
+xlim([-.8, .55]);
+set(gca,'TickDir','out');
+H = gca;
+H.LineWidth = 1;
+yticks([]);
+set(gca,'ycolor',[1 1 1]);
+ylim([0,17.5]);
+legend(lg,{'0','3.2','6.4','12.8','25.6','51.2'},'Location','best','FontSize',fontsize-2);
+savefigs(h,filename,plot_dir,fontsize,aspect);
+saveas(h,fullfile(plot_dir,[filename, '.fig']),'fig');
+
 end

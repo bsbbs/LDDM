@@ -50,6 +50,7 @@ sizeComput = [sizeVinput, sims];
 NComput = prod(sizeComput);
 
 presentt = presentt/unit;
+triggert = presentt;
 dur = dur/unit;
 stimdur = stimdur/unit;
 % sliding window
@@ -59,7 +60,7 @@ time_wind = .050/dt/unit;  % Temporal window size for averaging, 50 msec
 posttask_steps = gpuArray(round(dur/dt));
 onset_of_stimuli = gpuArray(round(presentt/dt));
 onset_of_trigger = onset_of_stimuli;
-if isequal(size(onset_of_trigger), size(V1mat))
+if isequal(size(onset_of_trigger), size(cp1))
     onset_of_trigger = gpuArray(repmat(onset_of_trigger,1,1,sims));
 end
 stim_duration = gpuArray(round(stimdur/dt));
@@ -115,12 +116,6 @@ for ti = 0:max(posttask_steps(:))
     end
     
     % update the input values
-    if stoprule == 1
-        if NComput == 0 && all(tpafterward(:) > sum(sac_ax>0))
-            break;
-        end
-    end
-    
     if ti >= onset_of_stimuli && ti < offset_of_stimuli
         V1 = cp1Array;
         V2 = cp2Array;
@@ -182,9 +177,9 @@ for ti = 0:max(posttask_steps(:))
         % so automatically exclude data in m_mrcD within 200 ms of onset_of_stimuli (defined in time_spcD)
         % for chains are still going, update the values saved before sac
         mr1cD(1:(-min(sac_ax)-1), Continue) = mr1cD(2:-min(sac_ax),Continue); % push the values into the queue
-        mr1cD(-min(sac_ax),Continue) = R1(Continue); % update R1 from saved buffer
+        mr1cD(-min(sac_ax),Continue) = H1_wind(Continue); % update R1 from saved buffer
         mr2cD(1:(-min(sac_ax)-1), Continue) = mr2cD(2:-min(sac_ax),Continue); % push into the queue
-        mr2cD(-min(sac_ax),Continue) = R2(Continue);
+        mr2cD(-min(sac_ax),Continue) = H2_wind(Continue);
         % for chains just made decision
         mr1cD(-min(sac_ax)+1,flip) = H1_wind(flip);
         mr2cD(-min(sac_ax)+1,flip) = H2_wind(flip);
@@ -201,8 +196,8 @@ for ti = 0:max(posttask_steps(:))
     end
 end
 % for those trials that choices were not made
-R1Out(choice == 0) = R1(choice == 0);
-R2Out(choice == 0) = R2(choice == 0);
+R1Out(choice == 0) = H1_wind(choice == 0);
+R2Out(choice == 0) = H2_wind(choice == 0);
 %% calculate
 choice = choice/2; %1 choose R1, 2 choose R2, 1.5 R1 = R2,  0 choice is not made
 choice(choice == 0) = NaN; %1 choose R1, 2 choose R2, 1.5 R1 = R2, NaN choice is not made
