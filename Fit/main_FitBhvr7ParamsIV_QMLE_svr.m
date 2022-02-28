@@ -93,11 +93,12 @@ if ~exist(plot_dir,'dir')
 end
 dataDynmc = load('./Data/Data.mat');
 dataBhvr = LoadRoitmanData('../RoitmanDataCode');
-randseed = 69094639;
+randseed = 24356545;
 rng(randseed);
 % a, b, noise, scale, tauRGI, nLL
+% params = [0.000056	1.433901	24.837397	3254.833078	0.183152	0.248698	0.309921	16542.77267];
 params = [0	1.433631	25.35945	3251.289056	0.185325	0.224459	0.323132	16539.138186];
-name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f_sim1024',params(1:7));
+name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f',params(1:7));
 if ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
     tic;
     [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsIV_QMLE_GPU(params, dataBhvr);
@@ -112,8 +113,11 @@ end
 lwd = 1;
 mksz = 3;
 fontsize = 11;
+randseed = 24356545;
+rng(randseed);
 % a, b, noise, scale, tauRGI, nLL
-params = [	0	1.433631	25.35945	3251.289056	0.185325	0.224459	0.323132	16539.138186];
+% params = [0.000056	1.433901	24.837397	3254.833078	0.183152	0.248698	0.309921	16542.77267];
+params = [0	1.433631	25.35945	3251.289056	0.185325	0.224459	0.323132	16539.138186];
 simname = sprintf('LDDM_Dynmc_a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f_nLL%4.0f',params);
 
 a = params(1)*eye(2);
@@ -158,7 +162,7 @@ for vi = 2:6
 %     [R, G, I, rt, choice] = LcDsInhbt(Vinput, w, a, b, sgm, Tau, dur,...
 %         dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
     [~, ~, R, G, I] = LDDM(Vprior, Vinput, w, a, b, sgm, Tau, predur, dur,...
-    dt, presentt, triggert, 1.5*thresh, initialvals, stimdur, stoprule);
+    dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
     lgd2(vi-1) = plot(R(:,2), 'k-.', 'Color', mygray(vi,:), 'LineWidth',lwd);
     lgd1(vi-1) = plot(R(R(:,1)<=thresh,1), 'k-', 'Color', mygray(vi,:), 'LineWidth',lwd);
 end
@@ -300,6 +304,38 @@ h.PaperUnits = 'inches';
 h.PaperPosition = [0 0 3.0 10];
 %saveas(h,fullfile(plot_dir,sprintf('RTDistrb_%s.fig',name)),'fig');
 saveas(h,fullfile(plot_dir,sprintf('RTDistrb_%s.eps',name)),'epsc2');
+%% panel a, ditribution of RT and fitted line
+colorpalette = {'#ef476f','#ffd166','#06d6a0','#118ab2','#073b4c'};
+aspect8 = [2, 6.4]; % for the long format RT distribution fitting panels
+h = figure;
+filename = 'Fig5a';
+for ii = 1:6
+    subplot(6,1,ii);hold on;
+    bar(dataBhvr.bincenter(ii,1:30),dataBhvr.histmat(ii,1:30)*1024,'FaceColor',colorpalette{3},'EdgeAlpha',0);
+    bar(dataBhvr.bincenter(ii,1:30),-dataBhvr.histmat(ii,31:60)*1024,'FaceColor',colorpalette{2},'EdgeAlpha',0,'EdgeColor','none');
+    plot(BinMiddle{ii},bank1{ii},'Color',colorpalette{4},'LineWidth',lwd);
+    plot(BinMiddle{ii},-bank2{ii},'Color',colorpalette{1},'LineWidth',lwd);
+    if ii == 7
+        legend({'','','Correct','Error'},'NumColumns',2,'Location','North');
+        legend('boxoff');
+    end
+    ylim([-60,100]);
+    yticks([-50:50:100]);
+    yticklabels({'50','0','50','100'});
+    xlim([100 1762]/1000);
+    xticks([.5,1.0,1.5]);
+    if ii == 6
+        xticklabels({'.5','1.0','1.5'});
+        xlabel('Reaction time (s)');
+    else
+        xticklabels({});
+    end
+    if ii == 1
+        ylabel(' ');
+    end
+    set(gca, 'box','off');
+    savefigs(h, filename, plot_dir, fontsize, aspect8);
+end
 %% aggregated RT & ACC
 lwd = 1;
 mksz = 3;
@@ -379,7 +415,7 @@ ylabel('RT (s)');
 % saveas(h,fullfile(plot_dir,sprintf('Q-QPlot_%s.fig',name)),'fig');
 filename = sprintf('Q-QPlot_%s',name);
 % saveas(h,fullfile(plot_dir,filename),'epsc2');
-savefigs(h, filename, plot_dir, fontsize, [2 2.5]);
+savefigs(h, filename, plot_dir, fontsize, [2.5 2.5]);
 %% the original space of QMLE
 acc = dataBhvr.proportionmat;
 ON = dataBhvr.ON;
@@ -456,7 +492,7 @@ saveas(h,fullfile(plot_dir,sprintf('Proportion_Plot_%s.eps',name)),'epsc2');
 %% plot time course
 if ~exist(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),'file')
     tic;
-    [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LcDFitBhvr7ParamsIV_QMLE_GPU(params, dataDynmc, dataBhvr);
+    [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDMDynamic_FitBhvr7ParamsIV_QMLE_GPU(params, dataDynmc, dataBhvr);
     %sm_mr1c = gather(sm_mr1c);
     save(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),...
         'rtmat','choicemat','sm_mr1c','sm_mr2c','sm_mr1cD','sm_mr2cD','params');
@@ -472,7 +508,7 @@ m_mr2cD = m_mr2cD';
 dot_ax = dot_ax';
 sac_ax = sac_ax';
 h = figure;
-aspect = [5, 2.5];
+aspect = [3, 2.5];
 fontsize = 10;
 lwd = 1;
 filename = sprintf('FittedTimeCourse_%s',name);
@@ -507,7 +543,7 @@ H.LineWidth = 1;
 yticks([]);
 set(gca,'ycolor',[1 1 1]);
 ylim([20,70.5]);
-legend(lg,{'0','3.2','6.4','12.8','25.6','51.2'},'Location','best','FontSize',fontsize-2);
+legend(flip(lg),flip({'0','3.2','6.4','12.8','25.6','51.2'}),'Location','best','FontSize',fontsize-2);
 savefigs(h,filename,plot_dir,fontsize,aspect);
 saveas(h,fullfile(plot_dir,[filename, '.fig']),'fig');
 
@@ -527,55 +563,57 @@ saveas(h,fullfile(plot_dir,[filename, '.fig']),'fig');
 %% plot firing rates at position a,b,c,d 
 Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
 h = figure;
+filename = sprintf('abcd_%s',name);
 subplot(2,1,1);hold on;
 x = Cohr*100;
-y = sm_mr1c(20,:);
+y = sm_mr1c(19,:);
 plot(x, y,'k.','MarkerSize',16);
 p = polyfit(x,y,1);
 mdl = fitlm(x,y,'linear')
 plot(x,p(1)*x+p(2),'k-');
-y = sm_mr2c(20,:);
+y = sm_mr2c(19,:);
 plot(x, y,'k.','MarkerSize',16);
 p = polyfit(x,y,1);
 mdl = fitlm(x,y,'linear')
 plot(x,p(1)*x+p(2),'k-');
 % ylim([10,45]);
 xlim([-4,55.2]);
-yticks([10:10:40]);
+yticks([30:10:60]);
 xticks([0:10:50]);
 xticklabels({});
 ylabel('Firing rates (sp/s)');
-set(gca,'FontSize',14);
-set(gca,'TickDir','out');
-H = gca;
-H.LineWidth = 1;
+% set(gca,'FontSize',12);
+% set(gca,'TickDir','out');
+% H = gca;
+% H.LineWidth = 1;
+savefigs(h, filename, plot_dir, fontsize, [2 2.5]);
 
 subplot(2,1,2);hold on;
-y = sm_mr1cD(end-17,:);
+y = sm_mr1cD(end-15,:);
 plot(x, y,'k.','MarkerSize',16);
 p = polyfit(x,y,1);
 mdl = fitlm(x,y,'linear')
 plot(x,p(1)*x+p(2),'k-');
-y = sm_mr2cD(end-17,:);
+y = sm_mr2cD(end-15,:);
 plot(x, y,'k.','MarkerSize',16);
 p = polyfit(x,y,1);
 mdl = fitlm(x,y,'linear')
 plot(x,p(1)*x+p(2),'k-');
 % ylim([0,60]);
 xlim([-4,55.2]);
-yticks([0:10:70]);
+yticks([10:20:70]);
 xticks([0:10:50]);
 xlabel('Input strength (% coh)');
 ylabel('Firing rates (sp/s)');
-set(gca,'FontSize',14);
-set(gca,'TickDir','out');
-H = gca;
-H.LineWidth = 1;
-h.PaperUnits = 'inches';
-h.PaperPosition = [0 0 2.5 4];
+% set(gca,'FontSize',12);
+% set(gca,'TickDir','out');
+% H = gca;
+% H.LineWidth = 1;
+% h.PaperUnits = 'inches';
+% h.PaperPosition = [0 0 2.5 4];
 %saveas(h,fullfile(plot_dir,sprintf('abcd_%s.fig',name)),'fig');
-saveas(h,fullfile(plot_dir,sprintf('abcd_%s.eps',name)),'epsc2');
-
+% saveas(h,fullfile(plot_dir,sprintf('abcd_%s.eps',name)),'epsc2');
+savefigs(h, filename, plot_dir, fontsize, [2.5 4]);
 
 %% disribution of fitted parameters
 rslts = dlmread(fullfile(out_dir,'RsltList.txt'));

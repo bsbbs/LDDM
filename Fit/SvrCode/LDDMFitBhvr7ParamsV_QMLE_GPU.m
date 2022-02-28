@@ -1,7 +1,5 @@
-function [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDMDynamic_FitBhvr7ParamsIV_QMLE_GPU(params,dataDynmc, dataBhvr)
+function [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsV_QMLE_GPU(params, dataBhvr)
 % reload Roitman's data, processed
-dot_ax = dataDynmc.dot_ax';
-sac_ax = dataDynmc.sac_ax';
 q = dataBhvr.q;
 On = dataBhvr.On;
 ON = dataBhvr.ON;
@@ -13,14 +11,14 @@ sgm = params(3);
 tauR = params(5);
 tauG = params(6);
 tauI = params(7);
-ndt = .09 + .03; % sec, 90ms after stimuli onset, resort to the saccade side,
-% the activities reaches peak 30ms before initiation of saccade, according to Roitman & Shadlen
+ndt = .09 + .1 + .03; % sec, 90ms of initial dip after stimuli onset,  and ~100ms to recover to ~42Hz, resort to the saccade side,
+% the activiies reaches peak 30ms before initiation of saccade, according to Roitman & Shadlen
 presentt = 0; % changed for this version to move the fitting begin after the time point of recovery
 scale = params(4);
 
 % other fixed parameters
 % sims = 1024;
-deduction = 1;
+deduction = .1;
 sims = 1024/deduction;
 Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
 predur = 0;
@@ -31,9 +29,9 @@ thresh = 70; %70.8399; % mean(max(m_mr1cD))+1;
 stimdur = dur;
 stoprule = 1;
 w = [1 1; 1 1];
-Rstar = 32; % ~ 32 Hz at the bottom of initial fip, according to Roitman and Shadlen's data
+Rstar = 42; % ~ 42 Hz at the bottom of initial fip, according to Roitman and Shadlen's data
 initialvals = [Rstar,Rstar; sum(w(1,:))*Rstar,sum(w(2,:))*Rstar; 0,0];
-Vprior = ones(6,2)*((1-a(1,1))*Rstar + 2*Rstar^2);
+eqlb = Rstar; % set equilibrium value before task as R^*
 
 Tau = [tauR tauG tauI];
 % simulation
@@ -41,9 +39,10 @@ Tau = [tauR tauG tauI];
 V1 = (1 + Cohr)';
 V2 = (1 - Cohr)';
 Vinput = [V1, V2]*scale;
-% tic;
-[rtmat, choicemat, ~, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDM_Dynmc_Trim_GPU(Vprior, Vinput, w, a, b,...
-    sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims, dot_ax, sac_ax);
+Vprior = ones(size(Vinput))*(2*mean(w,'all')*eqlb.^2 + (1-a(1)).*eqlb);
+% tic
+[rtmat, choicemat, ~] = LDDM_GPU(Vprior, Vinput, w, a, b,...
+    sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims);
 rtmat = squeeze(rtmat)'+ndt;
 choicemat = squeeze(choicemat)';
 % toc;
