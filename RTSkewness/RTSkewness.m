@@ -52,6 +52,9 @@ for ai = 1:numel(avec)
     end
 end
 %% 
+[Bmat, Amat] = meshgrid(bvec, avec);
+surf(Amat,Bmat,randn(size(Bmat)));
+view(0,90);
 
 %% plot RT distribution - fitted
 rate = length(rtmat)/1024;
