@@ -415,7 +415,7 @@ ylabel('RT (s)');
 % saveas(h,fullfile(plot_dir,sprintf('Q-QPlot_%s.fig',name)),'fig');
 filename = sprintf('Q-QPlot_%s',name);
 % saveas(h,fullfile(plot_dir,filename),'epsc2');
-savefigs(h, filename, plot_dir, fontsize, [2 2.5]);
+savefigs(h, filename, plot_dir, fontsize, [2.5 2.5]);
 %% the original space of QMLE
 acc = dataBhvr.proportionmat;
 ON = dataBhvr.ON;
@@ -543,7 +543,7 @@ H.LineWidth = 1;
 yticks([]);
 set(gca,'ycolor',[1 1 1]);
 ylim([20,70.5]);
-legend(lg,{'0','3.2','6.4','12.8','25.6','51.2'},'Location','best','FontSize',fontsize-2);
+legend(flip(lg),flip({'0','3.2','6.4','12.8','25.6','51.2'}),'Location','best','FontSize',fontsize-2);
 savefigs(h,filename,plot_dir,fontsize,aspect);
 saveas(h,fullfile(plot_dir,[filename, '.fig']),'fig');
 
@@ -563,55 +563,57 @@ saveas(h,fullfile(plot_dir,[filename, '.fig']),'fig');
 %% plot firing rates at position a,b,c,d 
 Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
 h = figure;
+filename = sprintf('abcd_%s',name);
 subplot(2,1,1);hold on;
 x = Cohr*100;
-y = sm_mr1c(20,:);
+y = sm_mr1c(19,:);
 plot(x, y,'k.','MarkerSize',16);
 p = polyfit(x,y,1);
 mdl = fitlm(x,y,'linear')
 plot(x,p(1)*x+p(2),'k-');
-y = sm_mr2c(20,:);
+y = sm_mr2c(19,:);
 plot(x, y,'k.','MarkerSize',16);
 p = polyfit(x,y,1);
 mdl = fitlm(x,y,'linear')
 plot(x,p(1)*x+p(2),'k-');
 % ylim([10,45]);
 xlim([-4,55.2]);
-yticks([10:10:40]);
+yticks([30:10:60]);
 xticks([0:10:50]);
 xticklabels({});
 ylabel('Firing rates (sp/s)');
-set(gca,'FontSize',14);
-set(gca,'TickDir','out');
-H = gca;
-H.LineWidth = 1;
+% set(gca,'FontSize',12);
+% set(gca,'TickDir','out');
+% H = gca;
+% H.LineWidth = 1;
+savefigs(h, filename, plot_dir, fontsize, [2 2.5]);
 
 subplot(2,1,2);hold on;
-y = sm_mr1cD(end-17,:);
+y = sm_mr1cD(end-15,:);
 plot(x, y,'k.','MarkerSize',16);
 p = polyfit(x,y,1);
 mdl = fitlm(x,y,'linear')
 plot(x,p(1)*x+p(2),'k-');
-y = sm_mr2cD(end-17,:);
+y = sm_mr2cD(end-15,:);
 plot(x, y,'k.','MarkerSize',16);
 p = polyfit(x,y,1);
 mdl = fitlm(x,y,'linear')
 plot(x,p(1)*x+p(2),'k-');
 % ylim([0,60]);
 xlim([-4,55.2]);
-yticks([0:10:70]);
+yticks([10:20:70]);
 xticks([0:10:50]);
 xlabel('Input strength (% coh)');
 ylabel('Firing rates (sp/s)');
-set(gca,'FontSize',14);
-set(gca,'TickDir','out');
-H = gca;
-H.LineWidth = 1;
-h.PaperUnits = 'inches';
-h.PaperPosition = [0 0 2.5 4];
+% set(gca,'FontSize',12);
+% set(gca,'TickDir','out');
+% H = gca;
+% H.LineWidth = 1;
+% h.PaperUnits = 'inches';
+% h.PaperPosition = [0 0 2.5 4];
 %saveas(h,fullfile(plot_dir,sprintf('abcd_%s.fig',name)),'fig');
-saveas(h,fullfile(plot_dir,sprintf('abcd_%s.eps',name)),'epsc2');
-
+% saveas(h,fullfile(plot_dir,sprintf('abcd_%s.eps',name)),'epsc2');
+savefigs(h, filename, plot_dir, fontsize, [2.5 4]);
 
 %% disribution of fitted parameters
 rslts = dlmread(fullfile(out_dir,'RsltList.txt'));
