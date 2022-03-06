@@ -588,7 +588,7 @@ ylabel('Firing rates (sp/s)');
 % set(gca,'TickDir','out');
 % H = gca;
 % H.LineWidth = 1;
-savefigs(h, filename, plot_dir, fontsize, [2 2.5]);
+savefigs(h, filename, plot_dir, fontsize, [2 3]);
 
 subplot(2,1,2);hold on;
 y = sm_mr1cD(end-15,:);
@@ -615,7 +615,7 @@ ylabel('Firing rates (sp/s)');
 % h.PaperPosition = [0 0 2.5 4];
 %saveas(h,fullfile(plot_dir,sprintf('abcd_%s.fig',name)),'fig');
 % saveas(h,fullfile(plot_dir,sprintf('abcd_%s.eps',name)),'epsc2');
-savefigs(h, filename, plot_dir, fontsize, [2.5 4]);
+savefigs(h, filename, plot_dir, fontsize, [2 3]);
 
 %% disribution of fitted parameters
 rslts = dlmread(fullfile(out_dir,'RsltList.txt'));

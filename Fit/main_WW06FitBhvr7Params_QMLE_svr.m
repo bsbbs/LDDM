@@ -285,6 +285,40 @@ h.PaperUnits = 'inches';
 h.PaperPosition = [0 0 3.0 10];
 % saveas(h,fullfile(plot_dir,sprintf('RTDistrb_%s.fig',name)),'fig');
 saveas(h,fullfile(plot_dir,sprintf('RTDistrb_%s.eps',name)),'epsc2');
+%% panel a, ditribution of RT and fitted line
+lwd = 1;
+fontsize = 11;
+colorpalette = {'#ef476f','#ffd166','#06d6a0','#118ab2','#073b4c'};
+aspect8 = [2, 6.4]; % for the long format RT distribution fitting panels
+h = figure;
+filename = 'FigSXa';
+for ii = 1:6
+    subplot(6,1,ii);hold on;
+    bar(dataBhvr.bincenter(ii,1:30),dataBhvr.histmat(ii,1:30)*1024,'FaceColor',colorpalette{3},'EdgeAlpha',0);
+    bar(dataBhvr.bincenter(ii,1:30),-dataBhvr.histmat(ii,31:60)*1024,'FaceColor',colorpalette{2},'EdgeAlpha',0,'EdgeColor','none');
+    plot(BinMiddle{ii},bank1{ii},'Color',colorpalette{4},'LineWidth',lwd);
+    plot(BinMiddle{ii},-bank2{ii},'Color',colorpalette{1},'LineWidth',lwd);
+    if ii == 7
+        legend({'','','Correct','Error'},'NumColumns',2,'Location','North');
+        legend('boxoff');
+    end
+    ylim([-60,100]);
+    yticks([-50:50:100]);
+    yticklabels({'50','0','50','100'});
+    xlim([100 1762]/1000);
+    xticks([.5,1.0,1.5]);
+    if ii == 6
+        xticklabels({'.5','1.0','1.5'});
+        xlabel('Reaction time (s)');
+    else
+        xticklabels({});
+    end
+    if ii == 1
+        ylabel(' ');
+    end
+    set(gca, 'box','off');
+    savefigs(h, filename, plot_dir, fontsize, aspect8);
+end
 %% aggregated RT & ACC
 lwd = 1;
 mksz = 3;
@@ -360,7 +394,7 @@ ylim([0.2, 1.4]);
 yticks([.2:.4:1.4]);
 xlabel('Proportion');
 ylabel('RT (s)');
-savefigs(h, filename, plot_dir, fontsize, [2 2.5]);
+savefigs(h, filename, plot_dir, fontsize, [2.5 2.5]);
 %% the original space of QMLE
 acc = dataBhvr.proportionmat;
 ON = dataBhvr.ON;
@@ -464,6 +498,7 @@ ylabel('Firing rate (sp/s)');
 xlabel('Time (secs)');
 xlim([-.05, .8]);
 xticks([0:.2:.8]);
+xticklabels({'0','.2','.4','.6','.8'});
 % set(gca,'FontSize',16);
 savefigs(h,filename,plot_dir,fontsize,aspect);
 subplot(1,2,2);hold on;
@@ -472,15 +507,72 @@ for ci = 1:6
     lg(ci) = plot(sac_ax/1000, sm_mr1cD(:,ci),'Color',colvec{ci},'LineWidth',lwd);
     plot(sac_ax/1000, sm_mr2cD(:,ci),'--','Color',colvec{ci},'LineWidth',lwd);
 end
-xlim([-.8, .55]);
+xlim([-.8, .05]);
+xticks(-.8:.2:0);
+xticklabels({'-.8','-.6','-.4','-.2','0'});
 set(gca,'TickDir','out');
 H = gca;
 H.LineWidth = 1;
 yticks([]);
 set(gca,'ycolor',[1 1 1]);
 ylim([0,17.5]);
-legend(lg,{'0','3.2','6.4','12.8','25.6','51.2'},'Location','best','FontSize',fontsize-2);
+% legend(lg,{'0','3.2','6.4','12.8','25.6','51.2'},'Location','best','FontSize',fontsize-2);
 savefigs(h,filename,plot_dir,fontsize,aspect);
 saveas(h,fullfile(plot_dir,[filename, '.fig']),'fig');
+
+%% plot firing rates at position a,b,c,d 
+Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
+h = figure;
+filename = sprintf('abcd_%s',name);
+subplot(2,1,1);hold on;
+x = Cohr*100;
+y = sm_mr1c(24,:);
+plot(x, y,'k.','MarkerSize',16);
+p = polyfit(x,y,1);
+mdl = fitlm(x,y,'linear')
+plot(x,p(1)*x+p(2),'k-');
+y = sm_mr2c(24,:);
+plot(x, y,'k.','MarkerSize',16);
+p = polyfit(x,y,1);
+mdl = fitlm(x,y,'linear')
+plot(x,p(1)*x+p(2),'k-');
+% ylim([10,45]);
+xlim([-4,55.2]);
+%yticks([30:10:60]);
+xticks([0:10:50]);
+xticklabels({});
+ylabel('Firing rates (sp/s)');
+% set(gca,'FontSize',12);
+% set(gca,'TickDir','out');
+% H = gca;
+% H.LineWidth = 1;
+savefigs(h, filename, plot_dir, fontsize, [2 3]);
+
+subplot(2,1,2);hold on;
+y = sm_mr1cD(end-15,:);
+plot(x, y,'k.','MarkerSize',16);
+p = polyfit(x,y,1);
+mdl = fitlm(x,y,'linear')
+plot(x,p(1)*x+p(2),'k-');
+y = sm_mr2cD(end-15,:);
+plot(x, y,'k.','MarkerSize',16);
+p = polyfit(x,y,1);
+mdl = fitlm(x,y,'linear')
+plot(x,p(1)*x+p(2),'k-');
+% ylim([0,60]);
+xlim([-4,55.2]);
+yticks([3:3:15]);
+xticks([0:10:50]);
+xlabel('Input strength (% coh)');
+ylabel('Firing rates (sp/s)');
+% set(gca,'FontSize',12);
+% set(gca,'TickDir','out');
+% H = gca;
+% H.LineWidth = 1;
+% h.PaperUnits = 'inches';
+% h.PaperPosition = [0 0 2.5 4];
+%saveas(h,fullfile(plot_dir,sprintf('abcd_%s.fig',name)),'fig');
+% saveas(h,fullfile(plot_dir,sprintf('abcd_%s.eps',name)),'epsc2');
+savefigs(h, filename, plot_dir, fontsize, [2 3]);
 
 end
