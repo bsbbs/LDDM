@@ -22,28 +22,62 @@ dataBhvr = LoadRoitmanData('../RoitmanDataCode');
 randseed = 24356545;
 rng(randseed);
 %%
-avec = [0, 10.^(0:.1:1.8)];
-bvec = [.6:.1:2.6];
+avec = 10.^[-1:.01:1.9];
+bvec = linspace(0,4,401);
+[Amat,Bmat] = meshgrid(avec,bvec);
+params = [0	1.433631	25.35945	3251.289056	0.185325	0.224459	0.323132	16539.138186];
+sgm = params(3);
+tauR = params(5);
+tauG = params(6);
+tauI = params(7);
+
+predur = 0;
+presentt = 0; 
+triggert = 0;
+dur = 5;
+dt =.001;
+thresh = 70; %70.8399; % mean(max(m_mr1cD))+1; 
+stimdur = dur;
+stoprule = 1;
+w = [1 1; 1 1];
+Rstar = 42; % ~ 42 Hz at the bottom of initial fip, according to Roitman and Shadlen's data
+initialvals = [Rstar,Rstar; sum(w(1,:))*Rstar,sum(w(2,:))*Rstar; 0,0];
+eqlb = Rstar; % set equilibrium value before task as R^*
+scale = 2*1*eqlb.^2 + (1-Amat).*eqlb; % a = 1-(scale/eqlb - 2*eqlb)
+Tau = [tauR tauG tauI];
+sims = 256;
+Npiles = 40;
+cp = .128;
+Vinput.V1 = (1+cp)*scale;
+Vinput.V2 = (1-cp)*scale;
+Vprior.V1 = scale;
+Vprior.V2 = scale;
+
 effN = [];
 SK = [];
 KT = [];
 M = [];
 SD = [];
+name = sprintf('Amat%i_Bmat%i_sgm%2.1f_tau%1.2f_%1.2f_%1.2f_%i',numel(avec),numel(bvec),params([3,5:7]),sims*Npiles);
+if ~exist(fullfile(sim_dir,sprintf('PlotData_%s.mat',name)),'file')
+    for pi = 1:Npiles
+        tic;
+        [rt, choice, ~] = LDDM_GPU_ABMtrx(Vprior, Vinput, w, Amat, Bmat,...
+            sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims);
+        toc
+        rtmat(:,:,(sims*(pi-1)+1):(sims*pi)) = rt;
+        choicemat(:,:,(sims*(pi-1)+1):(sims*pi)) = choice;
+    end
+    save(fullfile(sim_dir,sprintf('PlotData_%s.mat',name)),...
+                'rtmat','choicemat');
+else
+    load(fullfile(sim_dir,sprintf('PlotData_%s.mat',name)));
+end
+
 for ai = 1:numel(avec)
     for bi = 1:numel(bvec)
-        params = [avec(ai)	bvec(bi)	25.35945	3251.289056	0.185325	0.224459	0.323132	16539.138186];
-        name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f',params(1:7));
-        if ~exist(fullfile(sim_dir,sprintf('PlotData_%s.mat',name)),'file')
-            tic;
-            [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsIV_QMLE_GPU(params, dataBhvr);
-            save(fullfile(sim_dir,sprintf('PlotData_%s.mat',name)),...
-                'rtmat','choicemat','params','nLL','Chi2','AIC','BIC');
-            toc
-        else
-            load(fullfile(sim_dir,sprintf('PlotData_%s.mat',name)));
-        end
         % mode: mean, deviance, skewness, turkosis
-        simdata = rtmat(choicemat(:,3)==1,3);
+        simdata = rtmat(bi,ai,~isnan(choicemat(bi,ai,:)));
         effN(bi,ai) = numel(simdata);
         SK(bi,ai) = skewness(simdata);
         KT(bi,ai) = kurtosis(simdata);
@@ -51,11 +85,152 @@ for ai = 1:numel(avec)
         SD(bi,ai) = std(simdata);
     end
 end
-%% 
-[Bmat, Amat] = meshgrid(bvec, avec);
-surf(Amat,Bmat,randn(size(Bmat)));
-view(0,90);
 
+%% 
+h = figure;
+filename = 'RT Distrib over a and b';
+subplot(2,2,1); hold on;
+s=surf(Bmat,Amat,SK);
+s.EdgeColor = 'none';
+set(gca,'YScale','log');
+title('Skewness');
+view(0,90);
+colorbar;
+subplot(2,2,2); hold on;
+s=surf(Bmat,Amat,KT);
+s.EdgeColor = 'none';
+set(gca,'YScale','log');
+title('Kurtosis');
+view(0,90);
+colorbar;
+subplot(2,2,3); hold on;
+s=surf(Bmat,Amat,M);
+s.EdgeColor = 'none';
+set(gca,'YScale','log');
+title('mean');
+view(0,90);
+colorbar;
+subplot(2,2,4); hold on;
+s=surf(Bmat,Amat,SD);
+s.EdgeColor = 'none';
+set(gca,'YScale','log');
+title('Deviance');
+view(0,90);
+colorbar;
+savefig(h,fullfile(plot_dir,[filename, '.fig']));
+%% get an clear-cut boundary from analytical analysis
+% mypool = parpool(7);
+%% panel e, parameter space for choice/representation under equal inputs
+w = 1;
+v = 1;
+V1 = (1+cp)*scale;
+V2 = (1-cp)*scale;
+Nb = length(bvec);
+filename = sprintf('Stability_Numeric_cp%1.3f_w%1.1f_v%1.1f_Amat%i_%1.2f_%1.2Bmat%i_%1.2f_%1.2f',...
+    [cp, w, v, numel(avec),min(avec),max(avec),numel(bvec),min(bvec),max(bvec)]);
+output = fullfile(sim_dir,[filename, '.mat']);
+if ~exist(output, 'file')
+    Npoints = NaN(size(Amat));
+    Eigenvalue = -ones([size(Amat),4]);
+    Stability = NaN(size(Amat));
+    for ai = 1:length(avec)
+        a = avec(ai);
+        fprintf('%2.1f.',a);
+        syms R1 R2;
+        vars = [R1 R2];
+        parfor bi = 1:Nb
+            fprintf('.');
+            b = bvec(bi);
+            eqns = [(V1(bi,ai)/R1 - (w - b)*R1 - (1-a))/v == R2, ... % dR1/dt = 0
+                (V2(bi,ai)/R2 - (w - b)*R2 - (1-a))/v == R1];% dR2/dt = 0
+            [AnswR1,AnswR2] = solve(eqns, vars);
+            AnswI1 = b*AnswR1;
+            AnswI2 = b*AnswR2;
+            AnswG1 = w*AnswR1 + v*AnswR2 - AnswI1;
+            AnswG2 = v*AnswR1 + w*AnswR2 - AnswI2;
+            PositiveRealAnsw = double(AnswR1) >0 & double(imag(AnswR1)) == 0;
+            Npoints(bi,ai) = sum(PositiveRealAnsw);
+            NegEigen = -ones(1,4);
+            for i = find(PositiveRealAnsw)'
+                R1star = double(AnswR1(i));
+                R2star = double(AnswR2(i));
+                G1star = double(AnswG1(i));
+                G2star = double(AnswG2(i));
+                JMat = [-1 + a/(1+G1star), -(V1(bi,ai)+a*R1star)/(1+G1star)^2, 0, 0, 0, 0
+                    w, -1, -1, v, 0, 0
+                    b, 0, -1, 0, 0, 0
+                    0, 0, 0, -1+a/(1+G2star),   -(V2(bi,ai)+a*R2star)/(1+G2star)^2, 0
+                    v, 0, 0, w, -1, -1
+                    0, 0, 0, b, 0, -1];
+                A = eig(JMat);
+                NegEigen(i) = all(real(A) < 0); % attractive 1, diversive 0
+            end
+            Stability(bi,ai)  = all(NegEigen>0);
+            Eigenvalue(bi,ai,:) = NegEigen;
+        end
+        fprintf('\n');
+    end
+    visualize = sum(Eigenvalue,3);
+    visualize(visualize == -2) = 2;
+    save(output,'Amat','Bmat','avec','bvec','V1','V2','cp','w','v','Npoints','Eigenvalue','Stability','visualize');
+else
+    load(output);
+end
+% plot
+dyadic = visualize == 2 | visualize == 0;
+colorpalettergb = [239,71,111;255,209,102;6,214,160;17,138,178;7,59,76]/255;
+h = figure; colormap(colorpalettergb([3,5],:));
+% filename = 'RTACC_fullspace_Stability_Numeric';
+s = surf(Bmat,Amat,dyadic+1,'EdgeColor','none');
+% colorbar;
+s.EdgeColor = 'none';
+set(gca,'YScale','log');
+%ylim([1,length(avec)]);
+%xlim([1,length(rvec)]);
+%xticks(linspace(1,length(rvec),5));
+%xticklabels(linspace(0,4,5));
+%yticks(linspace(1,length(avec),5));
+% yticklabels(linspace(0,60,5));
+%yticklabels({'10^{-1}','10^0','10^1','10^2'});
+xlabel('\beta');
+ylabel('\alpha');
+view(0,90);
+savefigs(h, filename, plot_dir, 12, [2.8, 2.54]*.95);
+
+%% plot with mask
+mask = NaN(size(dyadic));
+mask(~dyadic) = 1;
+h = figure;
+filename = 'RT Distrib over a and b [mask]';
+subplot(2,2,1); hold on;
+s=surf(Bmat,Amat,SK.*mask);
+s.EdgeColor = 'none';
+set(gca,'YScale','log');
+title('Skewness');
+view(0,90);
+colorbar;
+subplot(2,2,2); hold on;
+s=surf(Bmat,Amat,KT.*mask);
+s.EdgeColor = 'none';
+set(gca,'YScale','log');
+title('Kurtosis');
+view(0,90);
+colorbar;
+subplot(2,2,3); hold on;
+s=surf(Bmat,Amat,M.*mask);
+s.EdgeColor = 'none';
+set(gca,'YScale','log');
+title('mean');
+view(0,90);
+colorbar;
+subplot(2,2,4); hold on;
+s=surf(Bmat,Amat,SD.*mask);
+s.EdgeColor = 'none';
+set(gca,'YScale','log');
+title('Deviance');
+view(0,90);
+colorbar;
+savefig(h,fullfile(plot_dir,[filename, '.fig']));
 %% plot RT distribution - fitted
 rate = length(rtmat)/1024;
 maxrt = max(max(rtmat));
