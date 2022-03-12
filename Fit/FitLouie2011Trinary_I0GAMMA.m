@@ -1,6 +1,6 @@
 % Fit the mean firing rates from Louie, et al., 2011
-% cd('G:\My Drive\LDDM\Fit');
-cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
+cd('G:\My Drive\LDDM\Fit');
+% cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
 addpath(genpath('./bads-master'));
 addpath(genpath('../utils'));
 out_dir = './Rslts/FitLouie2011/TrinaryI0GAMMA';
@@ -47,7 +47,7 @@ options = bads('defaults');     % Default options
 options.Display = 'iter';
 options.UncertaintyHandling = false;    % Function is deterministic
 % options.UncertaintyHandling = true;    % Function is deterministic
-for i = 1:20
+for i = 10:20
     fprintf('Fit # %i: ',i);
     if size(summaries,1) < i
         x0 = randomX(LB,UB);
