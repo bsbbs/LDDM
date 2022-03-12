@@ -3,7 +3,7 @@
 cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
 addpath(genpath('./bads-master'));
 addpath(genpath('../utils'));
-out_dir = './Rslts/FitLouie2011/TrinaryI0';
+out_dir = './Rslts/FitLouie2011/TrinaryalphaI0';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -24,13 +24,14 @@ FR = LIPMeanData_TrinaryConditions.FR;
 Vilist = unique(Vi);
 V1list = unique(V1);
 %% Values in equilibirum
+a = 50;
 I0 = 0.1;
 S = 1;
-x = [I0,S];
-LB = [0.1, .6];
-UB = [500, 1.7];
-PLB = [80, .9];
-PUB = [120, 1.1];
+x = [a,I0,S];
+LB = [0,  0.1, .6];
+UB = [80, 500, 1.7];
+PLB = [5, 80, .9];
+PUB = [40, 120, 1.1];
 tic;
 [RSS, R1s] = OLS(x,V1,V2,V3,FR);
 toc
@@ -100,9 +101,9 @@ end
 
 %%
 function [RSS, R1s] = OLS(x,V1,V2,V3,FR)
-a = 0;
-I0 = x(1);
-S = x(2);
+a = x(1);
+I0 = x(2);
+S = x(3);
 R1s = [];
 for i = 1:numel(V1)
     % fprintf('%i.',i)
