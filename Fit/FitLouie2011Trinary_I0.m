@@ -3,6 +3,7 @@
 cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
 addpath(genpath('./bads-master'));
 addpath(genpath('../utils'));
+addpath(genpath('~/Documents/LDDM/'));
 out_dir = './Rslts/FitLouie2011/TrinaryI0';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
@@ -67,7 +68,7 @@ for i = 1:20
     %%
     if visulize
         h = figure(i);  hold on;
-        filename = sprintf('FitLouie_bads_%i_a%1.2f_I0%3.1f_S%1.2f_fval%1.3f_Rsqd%1.4f',i,x,fval,Rsquared);
+        filename = sprintf('FitLouie_bads_%i_I0%3.1f_S%1.2f_fval%1.3f_Rsqd%1.4f',i,x,fval,Rsquared);
         [RSS, R1s] = OLS(x,V1,V2,V3,FR);
         for ii = 1:numel(V1list)
             mask = V1 == V1list(ii);
