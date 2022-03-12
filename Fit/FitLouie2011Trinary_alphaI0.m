@@ -1,8 +1,9 @@
 % Fit the mean firing rates from Louie, et al., 2011
-% cd('G:\My Drive\LDDM\Fit');
-cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
+cd('G:\My Drive\LDDM\Fit');
+% cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
 addpath(genpath('./bads-master'));
 addpath(genpath('../utils'));
+addpath(genpath('C:\Users\Bo\Documents\LDDM'));
 out_dir = './Rslts/FitLouie2011/TrinaryalphaI0';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
