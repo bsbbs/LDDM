@@ -7,7 +7,7 @@ mypool = parpool(myCluster, myCluster.NumWorkers);
 addpath(genpath('../../RecurrentModel/bads/bads-master'));
 addpath('../CoreFunctions/');
 addpath('./SvrCode/');
-out_dir = '../../RecurrentModel/Fit/Rslts/FitBhvr7ParamsVI_QMLE_SvrGPU';
+out_dir = '../../RecurrentModel/Fit/Rslts/FitBhvr6ParamsVI_QMLE_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -33,7 +33,7 @@ x0 = rand(1,numel(LB)) .* (PUB - PLB) + PLB;
 
 % likelihood function
 % parpool(6);
-nLLfun = @(params) LDDMFitBhvr7ParamsVI_QMLE_GPU(params, dataBhvr);
+nLLfun = @(params) LDDMFitBhvr6ParamsVI_QMLE_GPU(params, dataBhvr);
 [fvalbest,~,~] = nLLfun(x0)
 fprintf('test succeeded\n');
 % change starting points
@@ -83,7 +83,7 @@ addpath(fullfile(Homedir,'Documents','LDDM','utils'));
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
 cd('G:\My Drive\LDDM\Fit');
 % cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
-out_dir = './Rslts/FitBhvr7ParamsVI_QMLE_SvrGPU';
+out_dir = './Rslts/FitBhvr6ParamsVI_QMLE_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -97,7 +97,7 @@ randseed = 24356545;
 rng(randseed);
 % a, b, noise, tauRGI, nLL
 params = [0	1.433631	25.35945	0.185325	0.224459	0.323132	16539.138186];
-name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f',params(1:7));
+name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_tau%1.2f_%1.2f_%1.2f',params(1:6));
 if ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
     tic;
     [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsVI_QMLE_GPU(params, dataBhvr);
@@ -116,20 +116,19 @@ randseed = 24356545;
 rng(randseed);
 % a, b, noise, scale, tauRGI, nLL
 % params = [0.000056	1.433901	24.837397	3254.833078	0.183152	0.248698	0.309921	16542.77267];
-params = [0	1.433631	25.35945	3251.289056	0.185325	0.224459	0.323132	16539.138186];
-simname = sprintf('LDDM_Dynmc_a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f_nLL%4.0f',params);
+% params = [0	1.433631	25.35945	3251.289056	0.185325	0.224459	0.323132	16539.138186];
+simname = sprintf('LDDM_Dynmc_a%2.2f_b%1.2f_sgm%2.1f_tau%1.2f_%1.2f_%1.2f_nLL%4.0f',params);
 
 a = params(1)*eye(2);
 b = params(2)*eye(2);
 sgm = params(3)/5;
-tauR = params(5);
-tauG = params(6);
-tauI = params(7);
+tauR = params(4);
+tauG = params(5);
+tauI = params(6);
 Tau = [tauR tauG tauI];
 ndt = .09 + .03; % sec, 90ms after stimuli onset, resort to the saccade side,
 % the activities reaches peak 30ms before initiation of saccade, according to Roitman & Shadlen
 presentt = 0; % changed for this version to move the fitting begin after the time point of recovery
-scale = params(4);
 
 predur = 0;
 triggert = 0;
@@ -140,14 +139,20 @@ stimdur = dur;
 stoprule = 1;
 w = [1 1; 1 1];
 Rstar = 32; % ~ 32 Hz at the bottom of initial fip, according to Roitman and Shadlen's data
-initialvals = [Rstar,Rstar; sum(w(1,:))*Rstar,sum(w(2,:))*Rstar; 0,0];
+I0 = params(2)*Rstar;
+initialvals = [Rstar,Rstar; (sum(w(1,:)) - params(2))*Rstar,(sum(w(2,:)) - params(2))*Rstar; I0, I0];
 eqlb = Rstar; % set equilibrium value before task as R^*
-Vprior = [1, 1]*(2*mean(w,'all')*eqlb.^2 + (1-a(1)).*eqlb);
-
+scale = ((2*mean(w,'all') - params(2)))*eqlb.^2 + (1-a(1)).*eqlb;
 Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
 c1 = (1 + Cohr)';
 c2 = (1 - Cohr)';
 cplist = [c1, c2];
+V1 = (1 + Cohr)';
+V2 = (1 - Cohr)';
+Vinput = [V1, V2]*scale;
+Vprior = ones(size(Vinput))*scale;
+
+
 mygray = flip(gray(length(cplist)));
 
 h = figure; 
@@ -493,7 +498,7 @@ saveas(h,fullfile(plot_dir,sprintf('Proportion_Plot_%s.eps',name)),'epsc2');
 %% plot time course
 if ~exist(fullfile(plot_dir,sprintf('PlotDynamic_%s_D0.mat',name)),'file')
     tic;
-    [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDMDynamic_FitBhvr7ParamsVI_QMLE_GPU(params, dataDynmc, dataBhvr);
+    [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDMDynamic_FitBhvr6ParamsVI_QMLE_GPU(params, dataDynmc, dataBhvr);
     %sm_mr1c = gather(sm_mr1c);
     save(fullfile(plot_dir,sprintf('PlotDynamic_%s_D0.mat',name)),...
         'rtmat','choicemat','sm_mr1c','sm_mr2c','sm_mr1cD','sm_mr2cD','params');

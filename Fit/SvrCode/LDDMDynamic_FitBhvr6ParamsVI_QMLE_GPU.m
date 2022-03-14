@@ -1,4 +1,4 @@
-function [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDMDynamic_FitBhvr7ParamsVI_QMLE_GPU(params,dataDynmc, dataBhvr)
+function [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDMDynamic_FitBhvr6ParamsVI_QMLE_GPU(params,dataDynmc, dataBhvr)
 % reload Roitman's data, processed
 dot_ax = dataDynmc.dot_ax';
 sac_ax = dataDynmc.sac_ax';
