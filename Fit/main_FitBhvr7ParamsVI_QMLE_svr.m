@@ -7,7 +7,7 @@ mypool = parpool(myCluster, myCluster.NumWorkers);
 addpath(genpath('../../RecurrentModel/bads/bads-master'));
 addpath('../CoreFunctions/');
 addpath('./SvrCode/');
-out_dir = '../../RecurrentModel/Fit/Rslts/FitBhvr7ParamsV_QMLE_SvrGPU';
+out_dir = '../../RecurrentModel/Fit/Rslts/FitBhvr7ParamsVI_QMLE_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -22,23 +22,23 @@ t = datenum(clock)*10^10 - floor(datenum(clock)*100)*10^8 + sortNum*10^7;
 num2str(t);
 rng(t);
 % Define optimization starting point and bounds
-%     a,    b, noise, scale, Tau
-LB = [0    0.1   .1    .1*256 [.001,.001,.001]];
-UB = [70   3	100  20*256 [1,1,1]];
-PLB = [15  .9	5    1*256 [.01 .01 .01]];
-PUB = [60   1.7	40   8*256 [.2 .2 .2]];
+%     a,    b, noise, Tau
+LB = [0    0.1   .1    [.001,.001,.001]];
+UB = [70   3	100  [1,1,1]];
+PLB = [15  .9	5  [.01 .01 .01]];
+PUB = [60   1.7	40  [.2 .2 .2]];
 
 % Randomize initial starting point inside plausible box
 x0 = rand(1,numel(LB)) .* (PUB - PLB) + PLB;
 
 % likelihood function
 % parpool(6);
-nLLfun = @(params) LDDMFitBhvr7ParamsV_QMLE_GPU(params, dataBhvr);
+nLLfun = @(params) LDDMFitBhvr7ParamsVI_QMLE_GPU(params, dataBhvr);
 [fvalbest,~,~] = nLLfun(x0)
 fprintf('test succeeded\n');
 % change starting points
 Collect = [];
-parfor i = 1:myCluster.NumWorkers*16
+parfor i = 1:myCluster.NumWorkers*8
     !ping -c 1 www.amazon.com
     t = datenum(clock)*10^10 - floor(datenum(clock)*100)*10^8 + sortNum*10^7 + i*10^5;
     %num2str(t);
@@ -83,7 +83,7 @@ addpath(fullfile(Homedir,'Documents','LDDM','utils'));
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
 cd('G:\My Drive\LDDM\Fit');
 % cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
-out_dir = './Rslts/FitBhvr7ParamsV_QMLE_SvrGPU';
+out_dir = './Rslts/FitBhvr7ParamsVI_QMLE_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -93,15 +93,14 @@ if ~exist(plot_dir,'dir')
 end
 dataDynmc = load('./Data/Data.mat');
 dataBhvr = LoadRoitmanData('../RoitmanDataCode');
-randseed = 98909897;
+randseed = 24356545;
 rng(randseed);
-% a, b, noise, scale, tauRGI, nLL
-% params = [0.000056	1.433901	24.837397	3254.833078	0.183152	0.248698	0.309921	16542.77267];
-params = [2.243691	1.208682	30.804911	3268.729634	0.001051	0.33589	0.241497	16675.19238];
+% a, b, noise, tauRGI, nLL
+params = [0	1.433631	25.35945	0.185325	0.224459	0.323132	16539.138186];
 name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f',params(1:7));
 if ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
     tic;
-    [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsV_QMLE_GPU(params, dataBhvr);
+    [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsVI_QMLE_GPU(params, dataBhvr);
     save(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),...
         'rtmat','choicemat','params','nLL','Chi2','AIC','BIC');
     toc
@@ -117,7 +116,7 @@ randseed = 24356545;
 rng(randseed);
 % a, b, noise, scale, tauRGI, nLL
 % params = [0.000056	1.433901	24.837397	3254.833078	0.183152	0.248698	0.309921	16542.77267];
-% params = [0	1.433631	25.35945	3251.289056	0.185325	0.224459	0.323132	16539.138186];
+params = [0	1.433631	25.35945	3251.289056	0.185325	0.224459	0.323132	16539.138186];
 simname = sprintf('LDDM_Dynmc_a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f_nLL%4.0f',params);
 
 a = params(1)*eye(2);
@@ -140,7 +139,7 @@ thresh = 70; %70.8399; % mean(max(m_mr1cD))+1;
 stimdur = dur;
 stoprule = 1;
 w = [1 1; 1 1];
-Rstar = 42; % ~ 32 Hz at the bottom of initial fip, according to Roitman and Shadlen's data
+Rstar = 32; % ~ 32 Hz at the bottom of initial fip, according to Roitman and Shadlen's data
 initialvals = [Rstar,Rstar; sum(w(1,:))*Rstar,sum(w(2,:))*Rstar; 0,0];
 eqlb = Rstar; % set equilibrium value before task as R^*
 Vprior = [1, 1]*(2*mean(w,'all')*eqlb.^2 + (1-a(1)).*eqlb);
@@ -305,6 +304,8 @@ h.PaperPosition = [0 0 3.0 10];
 %saveas(h,fullfile(plot_dir,sprintf('RTDistrb_%s.fig',name)),'fig');
 saveas(h,fullfile(plot_dir,sprintf('RTDistrb_%s.eps',name)),'epsc2');
 %% panel a, ditribution of RT and fitted line
+lwd = 1;
+fontsize = 11;
 colorpalette = {'#ef476f','#ffd166','#06d6a0','#118ab2','#073b4c'};
 aspect8 = [2, 6.4]; % for the long format RT distribution fitting panels
 h = figure;
@@ -490,15 +491,15 @@ h.PaperPosition = [0 0 3 10];
 saveas(h,fullfile(plot_dir,sprintf('Proportion_Plot_%s.eps',name)),'epsc2');
 
 %% plot time course
-if ~exist(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),'file')
+if ~exist(fullfile(plot_dir,sprintf('PlotDynamic_%s_D0.mat',name)),'file')
     tic;
-    [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDMDynamic_FitBhvr7ParamsV_QMLE_GPU(params, dataDynmc, dataBhvr);
+    [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDMDynamic_FitBhvr7ParamsVI_QMLE_GPU(params, dataDynmc, dataBhvr);
     %sm_mr1c = gather(sm_mr1c);
-    save(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),...
+    save(fullfile(plot_dir,sprintf('PlotDynamic_%s_D0.mat',name)),...
         'rtmat','choicemat','sm_mr1c','sm_mr2c','sm_mr1cD','sm_mr2cD','params');
     toc
 else
-    load(fullfile(plot_dir, sprintf('PlotDynamic_%s.mat',name)));
+    load(fullfile(plot_dir, sprintf('PlotDynamic_%s_D0.mat',name)));
 end
 load('./Data/Data.mat');
 m_mr1c = m_mr1c';
@@ -511,7 +512,7 @@ h = figure;
 aspect = [3, 2.5];
 fontsize = 10;
 lwd = 1;
-filename = sprintf('FittedTimeCourse_%s',name);
+filename = sprintf('FittedTimeCourse_%s_D0',name);
 subplot(1,2,1);hold on;
 clear flip;
 colvec = flip({[218,166,109]/256,[155 110 139]/256,'#32716d','#af554d','#708d57','#3b5d64'});
@@ -586,7 +587,7 @@ ylabel('Firing rates (sp/s)');
 % set(gca,'TickDir','out');
 % H = gca;
 % H.LineWidth = 1;
-savefigs(h, filename, plot_dir, fontsize, [2 2.5]);
+savefigs(h, filename, plot_dir, fontsize, [2 3]);
 
 subplot(2,1,2);hold on;
 y = sm_mr1cD(end-15,:);
@@ -613,7 +614,7 @@ ylabel('Firing rates (sp/s)');
 % h.PaperPosition = [0 0 2.5 4];
 %saveas(h,fullfile(plot_dir,sprintf('abcd_%s.fig',name)),'fig');
 % saveas(h,fullfile(plot_dir,sprintf('abcd_%s.eps',name)),'epsc2');
-savefigs(h, filename, plot_dir, fontsize, [2.5 4]);
+savefigs(h, filename, plot_dir, fontsize, [2 3]);
 
 %% disribution of fitted parameters
 rslts = dlmread(fullfile(out_dir,'RsltList.txt'));
