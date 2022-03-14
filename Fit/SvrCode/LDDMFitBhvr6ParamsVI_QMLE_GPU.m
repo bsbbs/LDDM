@@ -1,4 +1,4 @@
-function [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsVI_QMLE_GPU(params, dataBhvr)
+function [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr6ParamsVI_QMLE_GPU(params, dataBhvr)
 % reload Roitman's data, processed
 q = dataBhvr.q;
 On = dataBhvr.On;
