@@ -96,11 +96,11 @@ dataBhvr = LoadRoitmanData('../RoitmanDataCode');
 randseed = 24356545;
 rng(randseed);
 % a, b, noise, tauRGI, nLL
-params = [0	1.433631	25.35945	0.185325	0.224459	0.323132	16539.138186];
-name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_tau%1.2f_%1.2f_%1.2f',params(1:6));
+params = [27.2538    0.8518   11.8206    0.0079    0.0019    0.2695	16822.4]; % 16822.4 ± 2.98148
+name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_tau%1.2f_%1.2f_%1.2f_nLL%5.2f',params(1:7));
 if ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
     tic;
-    [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsVI_QMLE_GPU(params, dataBhvr);
+    [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr6ParamsVI_QMLE_GPU(params, dataBhvr);
     save(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),...
         'rtmat','choicemat','params','nLL','Chi2','AIC','BIC');
     toc
