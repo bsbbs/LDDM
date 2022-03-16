@@ -32,15 +32,15 @@ Tau = [tauR, tauG, tauI];
 w0 = ones(2);
 a0 = 40;
 b0 = 2.8;
-task = 'WM';
+task = 'RT';
 %RT, stimdur = Inf, triggert = presentt;
 %FDon, stimdur = Inf, triggert = presentt + .5;
 %FDoff, stimdur = .5, triggert = presentt + .5
 %WM, stimdur = .5, triggertt = presentt+.7
 predur = 0;
 presentt = dt;%*200;
-stimdur = .5;
-triggert = presentt+.7;
+stimdur = Inf;
+triggert = presentt+dt;
 dur = 4.5; % second
 
 thresh = 70; % Hz
@@ -56,7 +56,7 @@ Vprior = [1,1]*scale;
 
 boost = [1, 2];
 % Dynamics
-sgm = 0;
+sgm = 10;
 h = figure;
 filename = sprintf('timeCourse_%s_iSTDP%1.1fand%1.1f_sgm%2.2f',task, boost, sgm);
 mycl = jet(length(boost)*10);
@@ -95,7 +95,7 @@ lgd = legend(' ', ' ', 'V1', 'V2',...
 title(lgd, "Baseline                  iSTDP      .");
 savefigs(h, filename, plotdir,fontsize-5, [3,6]);
 
-% change iSTDP level
+%% change iSTDP level
 boost = 1:.4:4;
 sims = 10000;
 sgmInput = 0; % 1/3
