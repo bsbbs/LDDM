@@ -1,5 +1,5 @@
-function [choice, rt, R, G, I, Vcourse] = LDDM_STDP_RndInput(Vprior, Vinput, iSTDP, w, a, b,...
-    sgm, sgmInput, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule)
+function [choice, rt, R, G, I] = LDDM_SST_OneSide(Vprior, Vinput, iSTDP, w, a, b,...
+    sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule)
 %%%%%%%%%%%%%%%%%%
 % The core function of local disinhibition decision model (LDDM)
 % Created by Bo Shen, NYU, 2019
@@ -74,24 +74,19 @@ G = initialvals(2,:) + InoiseG;
 R = initialvals(1,:) + InoiseR;
 I = initialvals(3,:) + InoiseI;
 %% simulation begin
-Vnoise = randn(sizeVinput)*sgmInput;
 t_stamp = pretask_steps + 1;
 for ti = (-pretask_steps):posttask_steps % align the beginning of the task as ti = 0
     % input values
     if ti > -pretask_steps && ti < 0
         V = Vprior;
     elseif ti >= onset_of_stimuli && ti < offset_of_stimuli
-        if (mod(ti*dt, .005) == 0)
-            Vnoise = randn(sizeVinput)*sgmInput;
-        end
-        V = Vinput + Vnoise;
+        V = Vinput;
     else
-        V = zeros(sizeVinput);
+        V = 0;
     end
-    Vcourse(ti+t_stamp,:) = V;
     
     % update R, G, I
-    dR = (-R(ti+t_stamp,:)' + (V' + a*R(ti+t_stamp,:)')./(1+iSTDP*G(ti+t_stamp,:)'))/Tau(1)*dt;
+    dR = (-R(ti+t_stamp,:)' + (V' + a*R(ti+t_stamp,:)')./(1+[iSTDP 0; 0 1]*G(ti+t_stamp,:)'))/Tau(1)*dt;
     dG = (-G(ti+t_stamp,:)' + w * R(ti+t_stamp,:)' - I(ti+t_stamp,:)')/Tau(2)*dt;
     dI = (-I(ti+t_stamp,:)' + b*(ti >= onset_of_trigger)*R(ti+t_stamp,:)')/Tau(3)*dt;
     R(ti+t_stamp+1,:) = R(ti+t_stamp,:) + dR' + InoiseR;

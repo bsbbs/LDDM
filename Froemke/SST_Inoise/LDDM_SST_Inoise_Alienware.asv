@@ -249,11 +249,7 @@ boost = 1:.4:4;
 sgm = 0;
 sgmInput = 0;
 triggert = Inf;
-stimdur = Inf;
-dur = 4.5;
-Rstore = [];
-h = figure;
-filename = 'R dynamic over iSTDP';
+stimdur = 
 for level = 1:length(boost)
     Vinput = [c1, c2]*scale;
     a = a0;%*boost(level);
@@ -264,20 +260,5 @@ for level = 1:length(boost)
     initialvals = (a-1)./sum(w,2)'.*[1,1; sum(w,2)'; 0, 0];
     [choice, rt, R, G, I, Vcourse] = LDDM_STDP_RndInput(Vprior, Vinput, iSTDP, w, a, b,...
     sgm, sgmInput*scale, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-    Rstore(level) = R(end,1);
-    subplot(2,4,level);
-    plot(R);
-    ylim([10,40]);
-    xlabel('Time (a.u.)');
-    ylabel('Firing rates (Hz)');
 end
-savefigs(h, [filename], plotdir,fontsize-5, [6,4]);
-
-
-h = figure;
-filename = 'SteadyFR_iSTDP';
-plot(boost,Rstore);
-xlabel('iSTDP');
-ylabel('Max Firing rates (Hz)');
-savefigs(h, [filename], plotdir,fontsize-5, [3,3]);
 

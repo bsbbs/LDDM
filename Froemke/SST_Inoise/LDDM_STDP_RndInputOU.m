@@ -1,4 +1,4 @@
-function [choice, rt, R, G, I, Vcourse] = LDDM_STDP_RndInput(Vprior, Vinput, iSTDP, w, a, b,...
+function [choice, rt, R, G, I, Vcourse] = LDDM_STDP_RndInputOU(Vprior, Vinput, iSTDP, w, a, b,...
     sgm, sgmInput, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule)
 %%%%%%%%%%%%%%%%%%
 % The core function of local disinhibition decision model (LDDM)
@@ -48,6 +48,7 @@ function [choice, rt, R, G, I, Vcourse] = LDDM_STDP_RndInput(Vprior, Vinput, iST
 % 	1 for to stop, 0 for to continue simulating until total duration set in dur. 
 %%%%%%%%%%%%%%%%%%%
 tauN =0.002; % time constant for Ornstein-Uhlenbeck process of noise
+tauInput = .1; % time constant for Ornstein-Uhlenbeck process of input noise
 %% define parameters
 pretask_steps = round(predur/dt);
 onset_of_stimuli = round(presentt/dt); % align to the beginning of task as t = 0.
@@ -63,27 +64,29 @@ choice = NaN;
 InoiseG = zeros(sizeVinput);
 InoiseR = zeros(sizeVinput);
 InoiseI = zeros(sizeVinput);
+Vnoise = zeros(sizeVinput);
 stablizetime = round(.2/dt);
 for kk = 1:stablizetime
     % update noise
     InoiseG = InoiseG + (-InoiseG + randn(sizeVinput).*sqrt(dt).*sgm)/tauN*dt;
     InoiseI = InoiseI + (-InoiseI + randn(sizeVinput).*sqrt(dt).*sgm)/tauN*dt;
     InoiseR = InoiseR + (-InoiseR + randn(sizeVinput).*sqrt(dt).*sgm)/tauN*dt;
+    Vnoise = Vnoise + (-Vnoise + randn(sizeVinput)*sqrt(dt)*sgmInput)/tauInput*dt;
 end
 G = initialvals(2,:) + InoiseG;
 R = initialvals(1,:) + InoiseR;
 I = initialvals(3,:) + InoiseI;
 %% simulation begin
-Vnoise = randn(sizeVinput)*sgmInput;
 t_stamp = pretask_steps + 1;
 for ti = (-pretask_steps):posttask_steps % align the beginning of the task as ti = 0
     % input values
     if ti > -pretask_steps && ti < 0
         V = Vprior;
     elseif ti >= onset_of_stimuli && ti < offset_of_stimuli
-        if (mod(ti*dt, .005) == 0)
-            Vnoise = randn(sizeVinput)*sgmInput;
-        end
+%         if (mod(ti*dt, .005) == 0)
+%             Vnoise = randn(sizeVinput)*sgmInput;
+%         end
+        Vnoise = Vnoise + (-Vnoise + randn(sizeVinput)*sqrt(dt)*sgmInput)/tauInput*dt;
         V = Vinput + Vnoise;
     else
         V = zeros(sizeVinput);
