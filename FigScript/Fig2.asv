@@ -1,0 +1,44 @@
+% Fig 2 
+%% panel b, Example dynamics of the LDDM 
+a = 15*eye(2,2);
+b = 1.02*eye(2,2);
+w = ones(2,2);
+cp = .128;
+initialvals = [20,20;20,20;0,0]/10;
+predur = 0;
+presentt = 0;
+dur = 1.5;
+stimdur = dur;
+sgm = 0;
+triggert = .8;
+thresh = 70;
+stoprule = 1;
+
+-o
+h = figure; hold on;
+filename = 'Fig2b';
+    Vprior = ones(1,2)*scale0;
+    Vinput = [1 + cp, 1 - cp]*scale0;
+    [choice, rt, R, G, I] = LDDM(Vprior, Vinput, w, a, b,...
+    sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+
+    %[R, G, I, rt, choice] = LDDM(Vinput, w, a, b, sgm, Tau, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+    
+    lgd4 = plot(G(:,2), '--', 'Color',mygray(3,:), 'LineWidth',lwd);
+    lgd3 = plot(G(:,1), '-', 'Color',mygray(3,:), 'LineWidth',lwd/2);
+    lgd6 = plot(I(:,2),'g--', 'Color','#06d6a0', 'LineWidth',lwd);
+    lgd5 = plot(I(:,1),'g-', 'Color','#06d6a0', 'LineWidth',lwd/2); % old color 669900
+    lgd2 = plot(R(:,2), 'k--', 'LineWidth',lwd);
+    lgd1 = plot(R(:,1), 'k-', 'LineWidth',lwd);
+
+ylim([-1,max(ylim)]);
+yticks([0]);
+xticks([presentt/dt, triggert/dt]);
+xticklabels({'0',''});
+yticklabels({'0'});
+ylabel('Activity (a.u.)');
+xlabel('Time (a.u.)');
+legend([lgd1,lgd3,lgd5, lgd2,lgd4,lgd6],{'R_1','G_1','D_1', 'R_2','G_2','D_2'},...
+    'Location','North','FontSize',fontsize-5, 'FontName','Times New Roman', ...
+    'FontAngle','italic','NumColumns',2,'Box','off');
+savefig(h, filename, outdir, fontsize, aspect1);
