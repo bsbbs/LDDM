@@ -1,4 +1,4 @@
-function [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr6ParamsVI_QMLE_GPU(params, dataBhvr)
+function [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsVII_QMLE_GPU(params, dataBhvr)
 % reload Roitman's data, processed
 q = dataBhvr.q;
 On = dataBhvr.On;
@@ -8,9 +8,10 @@ OP = dataBhvr.OP;
 a = params(1)*eye(2);
 b = params(2)*eye(2);
 sgm = params(3);
-tauR = params(4);
-tauG = params(5);
-tauI = params(6);
+B0 = params(4);
+tauR = params(5);
+tauG = params(6);
+tauI = params(7);
 ndt = .09 + .03; % sec, 90ms after stimuli onset, resort to the saccade side,
 % the activities reaches peak 30ms before initiation of saccade, according to Roitman & Shadlen
 presentt = 0; % changed for this version to move the fitting begin after the time point of recovery
@@ -33,11 +34,11 @@ Rstar = 42; % ~ 32 Hz at the bottom of initial fip, according to Roitman and Sha
 I0 = params(2)*Rstar;
 initialvals = [Rstar,Rstar; (sum(w(1,:)) - params(2))*Rstar,(sum(w(2,:)) - params(2))*Rstar; I0, I0];
 eqlb = Rstar; % set equilibrium value before task as R^*
-scale = ((2*mean(w,'all') - params(2)))*eqlb.^2 + (1-a(1)).*eqlb;
+scale = max([5, (((2*mean(w,'all') - params(2)))*eqlb.^2 + (1-a(1)).*eqlb)/(1 + B0)]);
 V1 = (1 + Cohr)';
 V2 = (1 - Cohr)';
-Vinput = [V1, V2]*scale;
-Vprior = ones(size(Vinput))*scale;
+Vinput = ([V1, V2]+B0)*scale;
+Vprior = (ones(size(Vinput)) + B0)*scale;
 
 
 Tau = [tauR tauG tauI];

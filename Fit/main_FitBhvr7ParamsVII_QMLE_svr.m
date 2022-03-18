@@ -7,7 +7,7 @@ mypool = parpool(myCluster, myCluster.NumWorkers);
 addpath(genpath('../../RecurrentModel/bads/bads-master'));
 addpath('../CoreFunctions/');
 addpath('./SvrCode/');
-out_dir = '../../RecurrentModel/Fit/Rslts/FitBhvr6ParamsVI_QMLE_SvrGPU';
+out_dir = '../../RecurrentModel/Fit/Rslts/FitBhvr7ParamsVII_QMLE_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -22,18 +22,18 @@ t = datenum(clock)*10^10 - floor(datenum(clock)*100)*10^8 + sortNum*10^7;
 num2str(t);
 rng(t);
 % Define optimization starting point and bounds
-%     a,    b, noise, Tau
-LB = [0    0.1   .1    [.001,.001,.001]];
-UB = [70   3	100  [1,1,1]];
-PLB = [15  .9	5  [.01 .01 .01]];
-PUB = [60   1.7	40  [.2 .2 .2]];
+%     a,    b, noise, B0, Tau
+LB = [0    0.1   .1   0 [.001,.001,.001]];
+UB = [70   2	100  1 [1,1,1]];
+PLB = [15  .9	5  .1 [.01 .01 .01]];
+PUB = [60   1.7	40 .6 [.2 .2 .2]];
 
 % Randomize initial starting point inside plausible box
 x0 = rand(1,numel(LB)) .* (PUB - PLB) + PLB;
 
 % likelihood function
 % parpool(6);
-nLLfun = @(params) LDDMFitBhvr6ParamsVI_QMLE_GPU(params, dataBhvr);
+nLLfun = @(params) LDDMFitBhvr7ParamsVII_QMLE_GPU(params, dataBhvr);
 [fvalbest,~,~] = nLLfun(x0)
 fprintf('test succeeded\n');
 % change starting points
@@ -83,7 +83,7 @@ addpath(fullfile(Homedir,'Documents','LDDM','utils'));
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
 cd('G:\My Drive\LDDM\Fit');
 % cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
-out_dir = './Rslts/FitBhvr6ParamsVI_QMLE_SvrGPU';
+out_dir = './Rslts/FitBhvr7ParamsVII_QMLE_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -96,11 +96,11 @@ dataBhvr = LoadRoitmanData('../RoitmanDataCode');
 randseed = 72284006;
 rng(randseed);
 % a, b, noise, tauRGI, nLL
-params = [0.001773	1.812852	6.082312	0.017669	0.279181	0.633919	16728.81362]; % 16822.4 ± 2.98148
-name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_tau%1.2f_%1.2f_%1.2f_nLL%5.2f',params(1:7));
+params = [0.001773	1.812852	6.082312 .3	0.017669	0.279181	0.633919	16728.81362]; % 16822.4 ± 2.98148
+name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_B0%1.3f_tau%1.2f_%1.2f_%1.2f_nLL%5.2f',params);
 if ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
     tic;
-    [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr6ParamsVI_QMLE_GPU(params, dataBhvr);
+    [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsVII_QMLE_GPU(params, dataBhvr);
     save(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),...
         'rtmat','choicemat','params','nLL','Chi2','AIC','BIC');
     toc
@@ -117,14 +117,15 @@ rng(randseed);
 % a, b, noise, scale, tauRGI, nLL
 % params = [0.000056	1.433901	24.837397	3254.833078	0.183152	0.248698	0.309921	16542.77267];
 % params = [0	1.433631	25.35945	3251.289056	0.185325	0.224459	0.323132	16539.138186];
-simname = sprintf('LDDM_Dynmc_a%2.2f_b%1.2f_sgm%2.1f_tau%1.2f_%1.2f_%1.2f_nLL%4.0f',params);
+simname = sprintf('LDDM_Dynmc_a%2.2f_b%1.2f_sgm%2.1f_B0%1.3f_tau%1.2f_%1.2f_%1.2f_nLL%4.0f',params);
 
 a = params(1)*eye(2);
 b = params(2)*eye(2);
 sgm = params(3)/5;
-tauR = params(4);
-tauG = params(5);
-tauI = params(6);
+B0 = params(4);
+tauR = params(5);
+tauG = params(6);
+tauI = params(7);
 Tau = [tauR tauG tauI];
 ndt = .09 + .03; % sec, 90ms after stimuli onset, resort to the saccade side,
 % the activities reaches peak 30ms before initiation of saccade, according to Roitman & Shadlen
@@ -138,19 +139,19 @@ thresh = 70; %70.8399; % mean(max(m_mr1cD))+1;
 stimdur = dur;
 stoprule = 1;
 w = [1 1; 1 1];
-Rstar = 32; % ~ 32 Hz at the bottom of initial fip, according to Roitman and Shadlen's data
+Rstar = 42; % ~ 32 Hz at the bottom of initial fip, according to Roitman and Shadlen's data
 I0 = params(2)*Rstar;
 initialvals = [Rstar,Rstar; (sum(w(1,:)) - params(2))*Rstar,(sum(w(2,:)) - params(2))*Rstar; I0, I0];
 eqlb = Rstar; % set equilibrium value before task as R^*
-scale = ((2*mean(w,'all') - params(2)))*eqlb.^2 + (1-a(1)).*eqlb;
+scale = max([5, (((2*mean(w,'all') - params(2)))*eqlb.^2 + (1-a(1)).*eqlb)/(1 + B0)]);
 Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
 c1 = (1 + Cohr)';
 c2 = (1 - Cohr)';
 cplist = [c1, c2];
 V1 = (1 + Cohr)';
 V2 = (1 - Cohr)';
-Vinput = [V1, V2]*scale;
-Vprior = ones(size(Vinput))*scale;
+Vinput = ([V1, V2]+B0)*scale;
+Vprior = (ones(size(Vinput)) + B0)*scale;
 
 
 mygray = flip(gray(length(cplist)));
@@ -162,10 +163,9 @@ filename = sprintf('%s',simname);
 randseed = 75245522;
 rng(randseed);
 for vi = 2:6
-    Vinput = cplist(vi,:)*scale;
-%     [R, G, I, rt, choice] = LcDsInhbt(Vinput, w, a, b, sgm, Tau, dur,...
-%         dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-    [~, ~, R, G, I] = LDDM(Vprior, Vinput, w, a, b, sgm, Tau, predur, dur,...
+    V0 = Vprior(vi,:);
+    V = Vinput(vi,:);
+    [~, ~, R, G, I] = LDDM(V0, V, w, a, b, sgm, Tau, predur, dur,...
     dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
     lgd2(vi-1) = plot(R(:,2), 'k-.', 'Color', mygray(vi,:), 'LineWidth',lwd);
     lgd1(vi-1) = plot(R(R(:,1)<=thresh,1), 'k-', 'Color', mygray(vi,:), 'LineWidth',lwd);
@@ -498,7 +498,7 @@ saveas(h,fullfile(plot_dir,sprintf('Proportion_Plot_%s.eps',name)),'epsc2');
 %% plot time course
 if ~exist(fullfile(plot_dir,sprintf('PlotDynamic_%s_D0.mat',name)),'file')
     tic;
-    [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDMDynamic_FitBhvr6ParamsVI_QMLE_GPU(params, dataDynmc, dataBhvr);
+    [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDMDynamic_FitBhvr7ParamsVII_QMLE_GPU(params, dataDynmc, dataBhvr);
     %sm_mr1c = gather(sm_mr1c);
     save(fullfile(plot_dir,sprintf('PlotDynamic_%s_D0.mat',name)),...
         'rtmat','choicemat','sm_mr1c','sm_mr2c','sm_mr1cD','sm_mr2cD','params');
