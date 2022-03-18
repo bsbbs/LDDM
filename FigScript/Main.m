@@ -18,7 +18,7 @@ end
 %% define parameters for simulation
 c = [3.2 12.8, 25.6, 38.4 51.2]'/100; % percentage of coherence
 scale0 = 250;
-
+B0 = 70;
 VmatDiag = 30*[1+c, 1-c];
 Vmat = [linspace(0,60,5)', ones(5,1)*30];
 V1Iter = linspace(0,60,50);

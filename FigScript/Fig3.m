@@ -79,7 +79,7 @@ ylabel('Activity (a.u.)');
 xlabel('Time (a.u.)');
 savefigs(h, filename, plotdir, fontsize, aspect2);
 subplot(2,2,4); hold on;
-plot(Vout(:,2), R1vecVout, '.', 'MarkerSize',mksz);
+plot(Vout(:,2), R1vecVout, '.', 'MarkerSize', mksz);
 %%
 mygray5 = gray(5 + 2);
 for vo = 1:length(Vout)
@@ -104,7 +104,8 @@ legend([lgd1, lgd2],{'R_1', 'R_2'},...
 savefig(h, filename, plotdir, fontsize, aspect2);
 %% panel b_left, nullclines for R1 and R2 under equal inputs
 rng('default'); rng(5);
-V = mean(Vmat(1,:))*[1,1]; 
+cp = 0;
+V = [1+cp, 1-cp]*scale0 + B0; 
 a = 15;
 b = 0;
 w = 1;
@@ -116,15 +117,15 @@ initialvals = zeros(3,2); stimdur = dur; stoprule = 0;
 % - Nullclines R1*-R2* space
 h = figure; hold on;
 filename = 'Fig3bL';
-R2 = linspace(.1,16,200);
+R2 = linspace(.1,40,200);
 R1 = (V(2)./R2 - (w - b)*R2 - (1-a))/v; % dR2/dt = 0
-lgd2 = plot(R1,R2,'k--','LineWidth',lwd); % dR2/dt = 0
-plot([V(1)/(1-a), V(1)/(1-a)],[min(R2), V(2)/(1-a)],'--k','LineWidth',1);
+lgd2 = plot(R2,R1,'k--','LineWidth',lwd/2); % dR2/dt = 0
+plot([min(R2), V(2)/(1-a)],[V(1)/(1-a), V(1)/(1-a)],'--k','LineWidth',1);
 Line1 = [R1' R2'];
-R1 = linspace(.1,16,200);
+R1 = linspace(.1,40,200);
 R2 = (V(1)./R1 - (w - b)*R1 - (1-a))/v; % dR1/dt = 0
-lgd1 = plot(R1,R2,'k-','LineWidth',lwd); % dR1/dt = 0
-plot([min(R1), V(1)/(1-a)],[V(2)/(1-a), V(2)/(1-a)],'--k','LineWidth',1);
+lgd1 = plot(R2,R1,'k-','LineWidth',lwd/2); % dR1/dt = 0
+plot([V(2)/(1-a), V(2)/(1-a)],[min(R1), V(1)/(1-a)],'--k','LineWidth',1);
 Line2 = [R1' R2'];
 if 0
     [R, G, I, ~, ~] = LcDsInhbt(V, [w,v;v,w], a*eye(2), b*eye(2),...
@@ -160,23 +161,100 @@ for i = [find(PositiveRealAnsw)]'
     A = eig(JMat);
     Stability(i) = all(real(A) < 0); % attractive 1, diversive 0
     if Stability(i)
-        plot(R1star, R2star, '.', 'Color','#073b4c', 'MarkerSize',mksz);
-        plot(R1star, R2star, 'o', 'Color','white', 'MarkerSize',mksz/3);
+        plot(R2star, R1star, '.', 'Color','#073b4c', 'MarkerSize',mksz);
+        plot(R2star, R1star, 'o', 'Color','white', 'MarkerSize',mksz/3);
     else
-        plot(R1star, R2star, '.', 'Color', '#06d6a0', 'MarkerSize',mksz);
+        plot(R2star, R1star, '.', 'Color', '#06d6a0', 'MarkerSize',mksz);
     end
 end
 set(gca, 'XScale','log');
 set(gca, 'YScale','log');
-xlim([.1,5*10^2]);ylim([.1,5*10^2]);
-xticks([1,10,100]);yticks([1,10,100]);
-xlabel('R_1 activity (a.u.)');
-ylabel('R_2 activity (a.u.)');
-savefig(h, filename, plotdir, fontsize, aspect3);
+xlim([.1,5*10^3]);ylim([.1,5*10^3]);
+xticks([1,10,100,1000]);yticks([1,10,100,1000]);
+xlabel('R_2 activity (a.u.)');
+ylabel('R_1 activity (a.u.)');
+savefigs(h, filename, plotdir, fontsize, aspect3);
 
-%% panel b_right, nullcines for R1 and R2 under unequal inputs
+%% panel b_middle, nullcines for R1 and R2 under moderately unequal inputs
 rng('default'); rng(5);
-V = [59 1]; %Vmat(5,:); 
+cp = .512;
+V = [1+cp 1-cp]*scale0 + B0; % 51.2 % 
+a = 15;
+b = 0;
+w = 1;
+v = 1;
+% - time couse R1 & R2
+sgm = 4; dur = 1;
+presentt = dt; triggert = Inf; thresh = Inf;
+initialvals = zeros(3,2); stimdur = dur; stoprule = 0;
+% - Nullclines R1*-R2* space
+h = figure; hold on;
+filename = 'Fig3bM';
+R2 = linspace(.01,70,200);
+R1 = (V(2)./R2 - (w - b)*R2 - (1-a))/v; % dR2/dt = 0
+lgd2 = plot(R2,R1,'k--','LineWidth',lwd/2); % dR2/dt = 0
+plot([min(R2), V(2)/(1-a)],[V(1)/(1-a), V(1)/(1-a)],'--k','LineWidth',1); %upbound
+Line1 = [R1' R2'];
+R1 = linspace(.01,60,200);
+R2 = (V(1)./R1 - (w - b)*R1 - (1-a))/v; % dR1/dt = 0
+lgd1 = plot(R2,R1,'k-','LineWidth',lwd/2); % dR1/dt = 0
+plot([V(2)/(1-a), V(2)/(1-a)],[min(R1), V(1)/(1-a)],'--k','LineWidth',1); %upbound
+Line2 = [R1' R2'];
+if 0
+    [R, G, I, ~, ~] = LcDsInhbt(V, [w,v;v,w], a*eye(2), b*eye(2),...
+        sgm, Tau, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+    plot(R(round(presentt/dt):end,1), R(round(presentt/dt):end,2),'-','Color','#ef476f','LineWidth',lwd/2);
+end
+if b == 0 || V(1) ~= V(2)
+    plot([0.1,1000],[0.1,1000],'--k');
+end
+b = b*w;
+syms R1 R2
+eqns = [(V(1)/R1 - (w - b)*R1 - (1-a))/v == R2, ... % dR1/dt = 0
+    (V(2)/R2 - (w - b)*R2 - (1-a))/v == R1];% dR2/dt = 0
+vars = [R1 R2];
+[AnswR1,AnswR2] = solve(eqns, vars);
+AnswI1 = b*AnswR1;
+AnswI2 = b*AnswR2;
+AnswG1 = w*AnswR1 + v*AnswR2 - AnswI1;
+AnswG2 = v*AnswR1 + w*AnswR2 - AnswI2;
+PositiveRealAnsw = double(AnswR1) >0 & double(imag(AnswR1)) == 0;
+Npoints = sum(PositiveRealAnsw);
+for i = [find(PositiveRealAnsw)]'
+    R1star = double(AnswR1(i));
+    R2star = double(AnswR2(i));
+    G1star = double(AnswG1(i));
+    G2star = double(AnswG2(i));
+    JMat = [-1 + a/(1+G1star), -(V(1)+a*R1star)/(1+G1star)^2, 0, 0, 0, 0
+        w, -1, -1, v, 0, 0
+        b, 0, -1, 0, 0, 0
+        0, 0, 0, -1+a/(1+G2star),   -(V(2)+a*R2star)/(1+G2star)^2, 0
+        v, 0, 0, w, -1, -1
+        0, 0, 0, b, 0, -1];
+    A = eig(JMat);
+    Stability(i) = all(real(A) < 0); % attractive 1, diversive 0
+    if Stability(i)
+        plot(R2star, R1star, '.', 'Color','#073b4c', 'MarkerSize',mksz);
+        plot(R2star, R1star, 'o', 'Color','white', 'MarkerSize',mksz/3);
+    else
+        plot(R2star, R1star, '.', 'Color', '#06d6a0', 'MarkerSize',mksz);
+    end
+end
+set(gca, 'XScale','log');
+set(gca, 'YScale','log');
+xlim([.1,5*10^3]);ylim([.1,5*10^3]);
+xticks([1,10,100,1000]);yticks([1,10,100,1000]);
+xlabel('R_2 activity (a.u.)');
+ylabel('R_1 activity (a.u.)');
+% legend([lgd1, lgd2],{'dR_1/dt = 0','dR_2/dt = 0'},...
+%     'Location','NorthEast','FontSize',fontsize-5, 'FontName','Times New Roman', ...
+%     'FontAngle','italic','NumColumns',1,'Box','off');
+savefigs(h, filename, plotdir, fontsize, aspect3);
+
+%% panel b_right, nullcines for R1 and R2 under extremely unequal inputs
+rng('default'); rng(5);
+cp = 1;
+V = [1+cp 1-cp]*scale0 + B0; % 100 % 
 a = 15;
 b = 0;
 w = 1;
@@ -188,15 +266,15 @@ initialvals = zeros(3,2); stimdur = dur; stoprule = 0;
 % - Nullclines R1*-R2* space
 h = figure; hold on;
 filename = 'Fig3bR';
-R2 = linspace(.1,16,200);
+R2 = linspace(.01,32,200);
 R1 = (V(2)./R2 - (w - b)*R2 - (1-a))/v; % dR2/dt = 0
-lgd2 = plot(R1,R2,'k--','LineWidth',lwd); % dR2/dt = 0
-plot([V(1)/(1-a), V(1)/(1-a)],[min(R2), V(2)/(1-a)],'--k','LineWidth',1); %upbound
+lgd2 = plot(R2,R1,'k--','LineWidth',lwd/2); % dR2/dt = 0
+plot([min(R2), V(2)/(1-a)],[V(1)/(1-a), V(1)/(1-a)],'--k','LineWidth',1); %upbound
 Line1 = [R1' R2'];
-R1 = linspace(.1,18,200);
+R1 = linspace(.01,35,200);
 R2 = (V(1)./R1 - (w - b)*R1 - (1-a))/v; % dR1/dt = 0
-lgd1 = plot(R1,R2,'k-','LineWidth',lwd); % dR1/dt = 0
-plot([min(R1), V(1)/(1-a)],[V(2)/(1-a), V(2)/(1-a)],'--k','LineWidth',1); %upbound
+lgd1 = plot(R2,R1,'k-','LineWidth',lwd/2); % dR1/dt = 0
+plot([V(2)/(1-a), V(2)/(1-a)],[min(R1), V(1)/(1-a)],'--k','LineWidth',1); %upbound
 Line2 = [R1' R2'];
 if 0
     [R, G, I, ~, ~] = LcDsInhbt(V, [w,v;v,w], a*eye(2), b*eye(2),...
@@ -232,250 +310,19 @@ for i = [find(PositiveRealAnsw)]'
     A = eig(JMat);
     Stability(i) = all(real(A) < 0); % attractive 1, diversive 0
     if Stability(i)
-        plot(R1star, R2star, '.', 'Color','#073b4c', 'MarkerSize',mksz);
-        plot(R1star, R2star, 'o', 'Color','white', 'MarkerSize',mksz/3);
+        plot(R2star, R1star, '.', 'Color','#073b4c', 'MarkerSize',mksz);
+        plot(R2star, R1star, 'o', 'Color','white', 'MarkerSize',mksz/3);
     else
-        plot(R1star, R2star, '.', 'Color', '#06d6a0', 'MarkerSize',mksz);
+        plot(R2star, R1star, '.', 'Color', '#06d6a0', 'MarkerSize',mksz);
     end
 end
 set(gca, 'XScale','log');
 set(gca, 'YScale','log');
-xlim([.1,5*10^2]);ylim([.1,5*10^2]);
-xticks([1,10,100]);yticks([1,10,100]);
-xlabel('R_1 activity (a.u.)');
-ylabel('R_2 activity (a.u.)');
+xlim([.1,5*10^3]);ylim([.1,5*10^3]);
+xticks([1,10,100,1000]);yticks([1,10,100,1000]);
+xlabel('R_2 activity (a.u.)');
+ylabel('R_1 activity (a.u.)');
 legend([lgd1, lgd2],{'dR_1/dt = 0','dR_2/dt = 0'},...
     'Location','NorthEast','FontSize',fontsize-5, 'FontName','Times New Roman', ...
     'FontAngle','italic','NumColumns',1,'Box','off');
-savefig(h, filename, plotdir, fontsize, aspect3);
-%% panel c, colormap of R1 activities as a function of V1 and V2 inputs
-sigma = 0;
-w = [1,1; 1,1];
-dur = 3.5;
-presentt = 0;
-stimdur = 3;
-triggert = dur;
-% Lofaro's
-alpha = eye(2,2)*0;
-name = sprintf('Lofaro_dur%1.1f_W%1.2f%1.2f_alpha%1.1f_sgm%1.2f',dur, w(1,1), w(1,2), alpha(1), sigma);
-output = fullfile(datadir,[name '.mat']);
-R1rp = [];R2rp = [];R1wm = [];R2wm = [];
-if ~exist(output,'file')
-    for ii = 1:length(V1Iterp)
-        fprintf('V1 %3.1f',V1Iterp(ii));
-        for kk = 1:length(V2Iterp)
-            fprintf('.');
-            Vinput = [V1Iterp(ii), V2Iterp(kk)];
-            [R, G, I, rt, choice] = LcDsInhbt(Vinput, w, alpha, beta, sigma, ...
-                Tau, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-            R1rp(kk,ii) = R(round((presentt+stimdur)/dt) - 1,1);
-            R2rp(kk,ii) = R(round((presentt+stimdur)/dt) - 1,2);
-            R1wm(kk, ii) = R(round((triggert)/dt) - 1,1);
-            R2wm(kk, ii) = R(round((triggert)/dt) - 1,2);
-        end
-        fprintf('\n');
-    end
-    save(output,'R1rp','R2rp','R1wm','R2wm');
-else
-    load(output);
-end
-% - heatmap for value representation
-h=figure;   colormap(jet);
-filename = 'Fig3cL';
-imagesc(V1Iterp,V2Iterp,R1rp/max(max(R1rp)));
-xticks([0,500]);yticks([0,500]);
-set(gca,'YDir','normal');
-xlabel('V_1 (a.u.)');ylabel('V_2 (a.u.)');
-c = colorbar;
-ylabel(c, 'Rescaled R_1 activity');
-xh = get(gca, 'xlabel'); p = get(xh, 'position'); p(2) = p(2)+abs(p(2))*.9; set(xh, 'position',p);
-yh = get(gca, 'ylabel'); p = get(yh, 'position'); p(1) = p(1)+abs(p(1))*.8; set(yh, 'position',p);
-savefig(h, filename, plotdir, fontsize, aspect4);
-% the hybrid model
-alpha = eye(2,2)*15;
-name = sprintf('LcDVR_dur%1.1f_W%1.2f%1.2f_alpha%1.1f_sgm%1.2f',dur, w(1,1), w(1,2), alpha(1), sigma);
-output = fullfile(datadir,[name '.mat']);
-R1rp = [];R2rp = [];R1wm = [];R2wm = [];
-if ~exist(output,'file')
-    for ii = 1:length(V1Iterp)
-        fprintf('V1 %3.1f',V1Iterp(ii));
-        for kk = 1:length(V2Iterp)
-            fprintf('.');
-            Vinput = [V1Iterp(ii), V2Iterp(kk)];
-            [R, G, I, rt, choice] = LcDsInhbt(Vinput, w, alpha, beta, sigma, ...
-                Tau, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-            R1rp(kk,ii) = R(round((presentt+stimdur)/dt) - 1,1);
-            R2rp(kk,ii) = R(round((presentt+stimdur)/dt) - 1,2);
-            R1wm(kk, ii) = R(round((triggert)/dt) - 1,1);
-            R2wm(kk, ii) = R(round((triggert)/dt) - 1,2);
-        end
-        fprintf('\n');
-    end
-    save(output,'R1rp','R2rp','R1wm','R2wm');
-else
-    load(output);
-end
-% - heatmap for value representation
-h=figure;   colormap(jet);
-filename = 'Fig3cM';
-imagesc(V1Iterp,V2Iterp,R1rp/max(max(R1rp)));
-xticks([0,500]);yticks([0,500]);
-set(gca,'YDir','normal');
-xlabel('V_1 (a.u.)');ylabel('V_2 (a.u.)');
-c = colorbar;
-ylabel(c, 'Rescaled R_1 activity');
-xh = get(gca, 'xlabel'); p = get(xh, 'position'); p(2) = p(2)+abs(p(2))*.9; set(xh, 'position',p);
-yh = get(gca, 'ylabel'); p = get(yh, 'position'); p(1) = p(1)+abs(p(1))*.8; set(yh, 'position',p);
-savefig(h, filename, plotdir, fontsize, aspect4);
-%% Wong and wang 2006 model
-presentt = 0;
-dur = 12;
-triggert = dur;
-stimdur = 8;
-miu0 = 30;
-sgm = 0 ;
-tauS = .1;
-tauAMPA = .002;
-I0 = .3255; % nA
-gamma = .641;
-JN = [.2609 -.0497
-    -.0497   .2609]; % nA
-initialvals = [2 2;.1 .1];
-name = sprintf('WW06VR_dur%1.1f_stimdur%1.1f', dur, stimdur);
-output = fullfile(datadir,[name '.mat']);
-R1rp = [];R2rp = [];R1wm = [];R2wm = [];
-if ~exist(output,'file')
-    for ii = 1:length(V1Iterp)
-        fprintf('V1 %3.1f',V1Iterp(ii));
-        for kk = 1:length(V2Iterp)
-            fprintf('.');
-            Vinput = [V1Iterp(ii), V2Iterp(kk)];
-            [nu_wind, s_wind, rt, choice, H, S] = wong06(Vinput,miu0,sgm,I0,JN,...
-                gamma, tauS, tauAMPA, dur, dt, presentt, stimdur, thresh, initialvals, stoprule);
-            R1rp(kk,ii) = nu_wind(round((presentt+stimdur)/dt) - 1,1);
-            R2rp(kk,ii) = nu_wind(round((presentt+stimdur)/dt) - 1,2);
-            R1wm(kk, ii) = nu_wind(round((triggert)/dt) - 1,1);
-            R2wm(kk, ii) = nu_wind(round((triggert)/dt) - 1,2);
-        end
-        fprintf('\n');
-    end
-    save(output,'R1rp','R2rp','R1wm','R2wm');
-else
-    load(output);
-end
-% - heatmap for value representation
-h=figure;   colormap(jet);
-filename = 'Fig3cR';
-imagesc(V1Iterp,V2Iterp,R1rp/max(max(R1rp)));
-xticks([0,500]);yticks([0,500]);
-set(gca,'YDir','normal');
-xlabel('V_1 (a.u.)');ylabel('V_2 (a.u.)');
-c = colorbar;
-ylabel(c, 'Rescaled R_1 activity');
-xh = get(gca, 'xlabel'); p = get(xh, 'position'); p(2) = p(2)+abs(p(2))*.9; set(xh, 'position',p);
-yh = get(gca, 'ylabel'); p = get(yh, 'position'); p(1) = p(1)+abs(p(1))*.8; set(yh, 'position',p);
-savefig(h, filename, plotdir, fontsize, aspect4);
-
-%% panel d, the coded ratio and input ratio under different connection weights
-sigma = 0;alpha = eye(2)*15;beta = zeros(2);
-dur = 10;presentt = dt;stimdur = 10;triggert = dur;stoprule = 0;
-name = sprintf('CodedRatio_LDDM_DNM_RNM');
-output = fullfile(datadir,[name '.mat']);
-R1rp = [];R2rp = [];
-if ~exist(output,'file')
-    for ii = 1:length(V1Iterp)
-        fprintf('V1 %3.1f',V1Iterp(ii));
-        fprintf('.');
-        initialvals = zeros(3,2);
-        Vinput = [V1Iterp(ii), 512 - V1Iterp(ii)];
-        [R, G, I, rt, choice] = LcDsInhbt(Vinput, w, alpha, beta, sigma, ...
-            Tau, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-        R1rp(ii,1) = R(round((presentt+stimdur)/dt) - 1,1);
-        R2rp(ii,1) = R(round((presentt+stimdur)/dt) - 1,2);
-        [R, G, I, rt, choice] = LcDsInhbt(Vinput, w, alpha*0, beta, sigma, ...
-            Tau, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-        R1rp(ii,2) = R(round((presentt+stimdur)/dt) - 1,1);
-        R2rp(ii,2) = R(round((presentt+stimdur)/dt) - 1,2);
-
-        initialvals = [2 2;.1 .1];
-        [nu_wind, s_wind, rt, choice, H, S] = wong06(Vinput,miu0,sgm,I0,JN,...
-            gamma, tauS, tauAMPA, dur, dt, presentt, stimdur, thresh, initialvals, stoprule);
-        R1rp(ii,3) = nu_wind(round((presentt+stimdur)/dt) - 1,1);
-        R2rp(ii,3) = nu_wind(round((presentt+stimdur)/dt) - 1,2);
-        fprintf('\n');
-    end
-    save(output,'R1rp','R2rp','V1Iterp');
-else
-    load(output);
-end
-%%
-h = figure;
-hold on;
-filename = 'Fig3d';
-i = 1; % LDDM
-interval = 3;
-lgd(i)=plot(V1Iterp(1:interval:end)/512, R1rp(1:interval:end,i)./(R1rp(1:interval:end,i)+R2rp(1:interval:end,i)),'.-','Color',colorpalette{5},'MarkerSize',mksz/2);
-i = 2; % DNM, skip
-i = 3;
-lgd(i)=plot(V1Iterp(1:interval:end)/512, R1rp(1:interval:end,i)./(R1rp(1:interval:end,i)+R2rp(1:interval:end,i)),'.-','Color',colorpalette{1},'MarkerSize',mksz/2);
-legend([lgd(1),lgd(3)],{'\color[rgb]{.0275,.2314,.298} Normalized coding',...
-    '\color[rgb]{.9373,.2784,.4353}WTA competition'}, 'Box','off', 'Location','Southeast',...
-    'FontSize', fontsize-7, 'FontName','Times New Roman','FontAngle','Italic',...
-    'FontWeight','bold');
-xlabel('Input ratio V_1/(V_1 + V_2)');ylabel('Coded ratio R_1/(R_1 + R_2)');
-xticks([0,.25,.5,.75,1]); yticks([0,.25,.5,.75,1]);
-savefig(h, filename, plotdir, fontsize, aspect3);
-%% old panel d
-sigma = 0;alpha = eye(2)*15;beta = zeros(2);
-dur = 4;presentt = dt;stimdur = 2;triggert = dur;stoprule = 0;
-h = figure;
-hold on;
-filename = 'Fig3d';
-for i = 1:5
-    if i == 1
-        w = [1,.1;.1,1]; %w = w/sqrt(sum(sum(w.^2))/4);
-    elseif i == 2
-        w = [1,.8;.8,1]; %w = w/sqrt(sum(sum(w.^2))/4);
-    elseif i == 5
-        w = [1,1;1,1]; %w = w/sqrt(sum(sum(w.^2))/4);
-    elseif i == 3
-        w = [.8,1;1,.8]; %w = w/sqrt(sum(sum(w.^2))/4);
-    elseif i == 4
-        w = [.3,1;1,.3]; %w = w/sqrt(sum(sum(w.^2))/4);
-    end
-    name = sprintf('CodedRatioSim%i_dur%1.1f_W%1.2f%1.2f_alpha%1.1f_sgm%1.2f',length(V1Iter), dur, w(1,1), w(1,2), alpha(1), sigma);
-    output = fullfile(datadir,[name '.mat']);
-    R1rp = [];R2rp = [];R1wm = [];R2wm = [];
-    if ~exist(output,'file')
-        for ii = 1:length(V1Iter)
-            fprintf('V1 %3.1f',V1Iter(ii));
-            fprintf('.');
-            Vinput = [V1Iter(ii), V2Iter(ii)];
-            [R, G, I, rt, choice] = LcDsInhbt(Vinput, w, alpha, beta, sigma, ...
-                Tau, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-            R1rp(ii) = R(round((presentt+stimdur)/dt) - 1,1);
-            R2rp(ii) = R(round((presentt+stimdur)/dt) - 1,2);
-            R1wm(ii) = R(round((triggert)/dt) - 1,1);
-            R2wm(ii) = R(round((triggert)/dt) - 1,2);
-            fprintf('\n');
-        end
-        save(output,'R1rp','R2rp','R1wm','R2wm','V1Iter','V2Iter');
-    else
-        load(output);
-    end
-    if i == 5
-        lgd(i)=plot(V1Iter(:)./(512), R1rp(:)./(R1rp(:)+R2rp(:)),'.-','Color',colorpalette{i},'MarkerSize',mksz/2);
-        %plot(V1Iter(:)./(512), R1rp(:)./(R1rp(:)+R2rp(:)),'-','Color',colorpalette{i});
-    else
-        lgd(i)=plot(V1Iter(:)./(512), R1rp(:)./(R1rp(:)+R2rp(:)),'.-','Color',colorpalette{i},'MarkerSize',mksz/2);
-        %plot(V1Iter(:)./(512), R1rp(:)./(R1rp(:)+R2rp(:)),'-','Color',colorpalette{i});
-    end
-end
-legend([lgd(1),lgd(2),lgd(5),lgd(3),lgd(4)],{'\color[rgb]{.9373,.2784,.4353}w_{ij} << w_{ii}','\color[rgb]{1,.8196,.4}w_{ij} < w_{ii}',...
-    '\color[rgb]{.0275,.2314,.298}w_{ij} = w_{ii}','\color[rgb]{.0235,.8392,.6275}w_{ij} > w_{ii}',...
-    '\color[rgb]{.0667,.5412,.6980}w_{ij} >> w_{ii}'}, 'Box','off', 'Location','Best',...
-    'FontSize', fontsize-7, 'FontName','Times New Roman','FontAngle','Italic',...
-    'FontWeight','bold');
-xlabel('Input ratio (V_1 vs. V_2)');ylabel('Coded ratio (R_1 vs. R_2)');
-xticks([0,.25,.5,.75,1]); yticks([0,.25,.5,.75,1]);
-savefig(h, filename, plotdir, fontsize, aspect3);
+savefigs(h, filename, plotdir, fontsize, aspect3);

@@ -30,10 +30,10 @@ saveas(h,fullfile(plotdir,[filename,'.eps']),'epsc2');
 a = 15*eye(2);
 b = zeros(2);
 w = ones(2);
-initialvals = [2,2;4,4;0,0];
-predur = .12;
+initialvals = [2,2;4,4;0,0]*0;
+predur = .1;
 presentt = 0;
-dur = 1.0;
+dur = 1;
 stimdur = dur;
 sgm = 0;
 triggert = Inf;
@@ -42,25 +42,44 @@ stoprule = 0;
 h = figure;
 filename = 'Fig3a_Dynamic';
 mygray4 = gray(4 + 2);
-subplot(2,1,1); hold on;
+subplot(2,2,1); hold on;
 R1vecVin = [];
 for vi = 1:length(Vin)
     Vprior = [0, 0];
     Vinput = Vin(vi,:);
     [choice, rt, R, G, I] = LDDM(Vprior, Vinput, w, a, b,...
     sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-    lgd1 = plot(R(:,1), 'k-', 'Color', mygray(vi+1,:), 'LineWidth',lwd);
+    lgd1 = plot(R(:,1), 'k-', 'Color', mygray4(vi,:), 'LineWidth',lwd);
     R1vecVin(vi) = mean(R((predur+presentt)/dt:((predur+presentt)/dt+1000),1));
 end
+ylim([-1,max(ylim)*1.3]);
+yticks([0, 30, 60]);
+xticks([(predur+presentt)/dt,predur/dt + 1000]);
+xticklabels({});
+ylabel('Activity (a.u.)');
+savefigs(h, filename, plotdir, fontsize, aspect2);
+subplot(2,2,2); hold on;
+plot(Vin(:,1), R1vecVin, '.', 'MarkerSize',mksz);
+
+subplot(2,2,3); hold on;
 R1vecVout = [];
-for vi = 1:length(Vin)
+for vo = 1:length(Vout)
     Vprior = [0, 0];
-    Vinput = Vin(vi,:);
+    Vinput = Vout(vo,:);
     [choice, rt, R, G, I] = LDDM(Vprior, Vinput, w, a, b,...
     sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-    lgd1 = plot(R(:,1), 'k-', 'Color', mygray(vi+1,:), 'LineWidth',lwd);
-    R1vec(vi) = mean(R((predur+presentt)/dt:((predur+presentt)/dt+1000),1));
+    lgd1 = plot(R(:,1), 'k-', 'Color', mygray5(vo,:), 'LineWidth',lwd);
+    R1vecVout(vo) = mean(R((predur+presentt)/dt:((predur+presentt)/dt+1000),1));
 end
+ylim([-1,max(ylim)*1.3]);
+yticks([0, 30, 60]);
+xticks([(predur+presentt)/dt,predur/dt + 1000]);
+xticklabels({'0','1.0'});
+ylabel('Activity (a.u.)');
+xlabel('Time (a.u.)');
+savefigs(h, filename, plotdir, fontsize, aspect2);
+subplot(2,2,4); hold on;
+plot(Vout(:,2), R1vecVout, '.', 'MarkerSize',mksz);
 %%
 mygray5 = gray(5 + 2);
 for vo = 1:length(Vout)
@@ -72,32 +91,21 @@ for vi = 1:5
     Vinput = Vmat(vi,:);
     
     
-    
-    
-    
     subplot(2,1,2); hold on;
     lgd2 = plot(R(:,2), 'k--', 'Color', mygray(vi+1,:), 'LineWidth',lwd);
 end
 subplot(2,1,1);
-ylim([-1,max(ylim)*1.3]);
-yticks([0,30]);
-xticks([presentt/dt,1000]);
-xticklabels({});
-savefig(h, filename, plotdir, fontsize, aspect2);
+
 subplot(2,1,2);
-ylim([-1,max(ylim)*1.3]);
-yticks([0,30]);
-xticks([presentt/dt,1000]);
-xticklabels({'0','1.0'});
-ylabel('Activity (a.u.)');
-xlabel('Time (a.u.)');
+
 legend([lgd1, lgd2],{'R_1', 'R_2'},...
     'Location','NorthEast','FontSize',fontsize-5, 'FontName','Times New Roman', ...
     'FontAngle','italic','NumColumns',1,'Box','off');
 savefig(h, filename, plotdir, fontsize, aspect2);
 %% panel b_left, nullclines for R1 and R2 under equal inputs
 rng('default'); rng(5);
-V = mean(Vmat(1,:))*[1,1]; 
+cp 
+V = [250, 250] + 5; 
 a = 15;
 b = 0;
 w = 1;
@@ -109,15 +117,15 @@ initialvals = zeros(3,2); stimdur = dur; stoprule = 0;
 % - Nullclines R1*-R2* space
 h = figure; hold on;
 filename = 'Fig3bL';
-R2 = linspace(.1,16,200);
+R2 = linspace(.1,40,200);
 R1 = (V(2)./R2 - (w - b)*R2 - (1-a))/v; % dR2/dt = 0
-lgd2 = plot(R1,R2,'k--','LineWidth',lwd); % dR2/dt = 0
-plot([V(1)/(1-a), V(1)/(1-a)],[min(R2), V(2)/(1-a)],'--k','LineWidth',1);
+lgd2 = plot(R2,R1,'k--','LineWidth',lwd/2); % dR2/dt = 0
+plot([min(R2), V(2)/(1-a)],[V(1)/(1-a), V(1)/(1-a)],'--k','LineWidth',1);
 Line1 = [R1' R2'];
-R1 = linspace(.1,16,200);
+R1 = linspace(.1,40,200);
 R2 = (V(1)./R1 - (w - b)*R1 - (1-a))/v; % dR1/dt = 0
-lgd1 = plot(R1,R2,'k-','LineWidth',lwd); % dR1/dt = 0
-plot([min(R1), V(1)/(1-a)],[V(2)/(1-a), V(2)/(1-a)],'--k','LineWidth',1);
+lgd1 = plot(R2,R1,'k-','LineWidth',lwd/2); % dR1/dt = 0
+plot([V(2)/(1-a), V(2)/(1-a)],[min(R1), V(1)/(1-a)],'--k','LineWidth',1);
 Line2 = [R1' R2'];
 if 0
     [R, G, I, ~, ~] = LcDsInhbt(V, [w,v;v,w], a*eye(2), b*eye(2),...
@@ -153,23 +161,23 @@ for i = [find(PositiveRealAnsw)]'
     A = eig(JMat);
     Stability(i) = all(real(A) < 0); % attractive 1, diversive 0
     if Stability(i)
-        plot(R1star, R2star, '.', 'Color','#073b4c', 'MarkerSize',mksz);
-        plot(R1star, R2star, 'o', 'Color','white', 'MarkerSize',mksz/3);
+        plot(R2star, R1star, '.', 'Color','#073b4c', 'MarkerSize',mksz);
+        plot(R2star, R1star, 'o', 'Color','white', 'MarkerSize',mksz/3);
     else
-        plot(R1star, R2star, '.', 'Color', '#06d6a0', 'MarkerSize',mksz);
+        plot(R2star, R1star, '.', 'Color', '#06d6a0', 'MarkerSize',mksz);
     end
 end
 set(gca, 'XScale','log');
 set(gca, 'YScale','log');
-xlim([.1,5*10^2]);ylim([.1,5*10^2]);
-xticks([1,10,100]);yticks([1,10,100]);
-xlabel('R_1 activity (a.u.)');
-ylabel('R_2 activity (a.u.)');
-savefig(h, filename, plotdir, fontsize, aspect3);
+xlim([.1,5*10^3]);ylim([.1,5*10^3]);
+xticks([1,10,100,1000]);yticks([1,10,100,1000]);
+xlabel('R_2 activity (a.u.)');
+ylabel('R_1 activity (a.u.)');
+savefigs(h, filename, plotdir, fontsize, aspect3);
 
-%% panel b_right, nullcines for R1 and R2 under unequal inputs
+%% panel b_middle, nullcines for R1 and R2 under moderately unequal inputs
 rng('default'); rng(5);
-V = [59 1]; %Vmat(5,:); 
+V = [45.36 14.64]+5; % 3.2 % 
 a = 15;
 b = 0;
 w = 1;
@@ -180,16 +188,16 @@ presentt = dt; triggert = Inf; thresh = Inf;
 initialvals = zeros(3,2); stimdur = dur; stoprule = 0;
 % - Nullclines R1*-R2* space
 h = figure; hold on;
-filename = 'Fig3bR';
+filename = 'Fig3bM';
 R2 = linspace(.1,16,200);
 R1 = (V(2)./R2 - (w - b)*R2 - (1-a))/v; % dR2/dt = 0
-lgd2 = plot(R1,R2,'k--','LineWidth',lwd); % dR2/dt = 0
-plot([V(1)/(1-a), V(1)/(1-a)],[min(R2), V(2)/(1-a)],'--k','LineWidth',1); %upbound
+lgd2 = plot(R2,R1,'k--','LineWidth',lwd/2); % dR2/dt = 0
+plot([min(R2), V(2)/(1-a)],[V(1)/(1-a), V(1)/(1-a)],'--k','LineWidth',1); %upbound
 Line1 = [R1' R2'];
 R1 = linspace(.1,18,200);
 R2 = (V(1)./R1 - (w - b)*R1 - (1-a))/v; % dR1/dt = 0
-lgd1 = plot(R1,R2,'k-','LineWidth',lwd); % dR1/dt = 0
-plot([min(R1), V(1)/(1-a)],[V(2)/(1-a), V(2)/(1-a)],'--k','LineWidth',1); %upbound
+lgd1 = plot(R2,R1,'k-','LineWidth',lwd/2); % dR1/dt = 0
+plot([V(2)/(1-a), V(2)/(1-a)],[min(R1), V(1)/(1-a)],'--k','LineWidth',1); %upbound
 Line2 = [R1' R2'];
 if 0
     [R, G, I, ~, ~] = LcDsInhbt(V, [w,v;v,w], a*eye(2), b*eye(2),...
@@ -225,22 +233,97 @@ for i = [find(PositiveRealAnsw)]'
     A = eig(JMat);
     Stability(i) = all(real(A) < 0); % attractive 1, diversive 0
     if Stability(i)
-        plot(R1star, R2star, '.', 'Color','#073b4c', 'MarkerSize',mksz);
-        plot(R1star, R2star, 'o', 'Color','white', 'MarkerSize',mksz/3);
+        plot(R2star, R1star, '.', 'Color','#073b4c', 'MarkerSize',mksz);
+        plot(R2star, R1star, 'o', 'Color','white', 'MarkerSize',mksz/3);
     else
-        plot(R1star, R2star, '.', 'Color', '#06d6a0', 'MarkerSize',mksz);
+        plot(R2star, R1star, '.', 'Color', '#06d6a0', 'MarkerSize',mksz);
+    end
+end
+set(gca, 'XScale','log');
+set(gca, 'YScale','log');
+xlim([.1,5*10^3]);ylim([.1,5*10^3]);
+xticks([1,10,100,1000]);yticks([1,10,100,1000]);
+xlabel('R_2 activity (a.u.)');
+ylabel('R_1 activity (a.u.)');
+legend([lgd1, lgd2],{'dR_1/dt = 0','dR_2/dt = 0'},...
+    'Location','NorthEast','FontSize',fontsize-5, 'FontName','Times New Roman', ...
+    'FontAngle','italic','NumColumns',1,'Box','off');
+savefigs(h, filename, plotdir, fontsize, aspect3);
+
+%% panel b_right, nullcines for R1 and R2 under extremely unequal inputs
+rng('default'); rng(5);
+V = [60 0]+5; %Vmat(5,:); 
+a = 15;
+b = 0;
+w = 1;
+v = 1;
+% - time couse R1 & R2
+sgm = 4; dur = 1;
+presentt = dt; triggert = Inf; thresh = Inf;
+initialvals = zeros(3,2); stimdur = dur; stoprule = 0;
+% - Nullclines R1*-R2* space
+h = figure; hold on;
+filename = 'Fig3bR';
+R2 = linspace(.1,16,200);
+R1 = (V(2)./R2 - (w - b)*R2 - (1-a))/v; % dR2/dt = 0
+lgd2 = plot(R2,R1,'k--','LineWidth',lwd/2); % dR2/dt = 0
+plot([min(R2), V(2)/(1-a)],[V(1)/(1-a), V(1)/(1-a)],'--k','LineWidth',1); %upbound
+Line1 = [R1' R2'];
+R1 = linspace(.1,18,200);
+R2 = (V(1)./R1 - (w - b)*R1 - (1-a))/v; % dR1/dt = 0
+lgd1 = plot(R2,R1,'k-','LineWidth',lwd/2); % dR1/dt = 0
+plot([V(2)/(1-a), V(2)/(1-a)],[min(R1), V(1)/(1-a)],'--k','LineWidth',1); %upbound
+Line2 = [R1' R2'];
+if 0
+    [R, G, I, ~, ~] = LcDsInhbt(V, [w,v;v,w], a*eye(2), b*eye(2),...
+        sgm, Tau, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+    plot(R(round(presentt/dt):end,1), R(round(presentt/dt):end,2),'-','Color','#ef476f','LineWidth',lwd/2);
+end
+if b == 0 || V(1) ~= V(2)
+    plot([0.1,30],[0.1,30],'--k');
+end
+b = b*w;
+syms R1 R2
+eqns = [(V(1)/R1 - (w - b)*R1 - (1-a))/v == R2, ... % dR1/dt = 0
+    (V(2)/R2 - (w - b)*R2 - (1-a))/v == R1];% dR2/dt = 0
+vars = [R1 R2];
+[AnswR1,AnswR2] = solve(eqns, vars);
+AnswI1 = b*AnswR1;
+AnswI2 = b*AnswR2;
+AnswG1 = w*AnswR1 + v*AnswR2 - AnswI1;
+AnswG2 = v*AnswR1 + w*AnswR2 - AnswI2;
+PositiveRealAnsw = double(AnswR1) >0 & double(imag(AnswR1)) == 0;
+Npoints = sum(PositiveRealAnsw);
+for i = [find(PositiveRealAnsw)]'
+    R1star = double(AnswR1(i));
+    R2star = double(AnswR2(i));
+    G1star = double(AnswG1(i));
+    G2star = double(AnswG2(i));
+    JMat = [-1 + a/(1+G1star), -(V(1)+a*R1star)/(1+G1star)^2, 0, 0, 0, 0
+        w, -1, -1, v, 0, 0
+        b, 0, -1, 0, 0, 0
+        0, 0, 0, -1+a/(1+G2star),   -(V(2)+a*R2star)/(1+G2star)^2, 0
+        v, 0, 0, w, -1, -1
+        0, 0, 0, b, 0, -1];
+    A = eig(JMat);
+    Stability(i) = all(real(A) < 0); % attractive 1, diversive 0
+    if Stability(i)
+        plot(R2star, R1star, '.', 'Color','#073b4c', 'MarkerSize',mksz);
+        plot(R2star, R1star, 'o', 'Color','white', 'MarkerSize',mksz/3);
+    else
+        plot(R2star, R1star, '.', 'Color', '#06d6a0', 'MarkerSize',mksz);
     end
 end
 set(gca, 'XScale','log');
 set(gca, 'YScale','log');
 xlim([.1,5*10^2]);ylim([.1,5*10^2]);
 xticks([1,10,100]);yticks([1,10,100]);
-xlabel('R_1 activity (a.u.)');
-ylabel('R_2 activity (a.u.)');
+xlabel('R_2 activity (a.u.)');
+ylabel('R_1 activity (a.u.)');
 legend([lgd1, lgd2],{'dR_1/dt = 0','dR_2/dt = 0'},...
     'Location','NorthEast','FontSize',fontsize-5, 'FontName','Times New Roman', ...
     'FontAngle','italic','NumColumns',1,'Box','off');
-savefig(h, filename, plotdir, fontsize, aspect3);
+savefigs(h, filename, plotdir, fontsize, aspect3);
 %% panel c, colormap of R1 activities as a function of V1 and V2 inputs
 sigma = 0;
 w = [1,1; 1,1];
