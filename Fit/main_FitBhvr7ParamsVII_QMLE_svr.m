@@ -40,6 +40,7 @@ fprintf('test succeeded\n');
 Collect = [];
 parfor i = 1:myCluster.NumWorkers*16
     !ping -c 1 www.amazon.com
+    %!ping www.google.com
     t = datenum(clock)*10^10 - floor(datenum(clock)*100)*10^8 + sortNum*10^7 + i*10^5;
     %num2str(t);
     rng(t);

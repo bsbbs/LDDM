@@ -96,12 +96,12 @@ dataDynmc = load('./Data/Data.mat');
 dataBhvr = LoadRoitmanData('../RoitmanDataCode');
 
 % randseed = 12391438;
-randseed = 90995481;
+randseed = 66974626;
 rng(randseed);
 %    JNp, JNn, I0, noise, miu0, tauS, nLL
 % params = [.2609, .0497, .3255, .02, 30, .1]; % in the paper ww06
-params = [0.165707	0	0.255055	0.0202	75.157252	0.732425	16544.66984];
-name = sprintf('JNp%2.1f_JNn%1.2f_I0%1.2f_noise%1.2f_miu0%2.2f_tauS%0.2f_nLL%5.2f',params(1:7));
+params = [0.26321	0.148968	0.267631	0.076302	51.664179	0.407443	16652.84519];
+name = sprintf('JNp%2.1f_JNn%1.2f_I0%1.2f_noise%1.2f_miu0%2.2f_tauS%0.2f_nLL%5.2f',params);
 % simulation
 if  ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
     tic;
@@ -120,7 +120,7 @@ lwd = 1;
 mksz = 3;
 fontsize = 11;
 %    JNp, JNn, I0, noise, miu0, tauS, nLL
-simname = sprintf('WW06Dynmc_JNp%2.1f_JNn%1.2f_I0%1.2f_noise%1.2f_miu0%2.2f_tauS%0.2f_nLL%5.2f',params(1:7));
+simname = sprintf('WW06Dynmc_JNp%2.1f_JNn%1.2f_I0%1.2f_noise%1.2f_miu0%2.2f_tauS%0.2f_nLL%5.2f',params);
 Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
 c1 = (1 + Cohr)';
 c2 = (1 - Cohr)';
@@ -144,7 +144,7 @@ gamma = .641;
 tauS = params(6);   %.1; % sec
 tauAMPA = .002; % sec
 unit = 1; % secs
-H0 = 2;
+H0 = thresh*32/70;
 S0 = H0*gamma*tauS/(H0*gamma*tauS+1);
 initialvals = [H0, H0;S0, S0]; % S = H*gamma*tauS./(H*gamma*tauS+1)
 h = figure; hold on;
