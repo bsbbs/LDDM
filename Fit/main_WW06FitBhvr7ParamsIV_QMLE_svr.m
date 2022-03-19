@@ -144,7 +144,7 @@ gamma = .641;
 tauS = params(6);   %.1; % sec
 tauAMPA = .002; % sec
 unit = 1; % secs
-H0 = 2;
+H0 = 42/70*thresh;
 S0 = H0*gamma*tauS/(H0*gamma*tauS+1);
 initialvals = [H0, H0;S0, S0]; % S = H*gamma*tauS./(H*gamma*tauS+1)
 h = figure; hold on;

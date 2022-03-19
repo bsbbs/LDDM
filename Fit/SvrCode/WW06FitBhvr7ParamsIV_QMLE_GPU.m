@@ -32,7 +32,7 @@ tauAMPA = .002; % sec
 % initialvals = [2 2;.1 .1; sgm*randn, sgm*randn]; % H, S, and noise;
 % H0 = 2;
 % S0 = H0*gamma*tauS/(H0*gamma*tauS+1);
-H0 = thresh*32/70;
+H0 = thresh*42/70;
 S0 = H0*gamma*tauS/(H0*gamma*tauS+1);
 initialvals = [H0, H0;S0, S0]; % S = H*gamma*tauS./(H*gamma*tauS+1)
 
