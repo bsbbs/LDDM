@@ -17,6 +17,10 @@ Most of the file, the target function is defined to minimize the curve of histog
 Algorithm QMLE (Quantile Maximum likelihood estimation) is based on reference: Heathcote & Australia, and Mewhort, 2002.
 4cpParams means 4 free parameters (alpha, beta, noise sigma, and scale) + 6 coherence levels.
 
+FitBhvr7ParamsV: Free parameters: a, b, sgm, scale, tauR, tauG, tauI; thresh = 70, initial values = [42, 42; 2*42, 2*42; 0, 0]. Non-decision time = 90 + 30 ms. Strings = 10240, iterations = 20*16.
+FitBhvr6ParamsVI: Free parameters: a, b, sgm,       tauR, tauG, tauI; thresh = 70, initial values = [42, 42; (2w-b)*42, (2w-b)*42; b*42, b*42]. scale = (2w-b)*eqlb.^2 + (1-a).*eqlb; Non-decision time = 90 + 30 ms. Strings = 10240, iterations = 20*16.
+FitBhvr7ParamsVII: Free parameters: a, b, sgm, B0,  tauR, tauG, tauI; thresh = 70, initial values = [42, 42; (2w-b)*42, (2w-b)*42; b*42, b*42]. scale = (2w-b)*eqlb.^2 + (1-a).*eqlb; Non-decision time = 90 + 30 ms. Strings = 10240, iterations = 20*16.
+FitBhvr7ParamsVIII: Free parameters: a, b, sgm, B0,  tauR, tauG, tauI; thresh = 70, initial values = [32, 32; (2w-b)*32, (2w-b)*32; b*32, b*32]. scale = (2w-b)*eqlb.^2 + (1-a).*eqlb; Non-decision time = 90 + 30 ms. Strings = 10240, iterations = 20*16.
 
 --
 AsymW series is for the model with asymmetric w weights (Li's model)
@@ -29,3 +33,6 @@ WW06_5Params: free parameters: Self excitation and lateral inhibition in the mat
 WW06_7Params: Similar to the 5-parameter version mentioned above. Set the tauNMDA and tauAMPA as free parameters. Originally in the paper, tauNMDA = 100ms, and tauAMPA = 2 ms.
 WW06_5ParamsII: similar to WW06_5Params but made the following changes: The initial values were set as [32, 32] Hz for the two excitatory pools. The threshold was set as 70Hz. These changes were aimed to match the empirical evidence of Roitman & Shadlen, 2002. The parameter constraints for miu0 was relaxed from 0-60 to 0-120. Number of iteration in bads fitting was reduced from 40*4 = 160 to 20*4 = 80 because of computational power draining.
 WW06_5ParamsII: similar to WW06_7Params but made the following changes: The initial values were set as [32, 32] Hz for the two excitatory pools. The threshold was set as 70Hz. These changes were aimed to match the empirical evidence of Roitman & Shadlen, 2002. The parameter constraints for miu0 was relaxed from 0-60 to 0-120. Number of iteration in bads fitting was reduced from 20*8 = 160 to 20*4 = 80 because of computational power draining.
+WW06_6ParamsIII: Free parameters: JNn, JNp, sgm, I0, miu0, tauNMDA; fixed parameters: tauAMPA = .002, gamma = .64. Initial value H0 = 2, S0 based on H0. Threshold = 15Hz, non-decision time = 90 + 30 ms. Strings = 10240, iterations = 20*16.
+WW06_7ParamsIV: Free parameters: JNn, JNp, sgm, I0, miu0, gamma, tauNMDA; fixed parameters: tauAMPA = .002. Initial value H0 = 42/70*15, S0 based on H0. Threshold = 15Hz, non-decision time = 90 + 30 ms. Strings = 10240, iterations = 20*16.
+WW06_7ParamsV: Free parameters: JNn, JNp, sgm, I0, miu0, gamma, tauNMDA; fixed parameters: tauAMPA = .002. Initial value H0 = 32/70*15, S0 based on H0. Threshold = 15Hz, non-decision time = 90 + 30 ms. Strings = 10240, iterations = 20*16.
