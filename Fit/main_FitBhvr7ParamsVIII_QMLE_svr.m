@@ -94,10 +94,10 @@ if ~exist(plot_dir,'dir')
 end
 dataDynmc = load('./Data/Data.mat');
 dataBhvr = LoadRoitmanData('../RoitmanDataCode');
-randseed = 72284006;
+randseed = 59233912;
 rng(randseed);
-% a, b, noise, tauRGI, nLL
-params = [0.001773	1.812852	6.082312 .3	0.017669	0.279181	0.633919	16728.81362]; % 16822.4 ± 2.98148
+% a, b, noise, B0, tauRGI, nLL
+params = [16.968578	1.12789	13.601809	0.000215	0.025217	0.155586	0.162089	16788.66382]; % 16822.4 ± 2.98148
 name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_B0%1.3f_tau%1.2f_%1.2f_%1.2f_nLL%5.2f',params);
 if ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
     tic;
@@ -113,11 +113,7 @@ end
 lwd = 1;
 mksz = 3;
 fontsize = 11;
-randseed = 24356545;
 rng(randseed);
-% a, b, noise, scale, tauRGI, nLL
-% params = [0.000056	1.433901	24.837397	3254.833078	0.183152	0.248698	0.309921	16542.77267];
-% params = [0	1.433631	25.35945	3251.289056	0.185325	0.224459	0.323132	16539.138186];
 simname = sprintf('LDDM_Dynmc_a%2.2f_b%1.2f_sgm%2.1f_B0%1.3f_tau%1.2f_%1.2f_%1.2f_nLL%4.0f',params);
 
 a = params(1)*eye(2);
@@ -140,7 +136,7 @@ thresh = 70; %70.8399; % mean(max(m_mr1cD))+1;
 stimdur = dur;
 stoprule = 1;
 w = [1 1; 1 1];
-Rstar = 42; % ~ 32 Hz at the bottom of initial fip, according to Roitman and Shadlen's data
+Rstar = 32; % ~ 32 Hz at the bottom of initial fip, according to Roitman and Shadlen's data
 I0 = params(2)*Rstar;
 initialvals = [Rstar,Rstar; (sum(w(1,:)) - params(2))*Rstar,(sum(w(2,:)) - params(2))*Rstar; I0, I0];
 eqlb = Rstar; % set equilibrium value before task as R^*
