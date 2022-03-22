@@ -46,7 +46,6 @@ colorpalettergb =[
     0.0235    0.8392    0.6275
     0.0667    0.5412    0.6980
     0.0275    0.2314    0.2980];
-
 %%
 aspect1 = [3.9,2.2]; % 16:9, for wide temporal dynamic
 aspect2 = [3 3]; % for temporal dynamic
