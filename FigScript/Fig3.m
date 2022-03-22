@@ -31,7 +31,7 @@ h.PaperUnits = 'inches';
 h.PaperPosition = [0 0 3.1 2.8]/2.4;
 saveas(h,fullfile(plotdir,[filename,'.eps']),'epsc2');
 %% panel a, dynamic of neural firing rates
-a = 15*eye(2);
+a = a0*eye(2);
 b = zeros(2);
 w = ones(2);
 initialvals = [2,2;4,4;0,0]*0;
