@@ -19,9 +19,9 @@ h.PaperUnits = 'inches';
 h.PaperPosition = [0 0 3.1 2.8]/2.4;
 saveas(h,fullfile(plotdir,[filename,'.eps']),'epsc2');
 %% panel a, dynamic of neural firing rates
-a = a0*eye(2,2);
-b = b0*eye(2,2);
-w = ones(2,2);
+a = a0*eye(2);
+b = b0*eye(2);
+w = ones(2);
 predur = .8;  
 presentt = dt;
 dur = 1.1;
@@ -57,33 +57,37 @@ ylabel('          Activity (a.u.)');
 xticks([1, predur/dt]);
 xticklabels({'',''});
 drawaxis(gca, 'x', 0, 'movelabel', 1);
-xlim([-50, (prepresentt+predur+presentt+dur)/dt]);
+xlim([-50, (predur+presentt+dur)/dt]);
 legend([lgd1(1), lgd2(1)],{'R_1', 'R_2'},...
     'Location','NorthWest','FontSize',fontsize-5, 'FontName','Times New Roman', ...
     'FontAngle','italic','NumColumns',1,'Box','off');
 savefigs(h, filename, plotdir, fontsize - 2, [2.8 2.54]);
 %% panel b, choice accuracy and reaction time
-a = eye(2)*a0;
+a = a0*eye(2);
 b = b0*eye(2);
 w = ones(2);
-initialvals = [4,4;8,8;0,0];
-Vprior = [1, 1]*scale0 + B0;
-predur = 0;
-dur = 4;
+predur = .8;  
 presentt = dt;
-stimdur = dur;
-triggert = dt;
+dur = 4;
+stimdur = dur-presentt;
+triggert = presentt;
+sgm = 0;
 thresh = 70;
 stoprule = 1;
-sgmvec = [5];
+Vprior = [1, 1]*scale0 + B0;
+Tau = [.1,.1,.1];
+initialvals = zeros(3,2);
+
+cplist = linspace(-1, 1, 100)';
+Vinput = [(1 + cplist)*scale0, (1 - cplist)*scale0] + B0;
+sgmvec = [15];
 sims = 10240;
-output = fullfile(datadir,sprintf('DCM_Sim%iV%ia%2.1fb%1.2f_sgm%1.1f_ChoiceRT.mat',sims,length(V1IterN),a(1,1),b(1,1),sgmvec));
+output = fullfile(datadir,sprintf('DCM_Sim%iV%ia%2.1fb%1.2f_sgm%1.1f_ChoiceRT.mat',sims,length(cplist),a(1,1),b(1,1),sgmvec));
 if ~exist(output,'file')
     CRALL = []; RTALL = [];
     for sgmi = 1:length(sgmvec)
         sgm = sgmvec(sgmi);
         RT = [];Choice = [];
-        Vinput = [V1IterN', V2IterN'];
         [rt, choice, ~] = LDDM_GPU(Vprior, Vinput, w, a, b,...
     sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims);
         Choice = squeeze(gather(choice));
@@ -100,11 +104,11 @@ h = figure;
 filename = 'Fig5b';
 subplot(2,1,1); hold on;
 for sgmi = length(sgmvec)
-    plot(1:nticks,100*(1-CRALL(sgmi,:)),'LineWidth',lwd/2,'Color',colorpalette{sgmi});
-    lgdtext{sgmi} = sprintf('\\color[rgb]{%s}\\sigma = %1.1f',num2str(colorpalettergb(sgmi,:)),sgmvec(sgmi));
+    plot(1:nticks,100*(1-CRALL(sgmi,:)),'LineWidth',lwd/2,'Color',colorpalette{5});
+    lgdtext{sgmi} = sprintf('\\color[rgb]{%s}\\sigma = %1.1f',num2str(colorpalettergb(5,:)),sgmvec(sgmi));
 end
-plot([0,50.5],[50,50],'k--');
-plot([50.5,50.5],[0,50],'k--');
+plot([0,50.5],[50,50],'k--','LineWidth',.5);
+plot([50.5,50.5],[0,50],'k--','LineWidth',.5);
 xlim([1,nticks]);
 xticks(linspace(1,nticks,5));
 % xticklabels({'0','.25','.5','.75','1.0'});
@@ -114,21 +118,21 @@ ylim([-2,100]);
 yticks([0:25:100]);
 ylabel('Choice (%)');
 %legend(lgdtext,'Location','NorthWest','FontSize',fontsize-5,'Box','off');
-savefigs(h, filename, plotdir, fontsize, [2.41 3]);
+savefigs(h, filename, plotdir, fontsize - 2, [2.41 3]);
 subplot(2,1,2); hold on;
 for sgmi = length(sgmvec)
-    plot(RTALL(sgmi,:),'LineWidth',lwd/2,'Color',colorpalette{sgmi});
+    plot(RTALL(sgmi,:),'LineWidth',lwd/2,'Color',colorpalette{5});
 end
-plot([50.5,50.5],[0,max(RTALL(sgmi,:))],'k--');
+plot([50.5,50.5],[0,max(RTALL(sgmi,:))],'k--','LineWidth',.5);
 xlim([1,nticks]);
 xticks(linspace(1,nticks,5));
 xticklabels({'0','.25','.5','.75','1.0'});
 xlabel('Input ratio'); ylabel('RT (a.u.)');
 ylim([min(RTALL(sgmi,:))*.8,max(RTALL(sgmi,:))*1.1]);
-yticks([.2:.2:max(RTALL(sgmi,:))]);
+yticks([.2:.4:max(RTALL(sgmi,:))]);
 % ylim([.6,1.4]);
 % yticks([.6:.2:1.4]);
-savefigs(h, filename, plotdir, fontsize, [2.41 3]);
+savefigs(h, filename, plotdir, fontsize - 2, [2.41 3]);
 %% panel c_left, nullclines for R1 and R2 under equal inputs
 a = a0;
 w = 1;
@@ -223,7 +227,7 @@ v = 1;
 cplist = linspace(-1,1,40);
 Vprior = [1, 1]*scale0 + B0;
 CodeRatio = nan(size(cplist));
-name = sprintf('CodedRatio_WTA_LDDM_Sim%i_a%1.1f_b%1.1f',length(V1Iter), a, b);
+name = sprintf('CodedRatio_WTA_LDDM_Sim%i_a%1.1f_b%1.1f',length(cplist), a, b);
 output = fullfile(datadir,[name '.mat']);
 if ~exist(output,'file')
     for ii = 1:length(cplist)
@@ -268,11 +272,11 @@ xticks([0,.25,.5,.75,1]); yticks([0,.25,.5,.75,1]);
 legend([lgd1, lgd2],{'\color[rgb]{0.0235,0.8392,0.6275}Choice','\color[rgb]{0.0275,0.2314,0.2980}Representation'},'Box','off','Location','NorthWest','FontSize',fontsize-5);
 savefigs(h, filename, plotdir, fontsize - 2, [2.8 2.54]*.95);
 %% panel e, parameter space for choice/representation under equal inputs
-V = [1, 1]*scale0;
+V = [1, 1]*scale0 + B0;
 w = 1;
 v = 1;
-V1 = V(1) + B0;
-V2 = V(2) + B0;
+V1 = V(1);
+V2 = V(2);
 %avec = linspace(0,60,601);
 avec = 10.^[-1:.01:3];
 rvec = linspace(0,4,401); % ratio of beta/w
@@ -330,7 +334,7 @@ end
 % plot
 dyadic = visualize == 2 | visualize == 0;
 h = figure;colormap(colorpalettergb([3,5],:));
-filename = 'Fig4e';
+filename = 'Fig5e';
 s = surf(dyadic+1,'EdgeColor','none');
 ylim([1,length(avec)]);
 xlim([1,length(rvec)]);
@@ -342,5 +346,5 @@ yticklabels({'10^{-1}','10^0','10^1','10^2','10^3'});
 xlabel('\beta');
 ylabel('\alpha');
 view(0,90);
-savefigs(h, filename, plotdir, fontsize, [2.8 2.54]*.95);
+savefigs(h, filename, plotdir, fontsize - 2, [2.8 2.54]*.95);
 

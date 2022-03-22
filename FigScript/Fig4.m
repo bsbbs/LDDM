@@ -1,7 +1,7 @@
 % Fig4. 
 cplist = linspace(-1,1,121);
 V1Iterp = (1 + cplist)*scale0;
-V2Iterp = (1 - cplist)*scale0;
+V2Iterp = (1 + cplist)*scale0;
 % panel c, colormap of R1 activities as a function of V1 and V2 inputs
 sgm = 0;
 w = [1,1; 1,1];
