@@ -135,30 +135,32 @@ yticks([.2:.4:max(RTALL(sgmi,:))]);
 savefigs(h, filename, plotdir, fontsize - 2, [2.41 3]);
 %% panel c_left, nullclines for R1 and R2 under equal inputs
 a = a0;
+B0 = 70;
 w = 1;
 v = 1;
-sgm = .02; dur = 8;
+sgm = .02; dur = 12;
 predur = 0;
 presentt = dt; triggert = presentt; thresh = Inf;
 initialvals = [4,4;8,8;0,0]/15; stimdur = dur; stoprule = 0;
 filenamelist = {'Fig5cUL','Fig5cUM','Fig5cUR';'Fig5cLL','Fig5cLM','Fig5cLR'};
-blist = [.98, b0];
+blist = [.9, b0];
 cplist = [0, .512, 1];
+Vprior = [1, 1]*scale0 + B0;
 for bi = 1:2
     b = blist(bi);
     for ci = 1:3
         cp = cplist(ci);
-        rng('default'); rng(4);
+        rng('default'); rng(8);
         V = [1+cp 1-cp]*scale0 + B0;
         h = figure; hold on;
         filename = filenamelist{bi,ci};
         % - Nullclines R1*-R2* space
-        R2 = linspace(.1,1500,300);
+        R2 = 10.^(linspace(-1,3,300)); %linspace(.1,1000,300);
         R1 = (V(2)./R2 - (w - b)*R2 - (1-a))/v; % dR2/dt = 0
         lgd2 = plot(R2,R1,'k--','LineWidth',lwd/2); % dR2/dt = 0
         plot([min(R2), V(2)/(1-a)],[V(1)/(1-a), V(1)/(1-a)],'--k','LineWidth',1);
         Line1 = [R1' R2'];
-        R1 = linspace(.1,1500,300);
+        R1 = 10.^(linspace(-1,3,300)); %linspace(.1,1000,300);
         R2 = (V(1)./R1 - (w - b)*R1 - (1-a))/v; % dR1/dt = 0
         lgd1 = plot(R2,R1,'k-','LineWidth',lwd/2); % dR1/dt = 0
         plot([V(2)/(1-a), V(2)/(1-a)],[min(R1), V(1)/(1-a0)],'--k','LineWidth',1);
@@ -212,7 +214,7 @@ for bi = 1:2
         end
         set(gca, 'XScale','log');
         set(gca, 'YScale','log');
-        xlim([.1,5*10^3]);ylim([.1,5*10^3]);
+        xlim([.2,10^3]);ylim([.2,10^3]);
         xticks([1,10,100,1000]);yticks([1,10,100,1000]);
         xlabel('R_2 activity (a.u.)');
         ylabel('R_1 activity (a.u.)');

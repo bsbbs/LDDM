@@ -1,10 +1,11 @@
 % Main function of generating figures for the paper: Shen, Louie, and
 % Glimcher, A disinhibition-based circuit model of decision-making
-Codedir = 'C:\Users\Bo\Documents\LDDM';
+Codedir = '/Users/bs3667/Documents/LDDM';
+% Codedir = 'C:\Users\Bo\Documents\LDDM';
 addpath(fullfile(Codedir,'CoreFunctions')); % inlcude the core functions
 addpath(fullfile(Codedir,'utils')); % inlcude utilities and functions
-% outdir = '/Volumes/GoogleDrive/My Drive/LDDM/Figs4Paper';
-outdir = 'G:\My Drive\LDDM\Figs4Paper';
+outdir = '/Volumes/GoogleDrive/My Drive/LDDM/Figs4Paper';
+% outdir = 'G:\My Drive\LDDM\Figs4Paper';
 if ~exist(outdir,'dir')
     mkdir(outdir);
 end
