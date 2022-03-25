@@ -1,19 +1,18 @@
 % Fig 2
 %% panel b, Example dynamics of the LDDM
-a = 15*eye(2,2);
-b = 1.1*eye(2,2);
-w = ones(2,2);
+a = a0*eye(2);
+b = b0*eye(2);
+w = ones(2);
 cp = .512;
 initialvals = [10,10;20,20;0,0]*0;
 predur = 0;
 presentt = 0;
-dur = 1.9;
+dur = 1.5;
 stimdur = dur;
 sgm = 0;
 triggert = .9;
 thresh = 70;
 stoprule = 1;
-
 
 h = figure; hold on;
 filename = 'Fig2b';

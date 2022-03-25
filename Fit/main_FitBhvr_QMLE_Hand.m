@@ -1,81 +1,3 @@
-addpath('../../RecurrentModel');
-numNode = 1;
-[sortNum, myCluster] = RndCtrl(numNode);
-mypool = parpool(myCluster, myCluster.NumWorkers);
-
-%% Model fitting with Bayesian Adaptive Direct Search (BADS) optimization algorithm
-addpath(genpath('../../RecurrentModel/bads/bads-master'));
-addpath('../CoreFunctions/');
-addpath('./SvrCode/');
-out_dir = '../../RecurrentModel/Fit/Rslts/FitBhvr7ParamsVIII_QMLE_SvrGPU';
-if ~exist(out_dir,'dir')
-    mkdir(out_dir);
-end
-%%
-% Take data from Roitman & Shadlen, 2002
-dataDynmc = load('../../RecurrentModel/Fit/Data/Data.mat');
-dataBhvr = LoadRoitmanData('../../RecurrentModel/RoitmanDataCode');
-% Fix random seed for reproducibility
-% rng(1);
-% change random seed
-t = datenum(clock)*10^10 - floor(datenum(clock)*100)*10^8 + sortNum*10^7;
-num2str(t);
-rng(t);
-% Define optimization starting point and bounds
-%     a,    b, noise, B0, Tau
-LB = [0    0.1   .1   0 [.001,.001,.001]];
-UB = [70   2	100  1 [1,1,1]];
-PLB = [15  .9	5  .1 [.01 .01 .01]];
-PUB = [60   1.7	40 .6 [.2 .2 .2]];
-
-% Randomize initial starting point inside plausible box
-x0 = rand(1,numel(LB)) .* (PUB - PLB) + PLB;
-
-% likelihood function
-% parpool(6);
-nLLfun = @(params) LDDMFitBhvr7ParamsVIII_QMLE_GPU(params, dataBhvr);
-[fvalbest,~,~] = nLLfun(x0)
-fprintf('test succeeded\n');
-% change starting points
-Collect = [];
-parfor i = 1:myCluster.NumWorkers*16
-    !ping -c 1 www.amazon.com
-    %!ping www.google.com
-    t = datenum(clock)*10^10 - floor(datenum(clock)*100)*10^8 + sortNum*10^7 + i*10^5;
-    %num2str(t);
-    rng(t);
-    
-    % Randomize initial starting point inside plausible box
-    x0 = rand(1,numel(LB)) .* (PUB - PLB) + PLB;
-    dlmwrite(fullfile(out_dir,'x0List.txt'),[sortNum, i, t, x0],'delimiter','\t','precision','%.6f','-append');
-    % fit
-    options = bads('defaults');     % Default options
-    options.Display = 'iter';
-    % options.UncertaintyHandling = false;    % Function is deterministic
-    options.UncertaintyHandling = true;    % Function is deterministic
-    [xest,fval,~,output] = bads(nLLfun,x0,LB,UB,PLB,PUB,options);
-    %     xest
-    %     fval
-    %     output
-    dlmwrite(fullfile(out_dir,'RsltList.txt'),[sortNum, i, t, xest fval],'delimiter','\t','precision','%.6f','-append');
-    %     if fval < fvalbest
-    %         xbest = xest;
-    %         fvalbest = fval;
-    %         outputbest = output;
-    %     end
-    % save(fullfile(out_dir,sprintf('./Rslts%i_%i.mat', sortNum, i)),'xest','fval','output');
-    Collect(i).rndseed = t;
-    Collect(i).x0 = x0;
-    Collect(i).xest = xest;
-    Collect(i).fval = fval;
-    Collect(i).output = output;
-    
-end
-t = datenum(clock)*10^10 - floor(datenum(clock)*100)*10^8 + sortNum*10^7 + i*10^5;
-save(fullfile(out_dir,sprintf('CollectRslts%i.mat',t)),'Collect');
-
-
-if 0
 %% hand tuning
 Homedir = 'C:\Users\Bo';
 % Homedir = '~';
@@ -84,7 +6,7 @@ addpath(fullfile(Homedir,'Documents','LDDM','utils'));
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
 cd('G:\My Drive\LDDM\Fit');
 % cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
-out_dir = './Rslts/FitBhvr7ParamsVIII_QMLE_SvrGPU';
+out_dir = './Rslts/FitBhvr_QMLE_Hand';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -95,19 +17,162 @@ end
 dataDynmc = load('./Data/Data.mat');
 dataBhvr = LoadRoitmanData('../RoitmanDataCode');
 randseed = 59233912;
+%% 
 rng(randseed);
-% a, b, noise, B0, tauRGI, nLL
-params = [16.968578	1.12789	13.601809	0.000215	0.025217	0.155586	0.162089	16788.66382]; % 16822.4 ± 2.98148
-name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_B0%1.3f_tau%1.2f_%1.2f_%1.2f_nLL%5.2f',params);
+% a, b, noise, B0, tauR, tauG, tauI, Rstart
+params = [13	1.22789	13.601809	0	0.11	0.056	0.162089	16]; % 16.968578	1.12789	13.601809	0	0.025217	0.155586	0.162089
+name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_B0%1.3f_tau%1.2f_%1.2f_%1.2f_Rstart%2.1f',params);
+% plot time course
+if ~exist(fullfile(plot_dir,sprintf('PlotDynamic_%s_D0.mat',name)),'file')
+    tic;
+    [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDMDynamic_FitBhvr_QMLE_GPUHand(params, dataDynmc, dataBhvr);
+    %sm_mr1c = gather(sm_mr1c);
+    save(fullfile(plot_dir,sprintf('PlotDynamic_%s_D0.mat',name)),...
+        'rtmat','choicemat','sm_mr1c','sm_mr2c','sm_mr1cD','sm_mr2cD','params');
+    toc
+    nLL
+else
+    load(fullfile(plot_dir, sprintf('PlotDynamic_%s_D0.mat',name)));
+end
+load('./Data/Data.mat');
+m_mr1c = m_mr1c';
+m_mr2c = m_mr2c';
+m_mr1cD = m_mr1cD';
+m_mr2cD = m_mr2cD';
+dot_ax = dot_ax';
+sac_ax = sac_ax';
+h = figure;
+aspect = [3, 2.5];
+fontsize = 10;
+lwd = 1;
+filename = sprintf('FittedTimeCourse_%s_D0',name);
+subplot(1,2,1);hold on;
+clear flip;
+colvec = flip({[218,166,109]/256,[155 110 139]/256,'#32716d','#af554d','#708d57','#3b5d64'});
+for ci = 1:6
+    lg(ci) = plot(dot_ax/1000, sm_mr1c(:,ci),'Color',colvec{ci},'LineWidth',lwd);
+    plot(dot_ax/1000, sm_mr2c(:,ci),'--','Color',colvec{ci},'LineWidth',lwd);
+end
+set(gca,'TickDir','out');
+H = gca;
+H.LineWidth = 1;
+% ylim([20,60]);
+ylim([0,70.5]);
+ylabel('Firing rate (sp/s)');
+xlabel('Time (secs)');
+xlim([-.05, .8]);
+xticks([0:.2:.8]);
+% set(gca,'FontSize',16);
+savefigs(h,filename,plot_dir,fontsize,aspect);
+subplot(1,2,2);hold on;
+plot([0,0],[20,71],'-k');
+for ci = 1:6
+    lg(ci) = plot(sac_ax/1000, sm_mr1cD(:,ci),'Color',colvec{ci},'LineWidth',lwd);
+    plot(sac_ax/1000, sm_mr2cD(:,ci),'--','Color',colvec{ci},'LineWidth',lwd);
+end
+xlim([-.8, .05]);
+set(gca,'TickDir','out');
+H = gca;
+H.LineWidth = 1;
+yticks([]);
+set(gca,'ycolor',[1 1 1]);
+ylim([0,70.5]);
+legend(flip(lg),flip({'0','3.2','6.4','12.8','25.6','51.2'}),'Location','best','FontSize',fontsize-2);
+savefigs(h,filename,plot_dir,fontsize,aspect);
+saveas(h,fullfile(plot_dir,[filename, '.fig']),'fig');
+
+% Q-Q plot for reaction time and choice
+lwd = 1.0;
+mksz = 3;
+fontsize = 11;
+x = dataBhvr.proportionmat;
+y = dataBhvr.q;
+qntls = dataBhvr.qntls;
+h = figure; hold on;
+for vi = 1:length(x)
+    xc = x(vi)*ones(size(y(:,1,vi)));
+    xw = 1 - x(vi)*ones(size(y(:,2,vi)));
+    lgc = plot(xc,y(:,1,vi),'gx','MarkerSize',mksz+1,'LineWidth',lwd);
+    lge = plot(xw,y(:,2,vi),'rx','MarkerSize',mksz+1,'LineWidth',lwd);
+    % fitted value
+    En(vi) = numel(rtmat(:,vi));
+    RT_corr = rtmat(choicemat(:,vi) == 1,vi);
+    RT_wro = rtmat(choicemat(:,vi) == 2,vi);
+    xr = numel(RT_corr)/(numel(RT_corr) + numel(RT_wro));
+    q(:,1,vi) = quantile(RT_corr,qntls); % RT value on quantiles, correct trial
+    q(:,2,vi) = quantile(RT_wro,qntls); % RT value on quantiles, error trial
+end
+for qi = 1:size(q,1)
+    xq = [flip(1-x), x]';
+    plot(xq,[squeeze(flip(q(qi,2,:)));squeeze(q(qi,1,:))],'k-o','MarkerSize',mksz,'LineWidth',lwd/2);
+end
+legend([lge,lgc],{'error','correct'},"NumColumns",2,'Location','northeast','FontSize',fontsize-2);
+legend('box','off');
+xlim([-.05 1.05]);
+ylim([.2, 1.4]);
+yticks([.2:.4:1.4]);
+xlabel('Proportion');
+ylabel('RT (s)');
+% h.PaperUnits = 'inches';
+% h.PaperPosition = [0 0 4 5];
+% saveas(h,fullfile(plot_dir,sprintf('Q-QPlot_%s.fig',name)),'fig');
+filename = sprintf('Q-QPlot_%s',name);
+% saveas(h,fullfile(plot_dir,filename),'epsc2');
+savefigs(h, filename, plot_dir, fontsize, [2.5 2.5]);
+
+% aggregated RT & ACC
+lwd = 1;
+mksz = 3;
+fontsize = 11;
+Cohr = [0 32 64 128 256 512]/1000;
+cplist = Cohr*100;
+cplist(1) = 1.1;
+h = figure;
+filename = sprintf('RT&ACC_%s',name);
+subplot(2,1,1);
+hold on;
+plot(cplist, accr*100, 'xk', 'MarkerSize', mksz+1);
+plot(cplist, acc*100,'-k','LineWidth',lwd);
+ylim([.45,1]*100);
+yticks([50,100]);
+xlim([1,100]);
+xticks([1,10,100]);
+xticklabels({'0','10','100'});
+ylabel('Correct (%)');
+xlabel('Input coherence (%)');
+set(gca, 'XScale', 'log');
+legend({'data','model'},'NumColumns',1,'Location','SouthEast','FontSize',fontsize-2);
+legend('boxoff');
+savefigs(h,filename,plot_dir,fontsize,[2,3.0]);
+
+subplot(2,1,2);
+hold on;
+lg1 = plot(cplist, meanrtcr, '.k', 'MarkerSize', mksz*3);
+lg2 = plot(cplist, meanrtc, '-k','LineWidth',lwd);
+lg3 = plot(cplist, meanrtwr, 'ok', 'MarkerSize', mksz);
+lg4 = plot(cplist, meanrtw, '--k','LineWidth',lwd);
+xlim([1,100]);
+xticks([1,10,100]);
+xticklabels({'0','10','100'});
+yticks([.4,1]);
+ylim([.4, 1]);
+ylabel('RT (secs)');
+xlabel('Input coherence (%)');
+set(gca, 'XScale', 'log');
+% lgd = legend([lg3,lg1,lg4,lg2],{'','','Error','Correct'},'NumColumns',2,'Location','SouthWest','FontSize',14);
+% legend('boxoff');
+savefigs(h,filename,plot_dir,fontsize,[2,3.0]);
+%%
 if ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
     tic;
-    [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsVIII_QMLE_GPU(params, dataBhvr);
+    [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr_QMLE_GPU(params, dataBhvr);
     save(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),...
         'rtmat','choicemat','params','nLL','Chi2','AIC','BIC');
     toc
 else
     load(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)));
 end
+
 
 %% Example dynamics
 lwd = 1;
@@ -339,86 +404,6 @@ for ii = 1:6
     set(gca, 'box','off');
     savefigs(h, filename, plot_dir, fontsize, aspect8);
 end
-%% aggregated RT & ACC
-lwd = 1;
-mksz = 3;
-fontsize = 11;
-Cohr = [0 32 64 128 256 512]/1000;
-cplist = Cohr*100;
-cplist(1) = 1.1;
-h = figure;
-filename = sprintf('RT&ACC_%s',name);
-subplot(2,1,1);
-hold on;
-plot(cplist, accr*100, 'xk', 'MarkerSize', mksz+1);
-plot(cplist, acc*100,'-k','LineWidth',lwd);
-ylim([.45,1]*100);
-yticks([50,100]);
-xlim([1,100]);
-xticks([1,10,100]);
-xticklabels({'0','10','100'});
-ylabel('Correct (%)');
-xlabel('Input coherence (%)');
-set(gca, 'XScale', 'log');
-legend({'data','model'},'NumColumns',1,'Location','SouthEast','FontSize',fontsize-2);
-legend('boxoff');
-savefigs(h,filename,plot_dir,fontsize,[2,3.0]);
-
-subplot(2,1,2);
-hold on;
-lg1 = plot(cplist, meanrtcr, '.k', 'MarkerSize', mksz*3);
-lg2 = plot(cplist, meanrtc, '-k','LineWidth',lwd);
-lg3 = plot(cplist, meanrtwr, 'ok', 'MarkerSize', mksz);
-lg4 = plot(cplist, meanrtw, '--k','LineWidth',lwd);
-xlim([1,100]);
-xticks([1,10,100]);
-xticklabels({'0','10','100'});
-yticks([.4,1]);
-ylim([.4, 1]);
-ylabel('RT (secs)');
-xlabel('Input coherence (%)');
-set(gca, 'XScale', 'log');
-% lgd = legend([lg3,lg1,lg4,lg2],{'','','Error','Correct'},'NumColumns',2,'Location','SouthWest','FontSize',14);
-% legend('boxoff');
-savefigs(h,filename,plot_dir,fontsize,[2,3.0]);
-%% Q-Q plot for reaction time and choice
-lwd = 1.0;
-mksz = 3;
-fontsize = 11;
-x = dataBhvr.proportionmat;
-y = dataBhvr.q;
-qntls = dataBhvr.qntls;
-h = figure; hold on;
-for vi = 1:length(x)
-    xc = x(vi)*ones(size(y(:,1,vi)));
-    xw = 1 - x(vi)*ones(size(y(:,2,vi)));
-    lgc = plot(xc,y(:,1,vi),'gx','MarkerSize',mksz+1,'LineWidth',lwd);
-    lge = plot(xw,y(:,2,vi),'rx','MarkerSize',mksz+1,'LineWidth',lwd);
-    % fitted value
-    En(vi) = numel(rtmat(:,vi));
-    RT_corr = rtmat(choicemat(:,vi) == 1,vi);
-    RT_wro = rtmat(choicemat(:,vi) == 2,vi);
-    xr = numel(RT_corr)/(numel(RT_corr) + numel(RT_wro));
-    q(:,1,vi) = quantile(RT_corr,qntls); % RT value on quantiles, correct trial
-    q(:,2,vi) = quantile(RT_wro,qntls); % RT value on quantiles, error trial
-end
-for qi = 1:size(q,1)
-    xq = [flip(1-x), x]';
-    plot(xq,[squeeze(flip(q(qi,2,:)));squeeze(q(qi,1,:))],'k-o','MarkerSize',mksz,'LineWidth',lwd/2);
-end
-legend([lge,lgc],{'error','correct'},"NumColumns",2,'Location','northeast','FontSize',fontsize-2);
-legend('box','off');
-xlim([-.05 1.05]);
-ylim([.2, 1.4]);
-yticks([.2:.4:1.4]);
-xlabel('Proportion');
-ylabel('RT (s)');
-% h.PaperUnits = 'inches';
-% h.PaperPosition = [0 0 4 5];
-% saveas(h,fullfile(plot_dir,sprintf('Q-QPlot_%s.fig',name)),'fig');
-filename = sprintf('Q-QPlot_%s',name);
-% saveas(h,fullfile(plot_dir,filename),'epsc2');
-savefigs(h, filename, plot_dir, fontsize, [2.5 2.5]);
 %% the original space of QMLE
 acc = dataBhvr.proportionmat;
 ON = dataBhvr.ON;
@@ -492,63 +477,7 @@ h.PaperPosition = [0 0 3 10];
 %saveas(h,fullfile(plot_dir,sprintf('Proportion_Plot_%s.fig',name)),'fig');
 saveas(h,fullfile(plot_dir,sprintf('Proportion_Plot_%s.eps',name)),'epsc2');
 
-%% plot time course
-if ~exist(fullfile(plot_dir,sprintf('PlotDynamic_%s_D0.mat',name)),'file')
-    tic;
-    [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDMDynamic_FitBhvr7ParamsVIII_QMLE_GPU(params, dataDynmc, dataBhvr);
-    %sm_mr1c = gather(sm_mr1c);
-    save(fullfile(plot_dir,sprintf('PlotDynamic_%s_D0.mat',name)),...
-        'rtmat','choicemat','sm_mr1c','sm_mr2c','sm_mr1cD','sm_mr2cD','params');
-    toc
-else
-    load(fullfile(plot_dir, sprintf('PlotDynamic_%s_D0.mat',name)));
-end
-load('./Data/Data.mat');
-m_mr1c = m_mr1c';
-m_mr2c = m_mr2c';
-m_mr1cD = m_mr1cD';
-m_mr2cD = m_mr2cD';
-dot_ax = dot_ax';
-sac_ax = sac_ax';
-h = figure;
-aspect = [3, 2.5];
-fontsize = 10;
-lwd = 1;
-filename = sprintf('FittedTimeCourse_%s_D0',name);
-subplot(1,2,1);hold on;
-clear flip;
-colvec = flip({[218,166,109]/256,[155 110 139]/256,'#32716d','#af554d','#708d57','#3b5d64'});
-for ci = 1:6
-    lg(ci) = plot(dot_ax/1000, sm_mr1c(:,ci),'Color',colvec{ci},'LineWidth',lwd);
-    plot(dot_ax/1000, sm_mr2c(:,ci),'--','Color',colvec{ci},'LineWidth',lwd);
-end
-set(gca,'TickDir','out');
-H = gca;
-H.LineWidth = 1;
-% ylim([20,60]);
-ylim([0,70.5]);
-ylabel('Firing rate (sp/s)');
-xlabel('Time (secs)');
-xlim([-.05, .8]);
-xticks([0:.2:.8]);
-% set(gca,'FontSize',16);
-savefigs(h,filename,plot_dir,fontsize,aspect);
-subplot(1,2,2);hold on;
-plot([0,0],[20,71],'-k');
-for ci = 1:6
-    lg(ci) = plot(sac_ax/1000, sm_mr1cD(:,ci),'Color',colvec{ci},'LineWidth',lwd);
-    plot(sac_ax/1000, sm_mr2cD(:,ci),'--','Color',colvec{ci},'LineWidth',lwd);
-end
-xlim([-.8, .05]);
-set(gca,'TickDir','out');
-H = gca;
-H.LineWidth = 1;
-yticks([]);
-set(gca,'ycolor',[1 1 1]);
-ylim([0,70.5]);
-legend(flip(lg),flip({'0','3.2','6.4','12.8','25.6','51.2'}),'Location','best','FontSize',fontsize-2);
-savefigs(h,filename,plot_dir,fontsize,aspect);
-saveas(h,fullfile(plot_dir,[filename, '.fig']),'fig');
+
 
 %% raw data time course
 % h = figure;
@@ -630,4 +559,3 @@ end
 h.PaperUnits = 'inches';
 h.PaperPosition = [0 0 5.3 4];
 saveas(h,fullfile(plot_dir,sprintf('FittedParamsDistribution.eps')),'epsc2');
-end

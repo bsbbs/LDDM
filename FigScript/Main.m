@@ -1,9 +1,11 @@
 % Main function of generating figures for the paper: Shen, Louie, and
 % Glimcher, A disinhibition-based circuit model of decision-making
-addpath('~/Documents/LDDM/CoreFunctions'); % inlcude the core functions
-addpath('~/Documents/LDDM/utils'); % inlcude utilities and functions
-cd '/Volumes/GoogleDrive/My Drive/LDDM';
+Codedir = '/Users/bs3667/Documents/LDDM';
+% Codedir = 'C:\Users\Bo\Documents\LDDM';
+addpath(fullfile(Codedir,'CoreFunctions')); % inlcude the core functions
+addpath(fullfile(Codedir,'utils')); % inlcude utilities and functions
 outdir = '/Volumes/GoogleDrive/My Drive/LDDM/Figs4Paper';
+% outdir = 'G:\My Drive\LDDM\Figs4Paper';
 if ~exist(outdir,'dir')
     mkdir(outdir);
 end
@@ -19,19 +21,34 @@ end
 c = [3.2 12.8, 25.6, 38.4 51.2]'/100; % percentage of coherence
 scale0 = 250;
 B0 = 70;
-VmatDiag = 30*[1+c, 1-c];
-Vmat = [linspace(0,60,5)', ones(5,1)*30];
-V1Iter = linspace(0,60,50);
-V2Iter = 60 - linspace(0,60,50);
-V1IterN = linspace(0,60,100);
-V2IterN = 60 - V1IterN;
-V1Iterp = linspace(0,512,129);
-V2Iterp = linspace(0,512,129);
+a0 = 15;
+b0 = 1.1;
 dt = .001;
 Tau = ones(1,3)*.1;
+% 
+% VmatDiag = 30*[1+c, 1-c];
+% Vmat = [linspace(0,60,5)', ones(5,1)*30];
+% V1Iter = linspace(0,60,50);
+% V2Iter = 60 - linspace(0,60,50);
+% 
+% V1IterN = linspace(0,60,100);
+% V2IterN = 60 - V1IterN;
+
+
 %% define parameters for visualization
 lwd = 2.0;
 mksz = 18;
+fontsize = 14;
+mygray = gray(length(c) + 3);
+colorpalette = {'#ef476f','#ffd166','#06d6a0','#118ab2','#073b4c'};
+colorpalettergb = [239,71,111;255,209,102;6,214,160;17,138,178;7,59,76]/255;
+colorpalettergb =[
+    0.9373    0.2784    0.4353
+    1.0000    0.8196    0.4000
+    0.0235    0.8392    0.6275
+    0.0667    0.5412    0.6980
+    0.0275    0.2314    0.2980];
+%%
 aspect1 = [3.9,2.2]; % 16:9, for wide temporal dynamic
 aspect2 = [3 3]; % for temporal dynamic
 aspect3 = [2.8 2.54]; % 1:1 for phase plane
@@ -47,16 +64,7 @@ aspect12 = [3.9,.6]; % for timeline Fig8
 aspect13 = [3, 2.0]; % for dynamic Fig7
 aspect14 = [2.41 3]; % for choice and RT panel
 aspect15 = [3, 11]; % for combined Fig7
-fontsize = 14;
-mygray = gray(length(c) + 3);
-colorpalette = {'#ef476f','#ffd166','#06d6a0','#118ab2','#073b4c'};
-colorpalettergb = [239,71,111;255,209,102;6,214,160;17,138,178;7,59,76]/255;
-colorpalettergb =[
-    0.9373    0.2784    0.4353
-    1.0000    0.8196    0.4000
-    0.0235    0.8392    0.6275
-    0.0667    0.5412    0.6980
-    0.0275    0.2314    0.2980];
+
 %% Fig 2 - model comparison
 Fig2;
 

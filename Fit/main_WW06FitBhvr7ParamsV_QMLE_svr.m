@@ -96,12 +96,11 @@ end
 dataDynmc = load('./Data/Data.mat');
 dataBhvr = LoadRoitmanData('../RoitmanDataCode');
 
-% randseed = 12391438;
-randseed = 90995481;
+randseed = 88979398;
 rng(randseed);
-%    JNp, JNn, I0, noise, miu0, tauS, nLL
-% params = [.2609, .0497, .3255, .02, 30, .1]; % in the paper ww06
-params = [0.165707	0	0.255055	0.0202	75.157252	0.732425	16544.66984];
+%    JNp, JNn, I0, noise, miu0, gamma, tauNMDA, nLL
+% params = [.2609, .0497, .3255, .02, 30, .64, .1]; % in the paper ww06
+params = [0.078189	0	0.379609	0.017695	22.388205	0.253382	0.517504	16570.70907];
 name = sprintf('JNp%2.1f_JNn%1.2f_I0%1.2f_noise%1.2f_miu0%2.2f_gamma%1.3f_tauS%0.2f_nLL%5.2f',params);
 % simulation
 if  ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
@@ -145,12 +144,11 @@ gamma = .641;
 tauS = params(6);   %.1; % sec
 tauAMPA = .002; % sec
 unit = 1; % secs
-H0 = 42/70*thresh;
+H0 = 32/70*thresh;
 S0 = H0*gamma*tauS/(H0*gamma*tauS+1);
 initialvals = [H0, H0;S0, S0]; % S = H*gamma*tauS./(H*gamma*tauS+1)
 h = figure; hold on;
 filename = sprintf('%s',simname);
-randseed = 12391438;
 rng(randseed);
 for vi = 2:6
     cp = cplist(vi,:);
