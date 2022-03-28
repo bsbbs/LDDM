@@ -4,10 +4,10 @@ c = [3.2 12.8, 25.6, 38.4 51.2]'/100; % percentage of coherence
 V = [1+c, 1-c]*scale0;
 h = figure; hold on;
 filename = 'Fig5a_InputMatrix';
-mygray = gray(length(c) + 3);
+% mygray = gray(length(c) + 3);
 for vi = 1:length(V)
     Vinput = V(vi,:);
-    plot(Vinput(2),Vinput(1),'k.','MarkerSize',mksz/2,'Color',mygray(vi+1,:));
+    plot(Vinput(2),Vinput(1),'k.','MarkerSize',mksz/2,'Color',mygray(vi+2,:));
 end
 ylabel('V_1 (a.u.)');xlabel('V_2 (a.u.)');
 xlim([0,500]);ylim([0,500]);
@@ -39,8 +39,8 @@ for vi = 1:5
     Vinput = [1+c(vi), 1-c(vi)]*scale0 + B0;
     [choice, rt, R, G, I] = LDDM(Vprior, Vinput, w, a, b,...
     sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-    lgd2(vi) = plot(R(:,2), 'k--', 'Color', mygray(vi+1,:), 'LineWidth',lwd/2);
-    lgd1(vi) = plot(R(:,1), 'k-', 'Color', mygray(vi+1,:), 'LineWidth',lwd/2);
+    lgd2(vi) = plot(R(:,2), 'k--', 'Color', mygray(vi+1,:), 'LineWidth',lwd);
+    lgd1(vi) = plot(R(:,1), 'k-', 'Color', mygray(vi+1,:), 'LineWidth',lwd);
 end
 plot([1.2, dur+predur]/dt,[thresh,thresh], 'k-');
 text(1200,thresh*1.05,'threshold');
@@ -58,7 +58,7 @@ xticks([1, predur/dt]);
 xticklabels({'',''});
 drawaxis(gca, 'x', 0, 'movelabel', 1);
 xlim([-50, (predur+presentt+dur)/dt]);
-legend([lgd1(1), lgd2(1)],{'R_1', 'R_2'},...
+legend([lgd1(5), lgd2(5)],{'R_1', 'R_2'},...
     'Location','NorthWest','FontSize',fontsize-5, 'FontName','Times New Roman', ...
     'FontAngle','italic','NumColumns',1,'Box','off');
 savefigs(h, filename, plotdir, fontsize - 2, [2.8 2.54]);
