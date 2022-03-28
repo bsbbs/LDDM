@@ -101,9 +101,9 @@ randseed = 88979398;
 rng(randseed);
 %    JNp, JNn, I0, noise, miu0, gamma, H0, tauNMDA, nLL
 % params = [.2609, .0497, .3255, .02, 30, .64, .1]; % in the paper ww06
-params = [0.078189	0	0.379609	0.017695	22.388205	0.253382	0.517504	16570.70907];
+params = [0.2338    0.1791    0.2988    0.0784   50.3306    0.6427    0.5725    0.1342	16876.5]; % 16876.5 ± 5.41397
 name = sprintf('JNp%2.1f_JNn%1.2f_I0%1.2f_noise%1.2f_miu0%2.2f_gamma%1.3f_H0%2.1f_tauS%0.2f_nLL%5.2f',params);
-%% plot time course
+% plot time course
 if ~exist(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),'file')
     tic;
     [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = WW06Dynamic_FitBhvr8ParamsVI_QMLE_GPU(params, dataDynmc, dataBhvr);
@@ -220,7 +220,7 @@ set(gca, 'XScale', 'log');
 % legend('boxoff');
 savefigs(h,filename,plot_dir,fontsize,[2,3.0]);
 
-%% Q-Q plot for reaction time and choice
+% Q-Q plot for reaction time and choice
 lwd = 1.0;
 mksz = 3;
 fontsize = 11;
