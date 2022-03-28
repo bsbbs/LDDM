@@ -3,8 +3,8 @@ Homedir = 'C:\Users\Bo';
 % Homedir = '~';
 addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
 addpath(fullfile(Homedir,'Documents','LDDM','utils'));
-addpath(fullfile(Homedir,'Documents','LDDM','Froemke/SST_Inoise_SlfExt'));
-cd('G:\My Drive\LDDM\Froemke\SST_Inoise_SlfExt');
+addpath(fullfile(Homedir,'Documents','LDDM','Froemke/Inoise_av'));
+cd('G:\My Drive\LDDM\Froemke\Inoise_av');
 % cd('/Volumes/GoogleDrive/My Drive/LDDM/Froemke');
 plotdir = fullfile('./Graphics');
 if ~exist(plotdir,'dir')
@@ -71,7 +71,7 @@ for level = 1:length(boost)
     iSTDP = boost(level);
     %initialvals = (a-1)/iSTDP./sum(w,2)'.*[1,1; sum(w,2)'; 0, 0]; % for R, G, and I variables, will be further scaled
     initialvals = (a0-1)./sum(w,2)'.*[1,1; sum(w,2)'; 0, 0];
-    [choice, rt, R, G, I, Vcourse] = LDDM_STDP_a_RndInput(Vprior, Vinput, iSTDP, w, a, b,...
+    [choice, rt, R, G, I, Vcourse] = LDDM_av_RndInput(Vprior, Vinput, iSTDP, w, a, b,...
     sgm, sgmInput*scale, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
 
     % [choice, rt, R, G, I] = LDDM_STDP(Vprior, Vinput, iSTDP, w, a, b,...
@@ -126,14 +126,14 @@ if dur >= 45
         iSTDP = boost(level);
         %initialvals = (a-1)/iSTDP./sum(w,2)'.*[1,1; sum(w,2)'; 0, 0]; % for R, G, and I variables, will be further scaled
         initialvals = (a0-1)./sum(w,2)'.*[1,1; sum(w,2)'; 0, 0];
-        [choice, rt, R, G, I, Vcourse] = LDDM_STDP_a_RndInput(Vprior, Vinput, iSTDP, w, a, b,...
+        [choice, rt, R, G, I, Vcourse] = LDDM_av_RndInput(Vprior, Vinput, iSTDP, w, a, b,...
             sgm, sgmInput*scale, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
         subplot(2,1,level); hold on;
         histogram(R(1000:end,1),40);
         histogram(R(1000:end,2),40);
-        xlim([12,40]);
+        xlim([12,70]);
     end
-    savefigs(h, filename, plotdir,fontsize-5, [3,5]);
+    savefigs(h, filename, plotdir,fontsize-5, [5,5]);
 end
 
 %% change iSTDP level
@@ -174,7 +174,7 @@ if ~exist(output,'file')
         Vinput.V2 = V2;
         Vprior.V1 = ones(size(V1))*scale;
         Vprior.V2 = ones(size(V2))*scale;
-        [rt, choice, ~] = LDDM_STDP_a_Rndinput_GPU(Vprior, Vinput, iSTDP, w, a, b,...
+        [rt, choice, ~] = LDDM_av_Rndinput_GPU(Vprior, Vinput, iSTDP, w, a, b,...
     sgm, sgmInput*scale, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims);
         ACC = gather(mean(2-squeeze(choice),3,'omitnan'));
         meanRT = gather(mean(squeeze(rt),3,'omitnan'));
@@ -226,7 +226,7 @@ if ~exist(output,'file')
         Vinput.V2 = V2;
         Vprior.V1 = ones(size(V1))*scale;
         Vprior.V2 = ones(size(V2))*scale;
-        [rt, choice, ~] = LDDM_STDP_a_Rndinput_GPU(Vprior, Vinput, iSTDP, w, a, b,...
+        [rt, choice, ~] = LDDM_av_Rndinput_GPU(Vprior, Vinput, iSTDP, w, a, b,...
             sgm, sgmInput*scale, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims);
         ACC(sgi,:) = gather(mean(2-squeeze(choice),2,'omitnan'));
         meanRT(sgi,:) = gather(mean(squeeze(rt),2,'omitnan'));
@@ -235,7 +235,7 @@ if ~exist(output,'file')
 else
     load(output);
 end
-%%
+%
 h = figure; hold on;
 plot(sgmInputvec, ACC(:,1));
 plot(sgmInputvec, ACC(:,2));
@@ -262,12 +262,12 @@ for level = 1:length(boost)
     iSTDP = boost(level);
     %initialvals = (a-1)/iSTDP./sum(w,2)'.*[1,1; sum(w,2)'; 0, 0]; % for R, G, and I variables, will be further scaled
     initialvals = (a-1)./sum(w,2)'.*[1,1; sum(w,2)'; 0, 0];
-    [choice, rt, R, G, I, Vcourse] = LDDM_STDP_a_RndInput(Vprior, Vinput, iSTDP, w, a, b,...
+    [choice, rt, R, G, I, Vcourse] = LDDM_av_RndInput(Vprior, Vinput, iSTDP, w, a, b,...
     sgm, sgmInput*scale, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
     Rstore(level) = R(end,1);
     subplot(2,4,level);
     plot(R);
-    ylim([10,40]);
+    ylim([10,100]);
     xlabel('Time (a.u.)');
     ylabel('Firing rates (Hz)');
 end
@@ -277,6 +277,7 @@ savefigs(h, [filename], plotdir,fontsize-5, [6,4]);
 h = figure;
 filename = 'SteadyFR_iSTDP';
 plot(boost,Rstore);
+%ylim([20,40]);
 xlabel('iSTDP');
 ylabel('Max Firing rates (Hz)');
 savefigs(h, [filename], plotdir,fontsize-5, [3,3]);

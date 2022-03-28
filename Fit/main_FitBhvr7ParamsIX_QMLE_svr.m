@@ -99,7 +99,7 @@ dataBhvr = LoadRoitmanData('../RoitmanDataCode');
 randseed = 59233912;
 rng(randseed);
 %     a,    b, noise, Rstar, tauR, tauG, tauI, nLL
-params = [16.968578	1.12789	13.601809	16	0.025217	0.155586	0.162089	16788.66382]; % 16822.4 ± 2.98148
+params = [1.3340 1.7922 7.8764 49.9305 0.3131 0.2782 0.2519	16759]; % 16759.0003 ± 3.3596
 name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_Rstar%2.1f_tau%1.2f_%1.2f_%1.2f_nLL%5.2f',params);
 %% plot time course
 if ~exist(fullfile(plot_dir,sprintf('PlotDynamic_%s_D0.mat',name)),'file')
