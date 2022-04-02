@@ -1,11 +1,12 @@
 %% define paths
 Homedir = 'C:\Users\Bo';
 % Homedir = '~';
-addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
-addpath(fullfile(Homedir,'Documents','LDDM','utils'));
-addpath(fullfile(Homedir,'Documents','LDDM','Froemke/SST_Inoise'));
-cd('G:\My Drive\LDDM\Froemke\SST_Inoise');
-% cd('/Volumes/GoogleDrive/My Drive/LDDM/Froemke');
+addpath(genpath(fullfile(Homedir,'Documents','LDDM','Froemke')));
+out_dir = 'G:\My Drive\LDDM\Froemke\G';
+if ~exist("out_dir",'dir')
+    mkdir(out_dir);
+end
+cd(out_dir);
 plotdir = fullfile('./Graphics');
 if ~exist(plotdir,'dir')
     mkdir(plotdir);
@@ -32,7 +33,7 @@ Tau = [tauR, tauG, tauI];
 w0 = ones(2);
 a0 = 40;
 b0 = 1.8;
-task = 'RT';
+task = 'FDon';
 %VR, stimdur = Inf, triggert = Inf;
 %RT, stimdur = Inf, triggert = presentt;
 %FDon, stimdur = Inf, triggert = presentt + .5;
@@ -41,7 +42,7 @@ task = 'RT';
 predur = 0;
 presentt = dt;%*200;
 stimdur = Inf;
-triggert = presentt + dt;
+triggert = presentt + .5;
 dur = 4.5; % second
 
 thresh = 70; % Hz
@@ -56,7 +57,7 @@ c2 = [1 - c];
 Vprior = [1,1]*scale;
 
 boost = [1, 2];
-% Dynamics
+% Dynamics 
 sgm = .01;
 % sgmInput = 150; for OU process
 sgmInput = 1/3;
@@ -249,7 +250,11 @@ boost = 1:.4:4;
 sgm = 0;
 sgmInput = 0;
 triggert = Inf;
-stimdur = 
+stimdur = Inf;
+dur = 4.5;
+Rstore = [];
+h = figure;
+filename = 'R dynamic over iSTDP';
 for level = 1:length(boost)
     Vinput = [c1, c2]*scale;
     a = a0;%*boost(level);
@@ -260,5 +265,20 @@ for level = 1:length(boost)
     initialvals = (a-1)./sum(w,2)'.*[1,1; sum(w,2)'; 0, 0];
     [choice, rt, R, G, I, Vcourse] = LDDM_STDP_RndInput(Vprior, Vinput, iSTDP, w, a, b,...
     sgm, sgmInput*scale, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+    Rstore(level) = R(end,1);
+    subplot(2,4,level);
+    plot(R);
+    ylim([10,40]);
+    xlabel('Time (a.u.)');
+    ylabel('Firing rates (Hz)');
 end
+savefigs(h, [filename], plotdir,fontsize-5, [6,4]);
+
+
+h = figure;
+filename = 'SteadyFR_iSTDP';
+plot(boost,Rstore);
+xlabel('iSTDP');
+ylabel('Max Firing rates (Hz)');
+savefigs(h, [filename], plotdir,fontsize-5, [3,3]);
 

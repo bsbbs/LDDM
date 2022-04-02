@@ -90,23 +90,23 @@ out_dir = './Rslts/WW06FitBhvr8ParamsVI_QMLE_GPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
-plot_dir = fullfile(out_dir,'graphics');
+plot_dir = fullfile(out_dir,'graphics'); 
 if ~exist(plot_dir,'dir')
     mkdir(plot_dir);
 end
 dataDynmc = load('./Data/Data.mat');
 dataBhvr = LoadRoitmanData('../RoitmanDataCode');
 
-randseed = 88979398;
+randseed = 90033894;
 rng(randseed);
 %    JNp, JNn, I0, noise, miu0, gamma, H0, tauNMDA, nLL
 % params = [.2609, .0497, .3255, .02, 30, .64, .1]; % in the paper ww06
-params = [0.2338    0.1791    0.2988    0.0784   50.3306    0.6427    0.5725    0.1342	16876.5]; % 16876.5 ± 5.41397
+params = [0.263217	0.022411	0.264743	0.070874	55.634434	0.588655	2.622382	0.167199	16586.81822]; % 16586.8182 ± 4.5167
 name = sprintf('JNp%2.1f_JNn%1.2f_I0%1.2f_noise%1.2f_miu0%2.2f_gamma%1.3f_H0%2.1f_tauS%0.2f_nLL%5.2f',params);
 % plot time course
 if ~exist(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),'file')
     tic;
-    [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = WW06Dynamic_FitBhvr8ParamsVI_QMLE_GPU(params, dataDynmc, dataBhvr);
+    [n LL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = WW06Dynamic_FitBhvr8ParamsVI_QMLE_GPU(params, dataDynmc, dataBhvr);
     % [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDMDynamic_FitBhvr7ParamsIV_QMLE_GPU(params, dataDynmc, dataBhvr);
     %sm_mr1c = gather(sm_mr1c);
     save(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),...
@@ -164,19 +164,20 @@ ylim([0,17.5]);
 % legend(lg,{'0','3.2','6.4','12.8','25.6','51.2'},'Location','best','FontSize',fontsize-2);
 savefigs(h,filename,plot_dir,fontsize,aspect);
 saveas(h,fullfile(plot_dir,[filename, '.fig']),'fig');
-% %% simulation
-% if  ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
-%     tic;
-%     [nLL, Chi2, BIC, AIC, rtmat, choicemat] = WW06FitBhvr8ParamsVI_QMLE_GPU(params, dataBhvr);
-%     num2str(nLL)
-%     num2str(AIC)
-%     num2str(BIC)
-%     save(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),...
-%         'rtmat','choicemat','params','nLL','Chi2','BIC','AIC');
-%     toc
-%     else
-%         load(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)));
-% end
+%% simulation
+sims = 10240;
+if  ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
+    tic;
+    [nLL, Chi2, BIC, AIC, rtmat, choicemat] = WW06FitBhvr8ParamsVI_QMLE_GPU(params, dataBhvr, sims);
+    num2str(nLL)
+    num2str(AIC)
+    num2str(BIC)
+    save(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),...
+        'rtmat','choicemat','params','nLL','Chi2','BIC','AIC');
+    toc
+    else
+        load(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)));
+end
 %% aggregated RT & ACC
 lwd = 1;
 mksz = 3;
