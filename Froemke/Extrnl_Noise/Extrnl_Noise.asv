@@ -19,7 +19,7 @@ if ~exist(Simdir,'dir')
 end
 %% parameters for visulization
 fontsize = 14;
-mksz = 25;
+mksz = 5;
 lwd = 1.5;
 cp = [.032, .064,.128, .256];
 mygray = flip(gray(numel(cp) + 2));
@@ -77,7 +77,7 @@ yticks([10, 15, 20, 25]);
 ylabel('Firing rates (Hz)');
 xlabel(' ');
 legend({'R_1','R_2'},'Box','off','Location','southeast',...
-    'FontName','Arial', 'FontAngle','italic',...
+    'FontName','Times New Roman', 'FontAngle','italic',...
     'FontSize',fontsize-4);
 savefigs(h, filename, plotdir, fontsize, [2.9,4]);
 
@@ -122,32 +122,32 @@ Vinput = [1+c, 1-c]*scale;
 rng(4);
 [choice, rt, R, G, D, Vcourse] = LDDM_RndInput(Vprior, Vinput, w, a, b,...
     sgm, sgmInput*scale, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-%%
-h = figure;  hold on;
-filename = 'Input';
+%
+h = figure; 
+filename = 'Input-output_baseline';
+subplot(1,2,1); hold on;
 h1 = histogram(Vcourse(2000:end,1),100);
-h1.FaceColor = 'r'; %myred(3,:);
+h1.FaceColor = myred(3,:);
 h1.EdgeColor = 'n';
 h2 = histogram(Vcourse(2000:end,2),100);
-h2.FaceColor = 'b';%myblue(3,:);
+h2.FaceColor = myblue(3,:);
 h2.EdgeColor = 'n';
 xlabel('Input value (a.u.)');
-ylabel('Frequency');
-% yticks([]);
-savefigs(h, filename, plotdir, fontsize, [2, 2]);
+ylabel(' ');
+yticks([]);
+savefigs(h, filename, plotdir, fontsize, [4, 2]);
 
-h = figure; hold on;
-filename = 'Output_baseline';
+subplot(1,2,2); hold on;
 h3 = histogram(R(2000:end,1),100);
-h3.FaceColor = 'r'; %myred(3,:);
+h3.FaceColor = myred(3,:);
 h3.EdgeColor = 'n';
 h4 = histogram(R(2000:end,2),100);
-h4.FaceColor = 'b'; %myblue(3,:);
+h4.FaceColor = myblue(3,:);
 h4.EdgeColor = 'n';
 xlabel('Firing rates (Hz)');
-ylabel('Frequency');
-% yticks([]);
-savefigs(h, filename, plotdir, fontsize, [2, 2]);
+ylabel(' ');
+yticks([]);
+savefigs(h, filename, plotdir, fontsize, [4, 2]);
 %% Value input course
 h = figure; hold on
 filename = 'Vcourse';
@@ -198,19 +198,63 @@ end
 h = figure;
 filename = 'RT_ACC_baseline';
 subplot(2,1,1); hold on;
-plot(cp,ACC,'k.-','LineWidth',lwd,'MarkerSize',mksz);
+plot(cp,ACC,'k.-');
 set(gca,'XScale','log');
 ylabel('% correct');
 savefigs(h, filename, plotdir, fontsize, [2.9, 4]);
 
 subplot(2,1,2); hold on;
-plot(cp,meanRT,'k.-','LineWidth',lwd,'MarkerSize',mksz);
+plot(cp,meanRT,'k.-');
 set(gca,'XScale','log');
 ylabel('RT (s)');
 savefigs(h, filename, plotdir, fontsize, [2.9, 4]);
 
+%% E-E only, self-excitation & input
+potentiation = [1, 2];
+%% Property 1. integration of noise
+predur = 0;
+dur = 100;
+triggert = Inf;
+stimdur = Inf;
+presentt = dt;
+Vprior = [1, 1]*scale;
+Vinput = [1+c, 1-c]*scale;
 
+for pi = 1:numel(potentiation)
+    STDP_v = potentiation(pi);
+    STDP_a = potentiation(pi);
+    STDP_G = 1;
+    
+rng(4);
+[choice, rt, R, G, D, Vcourse] = LDDM_RndInput_STDP(Vprior, Vinput, STDP_v, STDP_a, STDP_G, w, a, b,...
+    sgm, sgmInput*scale, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+end
+%%
+h = figure; 
+filename = 'Output_baseline&STDP_E-E';
+subplot(2,1,1); hold on;
+h1 = histogram(Vcourse(2000:end,1),100);
+h1.FaceColor = myred(3,:);
+h1.EdgeColor = 'n';
+h2 = histogram(Vcourse(2000:end,2),100);
+h2.FaceColor = myblue(3,:);
+h2.EdgeColor = 'n';
+xlabel('Input value (a.u.)');
+ylabel(' ');
+yticks([]);
+savefigs(h, filename, plotdir, fontsize, [4, 2]);
 
+subplot(1,2,2); hold on;
+h3 = histogram(R(2000:end,1),100);
+h3.FaceColor = myred(3,:);
+h3.EdgeColor = 'n';
+h4 = histogram(R(2000:end,2),100);
+h4.FaceColor = myblue(3,:);
+h4.EdgeColor = 'n';
+xlabel('Firing rates (Hz)');
+ylabel(' ');
+yticks([]);
+savefigs(h, filename, plotdir, fontsize, [4, 2]);
 %% I-E only, G -> R
 
 %% Both E-E & I-E
