@@ -1,9 +1,9 @@
 %% define paths
-% Homedir = 'C:\Users\Bo';
-Homedir = '~';
+Homedir = 'C:\Users\Bo';
+% Homedir = '~';
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Froemke')));
-% Glgdir = 'G:\My Drive';
-Glgdir = '/Volumes/GoogleDrive/My Drive';
+Glgdir = 'G:\My Drive';
+% Glgdir = '/Volumes/GoogleDrive/My Drive';
 out_dir = fullfile(Glgdir, 'LDDM/Froemke/Extrnl_Noise');
 if ~exist("out_dir",'dir')
     mkdir(out_dir);
@@ -19,7 +19,7 @@ if ~exist(Simdir,'dir')
 end
 %% parameters for visulization
 fontsize = 14;
-mksz = 5;
+mksz = 12;
 lwd = 1.5;
 cp = [.032, .064,.128, .256];
 mygray = flip(gray(numel(cp) + 2));
@@ -41,6 +41,9 @@ thresh = 70; % Hz
 stoprule = 1;
 eqlb = 32;
 scale = (2*w0 - b0)*eqlb^2 + (1-a0)*eqlb; %2*w0*eqlb.^2 + (1-a0).*eqlb;
+R0 = ((a0-1)+sqrt((1-a0)^2 + 4*scale*(2*w0 - b0)))/2/(2*w0 - b0);
+I0 = b0*R0;
+G0 = (2*w0-b0)*R0;
 Vprior = [1,1]*scale;
 %% Representation dynamic
 task = 'VR_RT';
@@ -86,9 +89,6 @@ stimdur = Inf;
 triggert = presentt;
 dur = 1.5; % second
 rng(8);
-R0 = ((a0-1)+sqrt((1-a0)^2 + 4*scale*(2*w0 - b0)))/2/(2*w0 - b0);
-I0 = b0*R0;
-G0 = (2*w0-b0)*R0;
 initialvals = [R0,R0; G0,G0; I0,I0];
 subplot(2,1,2); hold on;
 rtvec = [];
@@ -198,18 +198,19 @@ end
 h = figure;
 filename = 'RT_ACC_baseline';
 subplot(2,1,1); hold on;
-plot(cp,ACC,'k.-');
+plot(cp,ACC,'k.-','LineWidth',lwd,'MarkerSize',mksz);
 set(gca,'XScale','log');
-ylabel('% correct');
+ylabel('% Correct');
 savefigs(h, filename, plotdir, fontsize, [2.9, 4]);
 
 subplot(2,1,2); hold on;
-plot(cp,meanRT,'k.-');
+plot(cp,meanRT,'k.-','LineWidth',lwd,'MarkerSize',mksz);
 set(gca,'XScale','log');
 ylabel('RT (s)');
+xlabel('Coherence (%)'); 
 savefigs(h, filename, plotdir, fontsize, [2.9, 4]);
 %% E-E only, self-excitation
- 
+  
 %% E-E only, input
 
 %% E-E only, self-excitation & input
