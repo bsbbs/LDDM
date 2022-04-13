@@ -1,9 +1,9 @@
 %% define paths
-Homedir = 'C:\Users\Bo';
-% Homedir = '~';
+% Homedir = 'C:\Users\Bo';
+Homedir = '~';
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Froemke')));
-Glgdir = 'G:\My Drive';
-% Glgdir = '/Volumes/GoogleDrive/My Drive';
+% Glgdir = 'G:\My Drive';
+Glgdir = '/Volumes/GoogleDrive/My Drive';
 out_dir = fullfile(Glgdir, 'LDDM/Froemke/Extrnl_Noise');
 if ~exist("out_dir",'dir')
     mkdir(out_dir);
@@ -42,7 +42,7 @@ stoprule = 1;
 eqlb = 32;
 scale = (2*w0 - b0)*eqlb^2 + (1-a0)*eqlb; %2*w0*eqlb.^2 + (1-a0).*eqlb;
 R0 = ((a0-1)+sqrt((1-a0)^2 + 4*scale*(2*w0 - b0)))/2/(2*w0 - b0);
-I0 = b0*R0;
+D0 = b0*R0;
 G0 = (2*w0-b0)*R0;
 Vprior = [1,1]*scale;
 %% Representation dynamic
@@ -202,13 +202,13 @@ h = figure;
 filename = 'RT_ACC_baseline';
 subplot(2,1,1); hold on;
 plot(cp,ACC,'k.-','LineWidth',lwd,'MarkerSize',mksz);
-set(gca,'XScale','log');
+% set(gca,'XScale','log');
 ylabel('% Correct');
 savefigs(h, filename, plotdir, fontsize, [2.9, 4]);
 
 subplot(2,1,2); hold on;
 plot(cp,meanRT,'k.-','LineWidth',lwd,'MarkerSize',mksz);
-set(gca,'XScale','log');
+% set(gca,'XScale','log');
 ylabel('RT (s)');
 xlabel('Coherence (%)'); 
 savefigs(h, filename, plotdir, fontsize, [2.9, 4]);

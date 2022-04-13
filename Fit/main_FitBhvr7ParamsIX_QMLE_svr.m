@@ -79,13 +79,13 @@ save(fullfile(out_dir,sprintf('CollectRslts%i.mat',t)),'Collect');
 
 if 0
 %% hand tuning
-Homedir = 'C:\Users\Bo';
-% Homedir = '~';
+% Homedir = 'C:\Users\Bo';
+Homedir = '~';
 addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
 addpath(fullfile(Homedir,'Documents','LDDM','utils'));
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
-cd('G:\My Drive\LDDM\Fit');
-% cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
+% cd('G:\My Drive\LDDM\Fit');
+cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
 out_dir = './Rslts/FitBhvr7ParamsIX_QMLE_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
@@ -262,7 +262,7 @@ simname = sprintf('LDDM_Dynmc_a%2.2f_b%1.2f_sgm%2.1f_Rstar%2.1f_tau%1.2f_%1.2f_%
 
 a = params(1)*eye(2);
 b = params(2)*eye(2);
-sgm = params(3)/5;
+sgm = params(3)/50;
 Rstar = params(4);
 B0 = 0;
 tauR = params(5);
@@ -281,12 +281,10 @@ thresh = 70; %70.8399; % mean(max(m_mr1cD))+1;
 stimdur = dur;
 stoprule = 1;
 w = [1 1; 1 1];
-% Rstar = 32; % ~ 32 Hz at the bottom of initial fip, according to Roitman and Shadlen's data
-Rstar = 42;
 I0 = params(2)*Rstar;
 initialvals = [Rstar,Rstar; (sum(w(1,:)) - params(2))*Rstar,(sum(w(2,:)) - params(2))*Rstar; I0, I0];
 eqlb = Rstar; % set equilibrium value before task as R^*
-scale = 325; % max([5, (((2*mean(w,'all') - params(2)))*eqlb.^2 + (1-a(1)).*eqlb)/(1 + B0)]);
+scale = max([5, (((2*mean(w,'all') - params(2)))*eqlb.^2 + (1-a(1)).*eqlb)/(1 + B0)]);
 Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
 c1 = (1 + Cohr)';
 c2 = (1 - Cohr)';
