@@ -212,15 +212,10 @@ set(gca,'XScale','log');
 ylabel('RT (s)');
 xlabel('Coherence (%)'); 
 savefigs(h, filename, plotdir, fontsize, [2.9, 4]);
-
+%% E-E only, input & self-excitation
+E_Eonly;
 %% I-E only, G -> R
-
+I_Eonly;
 %% Both E-E & I-E
-
-
-% 
-% %% E-E only, self-excitation
-%  
-% %% E-E only, input
-
+I_E_E_EBoth;
 
