@@ -1,4 +1,4 @@
-%% E-E only, self-excitation & input
+%% I-E only, G -> R
 
 %% Property 1. integration of noise
 potentiation = [1, 2];
@@ -15,9 +15,9 @@ Vprior = [1, 1]*scale;
 Vinput = [1+c, 1-c]*scale;
 R_conds = [];
 for pi = 1:numel(potentiation)
-    STDP_v = potentiation(pi);
-    STDP_a = potentiation(pi);
-    STDP_G = 1;
+    STDP_v = 1; 
+    STDP_a = 1;
+    STDP_G = potentiation(pi);
     rng(5);
     [choice, rt, R, G, D, Vcourse] = LDDM_RndInput_STDP(Vprior, Vinput, STDP_v, STDP_a, STDP_G, w, a, b,...
         sgm, sgmInput*scale, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
@@ -25,7 +25,7 @@ for pi = 1:numel(potentiation)
 end
 %
 h = figure; 
-filename = 'Output_E-E';
+filename = 'Output_I-E';
 subplot(2,1,1); hold on;
 h1 = histogram(R_conds{1}(2000:end,1),100);
 h1.FaceColor = 'r'; % myred(6,:);
@@ -36,6 +36,7 @@ h2.EdgeColor = 'n';
 title('Baseline');
 xlabel('Firing rates (Hz)');
 ylabel('Frequency');
+% yticks([]);
 xlim([10, 35]);
 savefigs(h, filename, plotdir, fontsize, [2.9, 3]);
 
@@ -49,11 +50,12 @@ h4.EdgeColor = 'n';
 title('STDP');
 xlabel('Firing rates (Hz)');
 ylabel('Frequency');
+% yticks([]);
 xlim([10, 35]);
 savefigs(h, filename, plotdir, fontsize, [2.9, 3]);
 %% Property 2. predicted choice behavior
 potentiation = [1:.5:2.5];
-task = 'RT_E-E';
+task = 'RT_I-E';
 predur = 0;
 presentt = dt;
 triggert = presentt;
@@ -72,13 +74,14 @@ filename = sprintf('LDDM_%s_STDPfrom%1.1fto%1.1f_a%1.2f_b%1.2f_sgm%1.1fsinpt%0.3
     task,min(potentiation), max(potentiation), a0,b0,sgm,sgmInput,sims);
 output = fullfile(Simdir,[filename, '.mat']);
 cp = [2 4 8 16 32 64 128 256 512]'/1000;
-STDP_G = 1;
+STDP_v = 1;
+STDP_a = 1;
 ACC = [];
 meanRT = [];
 clear Vinput Vprior;
 if ~exist(output,'file')
-    [V1, STDP_v] = meshgrid(scale*(1+cp), potentiation);
-    [V2, STDP_a] = meshgrid(scale*(1-cp), potentiation);
+    [V1, ~] = meshgrid(scale*(1+cp), potentiation);
+    [V2, STDP_G] = meshgrid(scale*(1-cp), potentiation);
     Vinput.V1 = V1;
     Vinput.V2 = V2;
     Vprior.V1 = ones(size(V1))*scale;
@@ -94,7 +97,7 @@ end
 %
 mygray = [.9:-.9/numel(potentiation):0];
 h = figure;
-filename = 'RT_ACC_E_E';
+filename = 'RT_ACC_I_E';
 subplot(2,1,1); hold on;
 for level = 1:numel(potentiation)
     plot(cp,ACC(level,:),'.-','Color',mygray(level)*[1,1,1],'MarkerSize',mksz/2,'LineWidth',lwd);
@@ -114,6 +117,7 @@ ylabel('RT (s)');
 savefigs(h, filename, plotdir,fontsize, [2, 3]);
 
 %% Property 3. ACC as a function of Input noise, two STDP levels
+task = 'RT_I-E';
 predur = 0;
 presentt = dt;
 triggert = presentt;
@@ -129,15 +133,15 @@ potentiation = [1, 2];
 sgmInputvec = linspace(0,1.4,100);
 filename = sprintf('LDDM_%s_STDP%.1f_%.1f_a%1.2f_b%1.2f_sgm%1.1fsinpt%0.3fto%.3f_sims%i',task,min(potentiation),max(potentiation),a0,b0,sgm,min(sgmInputvec),max(sgmInputvec),sims);
 output = fullfile(Simdir,[filename, '.mat']);
-STDP_G = 1;
+STDP_v = 1;
+STDP_a = 1;
 c = 3.2/100;
 ACC = [];
 meanRT = [];
 clear Vinput Vprior;
 if ~exist(output,'file')
     for pi = 1:numel(potentiation)
-        STDP_v = potentiation(pi);
-        STDP_a = potentiation(pi);
+        STDP_G = potentiation(pi);
         fprintf('potentiation %.3f\n',potentiation(pi));
         [V1, ~] = meshgrid(scale*(1+c), sgmInputvec);
         [V2, sgmInput] = meshgrid(scale*(1-c), sgmInputvec);
@@ -154,7 +158,7 @@ if ~exist(output,'file')
 else
     load(output);
 end
-%%
+%
 h = figure; hold on;
 plot(sgmInputvec, ACC(1,:),'MarkerSize',mksz,'LineWidth',lwd,'Color',mygray(1)*[1,1,1]);
 plot(sgmInputvec, ACC(2,:),'MarkerSize',mksz,'LineWidth',lwd,'Color',mygray(3)*[1,1,1]);
@@ -164,7 +168,7 @@ ylabel('Accuracy');
 savefigs(h, ['ACCoversgmInput_', filename], plotdir,fontsize, [2,1.5]);
 
 %% largest amplitude and iSTDP
-task = 'VR_E-E';
+task = 'VR_I-E';
 potentiation = [1:.5:2.5];
 c = 3.2/100;
 sgm = 0;
@@ -172,7 +176,8 @@ sgmInput = 0;
 triggert = Inf;
 stimdur = Inf;
 dur = 4.5;
-STDP_G = 1;
+STDP_v = 1;
+STDP_a = 1;
 initialvals = [1,1;2,2;0,0]*eqlb/3;
 Rstore = [];
 h = figure;
@@ -182,8 +187,7 @@ for level = 1:length(potentiation)
     a = a0*eye(2);
     b = 0*eye(2);
     w = w0*ones(2);
-    STDP_v = potentiation(level);
-    STDP_a = potentiation(level);
+    STDP_G = potentiation(level);
     [choice, rt, R, G, I, Vcourse] = LDDM_RndInput_STDP(Vprior, Vinput, STDP_v, STDP_a, STDP_G, w, a, b,...
     sgm, sgmInput*scale, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
     Rstore(level) = max(R(:,1));
