@@ -7,23 +7,55 @@ dur = 100;
 sgm = .01;
 sgmInput = 1/3;
 c = 6.4/100;
+a = a0*eye(2);
+b = b0*eye(2);
+w = ones(2);
 triggert = Inf;
 stimdur = Inf;
 presentt = dt;
 initialvals = [1,1;2,2;0,0]*eqlb/3;
 Vprior = [1, 1]*scale;
 Vinput = [1+c, 1-c]*scale;
-R_conds = [];
-for pi = 1:numel(potentiation)
-    STDP_v = potentiation(pi);
-    STDP_a = potentiation(pi);
-    STDP_G = 1;
-    rng(5);
-    [choice, rt, R, G, D, Vcourse] = LDDM_RndInput_STDP(Vprior, Vinput, STDP_v, STDP_a, STDP_G, w, a, b,...
-        sgm, sgmInput*scale, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-    R_conds{pi} = R;
+filename = sprintf('LDDM_timeCourse_E-E_a%1.2f_b%1.2f_sgm%1.1fsinpt%0.3f',a0,b0,sgm,sgmInput);
+output = fullfile(Simdir,[filename, '.mat']);
+if ~exist(output, 'file')
+    R_conds = [];
+    for pi = 1:numel(potentiation)
+        STDP_v = potentiation(pi);
+        STDP_a = potentiation(pi);
+        STDP_G = 1;
+        rng(5);
+        [choice, rt, R, G, D, Vcourse] = LDDM_RndInput_STDP(Vprior, Vinput, STDP_v, STDP_a, STDP_G, w, a, b,...
+            sgm, sgmInput*scale, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+        R_conds{pi} = R;
+    end
+    save(output, 'R_conds','potentiation');
+else
+    load(putput);
 end
-%
+%% smoothed curve
+pd1 = fitdist(R_conds{1}(2000:end,1),'kernel','Kernel','normal');
+x = 10:.1:38;
+y1 = pdf(pd1,x);
+pd2 = fitdist(R_conds{1}(2000:end,2),'kernel','Kernel','normal');
+y2 = pdf(pd2,x);
+pd3 = fitdist(R_conds{2}(2000:end,1),'kernel','Kernel','normal');
+y3 = pdf(pd3,x);
+pd4 = fitdist(R_conds{2}(2000:end,2),'kernel','Kernel','normal');
+y4 = pdf(pd4,x);
+h = figure; hold on;
+filename = 'Output_E-Edist';
+plot(x,y1,'r--');
+plot(x,y2,'b--');
+plot(x,y3,'r-');
+area(x,y3,'FaceColor','r','FaceAlpha',.5,'EdgeAlpha',.3);
+plot(x,y4,'b-');
+area(x,y4,'FaceColor','b','FaceAlpha',.5,'EdgeAlpha',.3);
+xlim([10, 36]); 
+xlabel('Firing rates (Hz)');
+ylabel('Density');
+savefigs(h, filename, plotdir, fontsize, [2.9, 1.5]);
+%% hist
 h = figure; 
 filename = 'Output_E-E';
 subplot(2,1,1); hold on;
@@ -52,7 +84,7 @@ ylabel('Frequency');
 xlim([10, 35]);
 savefigs(h, filename, plotdir, fontsize, [2.9, 3]);
 %% Property 2. predicted choice behavior
-potentiation = [1:.5:2.5];
+potentiation = linspace(1,4,4); %[1:.5:2.5];
 task = 'RT_E-E';
 predur = 0;
 presentt = dt;
