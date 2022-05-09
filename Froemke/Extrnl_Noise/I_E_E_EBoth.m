@@ -31,9 +31,9 @@ if ~exist(output, 'file')
     end
     save(output, 'R_conds','potentiation');
 else
-    load(putput);
+    load(output);
 end
-%% smoothed curve
+% smoothed curve
 pd1 = fitdist(R_conds{1}(2000:end,1),'kernel','Kernel','normal');
 x = 10:.1:38;
 y1 = pdf(pd1,x);
@@ -52,7 +52,7 @@ area(x,y3,'FaceColor','r','FaceAlpha',.5,'EdgeAlpha',.3);
 plot(x,y4,'b-');
 area(x,y4,'FaceColor','b','FaceAlpha',.5,'EdgeAlpha',.3);
 xlim([10, 36]); 
-xlabel('Firing rates (Hz)');
+% xlabel('Firing rates (Hz)');
 ylabel('Density');
 savefigs(h, filename, plotdir, fontsize, [2.9, 1.5]);
 %% hist
@@ -86,7 +86,7 @@ ylabel('Frequency');
 xlim([10, 35]);
 savefigs(h, filename, plotdir, fontsize, [2.9, 3]);
 %% Property 2. predicted choice behavior
-potentiation = linspace(1,4,4); %[1:.5:2.5];
+potentiation = linspace(1,4,5); %[1:.5:2.5];
 task = 'RT_I-E&E-E';
 predur = 0;
 presentt = dt;
@@ -129,23 +129,25 @@ end
 mygray = [.9:-.9/numel(potentiation):0];
 h = figure;
 filename = 'RT_ACC_I-E&E-E';
-subplot(2,1,1); hold on;
+subplot(1,2,1); hold on;
 for level = 1:numel(potentiation)
     plot(cp,ACC(level,:),'.-','Color',mygray(level)*[1,1,1],'MarkerSize',mksz/2,'LineWidth',lwd);
 end
 set(gca,'XScale','log');
 ylabel('% Correct');
+ylim([.5, 1])
 lgd = legend(cellstr(string(potentiation)),...
     'Location','SouthEast', 'FontSize', fontsize-4, 'Box','off');
 title(lgd,'STDP','FontSize',fontsize-4);
-savefigs(h, filename, plotdir,fontsize, [2, 3]) ;
-subplot(2,1,2); hold on;
+savefigs(h, filename, plotdir,fontsize, [4, 1.5]) ;
+subplot(1,2,2); hold on;
 for level = 1:numel(potentiation)
     plot(cp,meanRT(level,:),'.-','Color',mygray(level)*[1,1,1],'MarkerSize',mksz/2,'LineWidth',lwd);
 end
 set(gca,'XScale','log');
 ylabel('RT (s)');
-savefigs(h, filename, plotdir,fontsize, [2, 3]);
+ylim([0, 3]);
+savefigs(h, filename, plotdir,fontsize, [4, 1.5]);
 
 %% Property 3. ACC as a function of Input noise, two STDP levels
 task = 'RT_I-E&E-E';
@@ -160,7 +162,7 @@ w = w0*ones(2);
 a = a0*eye(2);
 b = b0*eye(2);
 sims = 102400;
-potentiation = [1, 2];
+potentiation = [1, 4];
 sgmInputvec = linspace(0,1.4,100);
 filename = sprintf('LDDM_%s_STDP%.1f_%.1f_a%1.2f_b%1.2f_sgm%1.1fsinpt%0.3fto%.3f_sims%i',task,min(potentiation),max(potentiation),a0,b0,sgm,min(sgmInputvec),max(sgmInputvec),sims);
 output = fullfile(Simdir,[filename, '.mat']);
@@ -191,11 +193,12 @@ else
 end
 %
 h = figure; hold on;
-plot(sgmInputvec, ACC(1,:),'MarkerSize',mksz,'LineWidth',lwd,'Color',mygray(1)*[1,1,1]);
-plot(sgmInputvec, ACC(2,:),'MarkerSize',mksz,'LineWidth',lwd,'Color',mygray(3)*[1,1,1]);
+plot(sgmInputvec, ACC(1,:),'--','MarkerSize',mksz,'LineWidth',lwd,'Color',mygray(2)*[1,1,1]);
+plot(sgmInputvec, ACC(2,:),'MarkerSize',mksz,'LineWidth',lwd,'Color',mygray(5)*[1,1,1]);
 legend({'Baseline','STDP'},'Box','off','Location','northeast');
-xlabel('Input noise (a.u.)');
+%xlabel('Input noise (a.u.)');
 ylabel('Accuracy');
+ylim([.5, 1]);
 savefigs(h, ['ACCoversgmInput_', filename], plotdir,fontsize, [2,1.5]);
 
 %% largest amplitude and iSTDP
