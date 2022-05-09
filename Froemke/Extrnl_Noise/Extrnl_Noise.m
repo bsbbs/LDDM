@@ -165,8 +165,21 @@ ylabel('Frequency');
 % yticks([]);
 savefigs(h, filename, plotdir, fontsize, [2, 2]);
 %% Value input course
+c = .512;
+Vinput = [1 + c, 1 - c]*scale;
+filename = sprintf('LDDM_timeCourse_a%1.2f_b%1.2f_c%1.3f_sgm%1.1fsinpt%0.3f',a0,b0,c,sgm,sgmInput);
+output = fullfile(Simdir,[filename, '.mat']);
+if ~exist(output, 'file')
+    rng(4);
+    [choice, rt, R, G, D, Vcourse] = LDDM_RndInput(Vprior, Vinput, w, a, b,...
+        sgm, sgmInput*scale, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+    save(output,'R','G','D','Vcourse');
+else
+    load(output);
+end
+
 h = figure; hold on
-filename = 'Vcourse';
+filename = sprintf('Vcourse_c%1.3f',c);
 x = (1:numel(Vcourse(1:5000,1)))*dt;
 plot(x,Vcourse(1:5000,1), 'r-');
 plot(x,Vcourse(1:5000,2), 'b-');
@@ -214,18 +227,19 @@ else
 end
 h = figure;
 filename = 'RT_ACC_baseline';
-subplot(2,1,1); hold on;
+subplot(1,2,1); hold on;
 plot(cp,ACC,'k.-','LineWidth',lwd,'MarkerSize',mksz);
 set(gca,'XScale','log');
 ylabel('% Correct');
-savefigs(h, filename, plotdir, fontsize, [2.9, 4]);
+xlabel('Value difference (%)'); 
+savefigs(h, filename, plotdir, fontsize, [4, 2]);
 
-subplot(2,1,2); hold on;
+subplot(1,2,2); hold on;
 plot(cp,meanRT,'k.-','LineWidth',lwd,'MarkerSize',mksz);
 set(gca,'XScale','log');
 ylabel('RT (s)');
-xlabel('Coherence (%)'); 
-savefigs(h, filename, plotdir, fontsize, [2.9, 4]);
+xlabel('Value difference (%)'); 
+savefigs(h, filename, plotdir, fontsize, [4, 2]);
 
 %% SPRT choice
 % integrater = [];
