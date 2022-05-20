@@ -170,13 +170,13 @@ savefigs(h, filename, plotdir, fontsize, [2, 2]);
 %% Value input course
 c = .064;
 Vinput = [1 + c, 1 - c]*scale;
-sgmInput = sgmInput_rprsnt;
+sgmInput
 filename = sprintf('LDDM_timeCourse_a%1.2f_b%1.2f_c%1.3f_sgm%1.1fsinpt%0.3f',a0,b0,c,sgm,sgmInput);
 output = fullfile(Simdir,[filename, '.mat']);
 if ~exist(output, 'file')
     rng(4);
     [choice, rt, R, G, D, Vcourse] = LDDM_RndInput(Vprior, Vinput, w, a, b,...
-        sgm, sgmInput*scale, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+        sgm, sgmInput_rprsnt*scale, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
     save(output,'R','G','D','Vcourse');
 else
     load(output);

@@ -5,8 +5,8 @@ potentiation = [1, 2];
 predur = 0;
 dur = 100;
 sgm = .01;
-sgmInput = 1/3;
-c = 6.4/100;
+sgmInput = sgmInput_rprsnt;
+c = c_rprsnt;
 a = a0*eye(2);
 b = b0*eye(2);
 w = ones(2);
@@ -51,40 +51,10 @@ plot(x,y3,'r-');
 area(x,y3,'FaceColor','r','FaceAlpha',.5,'EdgeAlpha',.3);
 plot(x,y4,'b-');
 area(x,y4,'FaceColor','b','FaceAlpha',.5,'EdgeAlpha',.3);
-xlim([10, 36]); 
+xlim([10, 39]); 
 % xlabel('Firing rates (Hz)');
 ylabel('Density');
 savefigs(h, filename, plotdir, fontsize, [2.9, 1.5]);
-%% hist
-h = figure; 
-filename = 'Output_I-E&E-E';
-subplot(2,1,1); hold on;
-h1 = histogram(R_conds{1}(2000:end,1),100);
-h1.FaceColor = 'r'; % myred(6,:);
-h1.EdgeColor = 'n';
-h2 = histogram(R_conds{1}(2000:end,2),100);
-h2.FaceColor = 'b'; % myblue(6,:);
-h2.EdgeColor = 'n';
-title('Baseline');
-xlabel('Firing rates (Hz)');
-ylabel('Frequency');
-% yticks([]);
-xlim([10, 35]);
-savefigs(h, filename, plotdir, fontsize, [2.9, 3]);
-
-subplot(2,1,2); hold on;
-h3 = histogram(R_conds{2}(2000:end,1),100);
-h3.FaceColor = 'r'; % myred(6,:);
-h3.EdgeColor = 'n';
-h4 = histogram(R_conds{2}(2000:end,2),100);
-h4.FaceColor = 'b'; % myblue(6,:);
-h4.EdgeColor = 'n';
-title('STDP');
-xlabel('Firing rates (Hz)');
-ylabel('Frequency');
-% yticks([]);
-xlim([10, 35]);
-savefigs(h, filename, plotdir, fontsize, [2.9, 3]);
 %% Property 2. predicted choice behavior
 potentiation = linspace(1,4,5); %[1:.5:2.5];
 task = 'RT_I-E&E-E';
@@ -95,7 +65,7 @@ stimdur = Inf;
 dur = 4.5;
 sims = 102400;
 sgm = .01;
-sgmInput = 1/3;
+sgmInput = sgmInput_choice;
 w = w0*ones(2);
 a = a0*eye(2);
 b = b0*eye(2);
@@ -131,22 +101,26 @@ h = figure;
 filename = 'RT_ACC_I-E&E-E';
 subplot(1,2,1); hold on;
 for level = 1:numel(potentiation)
-    plot(cp,ACC(level,:),'.-','Color',mygray(level)*[1,1,1],'MarkerSize',mksz/2,'LineWidth',lwd);
+    plot(cp*100,ACC(level,:)*100,'.-','Color',mygray(level)*[1,1,1],'MarkerSize',mksz/2,'LineWidth',lwd);
 end
 set(gca,'XScale','log');
 ylabel('% Correct');
-ylim([.5, 1])
-lgd = legend(cellstr(string(potentiation)),...
-    'Location','SouthEast', 'FontSize', fontsize-4, 'Box','off');
-title(lgd,'STDP','FontSize',fontsize-4);
+ylim([50, 100]);
+xticks([1,10,100]);
+xticklabels({'1','10','100'});
+% lgd = legend(cellstr(string(potentiation)),...
+%     'Location','SouthEast', 'FontSize', fontsize-4, 'Box','off');
+% title(lgd,'LTP','FontSize',fontsize-4);
 savefigs(h, filename, plotdir,fontsize, [4, 1.5]) ;
 subplot(1,2,2); hold on;
 for level = 1:numel(potentiation)
-    plot(cp,meanRT(level,:),'.-','Color',mygray(level)*[1,1,1],'MarkerSize',mksz/2,'LineWidth',lwd);
+    plot(cp*100,meanRT(level,:),'.-','Color',mygray(level)*[1,1,1],'MarkerSize',mksz/2,'LineWidth',lwd);
 end
 set(gca,'XScale','log');
 ylabel('RT (s)');
-ylim([0, 3]);
+ylim([0, 4]);
+xticks([1,10,100]);
+xticklabels({'1','10','100'});
 savefigs(h, filename, plotdir,fontsize, [4, 1.5]);
 
 %% Property 3. ACC as a function of Input noise, two STDP levels
@@ -163,10 +137,10 @@ a = a0*eye(2);
 b = b0*eye(2);
 sims = 102400;
 potentiation = [1, 4];
-sgmInputvec = linspace(0,1.4,100);
+sgmInputvec = linspace(0,2,100);
 filename = sprintf('LDDM_%s_STDP%.1f_%.1f_a%1.2f_b%1.2f_sgm%1.1fsinpt%0.3fto%.3f_sims%i',task,min(potentiation),max(potentiation),a0,b0,sgm,min(sgmInputvec),max(sgmInputvec),sims);
 output = fullfile(Simdir,[filename, '.mat']);
-c = 3.2/100;
+c = c_choice;
 ACC = [];
 meanRT = [];
 clear Vinput Vprior;
@@ -193,12 +167,12 @@ else
 end
 %
 h = figure; hold on;
-plot(sgmInputvec, ACC(1,:),'--','MarkerSize',mksz,'LineWidth',lwd,'Color',mygray(2)*[1,1,1]);
-plot(sgmInputvec, ACC(2,:),'MarkerSize',mksz,'LineWidth',lwd,'Color',mygray(5)*[1,1,1]);
-legend({'Baseline','STDP'},'Box','off','Location','northeast');
+plot(sgmInputvec, ACC(1,:)*100,'--','MarkerSize',mksz,'LineWidth',lwd,'Color',mygray(2)*[1,1,1]);
+plot(sgmInputvec, ACC(2,:)*100,'MarkerSize',mksz,'LineWidth',lwd,'Color',mygray(5)*[1,1,1]);
+%legend({'Baseline','+LTP'},'Box','off','Location','northeast');
 %xlabel('Input noise (a.u.)');
-ylabel('Accuracy');
-ylim([.5, 1]);
+ylabel('% Correct');
+ylim([50, 100]);
 savefigs(h, ['ACCoversgmInput_', filename], plotdir,fontsize, [2,1.5]);
 
 %% largest amplitude and iSTDP
