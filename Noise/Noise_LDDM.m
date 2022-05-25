@@ -1,12 +1,11 @@
 %% To test different types and magnitudes of noise to value representation and irrelavant dependence of choice
 % include packages
-addpath('/Users/bs3667/Documents/LDDM/CoreFunctions');
-addpath('/Users/bs3667/Documents/LDDM/utils/');
-% set path
-% Homedir = 'C:\Users\Bo';
-Homedir = '~';
-% Glgdir = 'G:\My Drive';
-Glgdir = '/Volumes/GoogleDrive/My Drive';
+Homedir = 'C:\Users\Bo';
+% Homedir = '~';
+addpath(fullfile(Homedir, 'Documents/LDDM/CoreFunctions'));
+addpath(fullfile(Homedir, 'Documents/LDDM/utils/'));
+Glgdir = 'G:\My Drive';
+% Glgdir = '/Volumes/GoogleDrive/My Drive';
 out_dir = fullfile(Glgdir, 'LDDM/Noise');
 if ~exist("out_dir",'dir')
     mkdir(out_dir);
@@ -199,12 +198,14 @@ for i = 1:numel(sgm_internal_vec)
     end
 end
 %% Step 2. predicted choice behavior, relative choice ratio (V1 vs. V2) and RT as function of V3
+b0 = 1;
 eqlb = 32;
 scale = (2*w0 - b0)*eqlb^2 + (1-a0)*eqlb; % (3*w0 - b0)*eqlb^2 + (1-a0)*eqlb;
+b0 = 1.4;
 eqlb3 = ((a0-1)+sqrt((1-a0)^2 + 4*scale*(3*w0 - b0)))/2/(3*w0 - b0);
 R0 = eqlb3;
 D0 = b0*R0;
-G0 = (2*w0-b0)*R0;
+G0 = (3*w0-b0)*R0;
 task = 'RT';
 predur = 0;
 presentt = dt;
@@ -224,28 +225,51 @@ c = c_choice;
 V3 = [0:.05:1]';
 Vprior = [ones(size(V3)), ones(size(V3)), ones(size(V3))]*scale;
 Vinput = [ones(size(V3))*(1+c), ones(size(V3))*(1-c), V3]*scale;
+gi = 0;
+h = figure;
+figname = 'CR_V3';
 for i = 1:numel(sgm_internal_vec)
     sgm_internal = sgm_internal_vec(i);
     for j = 1:numel(sgm_external_vec)
+        gi = gi + 1;
         sgm_external = sgm_external_vec(j);
-        filename = sprintf('LDDM_%s_a%1.2f_b%1.2f_sgm_intrnl%1.2f_sgm_extrnl%1.2f',...
+        filename = sprintf('LDDM2_%s_a%1.2f_b%1.2f_sgm_intrnl%1.2f_sgm_extrnl%1.2f',...
             task, a(1), b(1), sgm_internal, sgm_external);
         output = fullfile(Simdir,[filename, '.mat']);
-        ACC = [];
-        meanRT = [];
         if ~exist(output,'file')
-            [rt, choice, argmaxR] = LDDM3_Rndinput_GPU(Vprior, Vinput, w, a, b,...
+            [rt, choice, argmaxR] = LDDM3_Rndinput2_GPU(Vprior, Vinput, w, a, b,...
                 sgm_internal, sgm_external*scale, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims);
-            chosenratio = ();
-            ACC = (mean(2-squeeze(choice),2,'omitnan'));
-            meanRT = (mean(squeeze(rt),2,'omitnan'));
-            save(output,'ACC','meanRT');
+            choice = squeeze(choice);
+            rt = squeeze(rt);
+            CR = []; %chosen ratio between V1 and V2
+            meanRT = [];
+            for v3i = 1:numel(V3)
+                CR(v3i) = sum(choice(v3i,:) == 1)/(sum(choice(v3i,:) == 1 | choice(v3i,:) == 2));
+                meanRT(v3i) = mean(rt(v3i,choice(v3i,:) == 1 | choice(v3i,:) == 2),2);
+            end
+            save(output,'CR','meanRT');
         else
             load(output);
         end
+        subplot(1,2,1); hold on;
+        crl(gi) = plot(V3,CR,'.-','LineWidth',lwd,'MarkerSize',mksz);
+        xlabel('V3');
+        ylabel('Ratio (1 vs. 2)');
+        savefigs(h, figname, plotdir, fontsize, [8, 3]);
+        subplot(1,2,2); hold on;
+        rtl(gi) = plot(V3,meanRT,'.-','LineWidth',lwd,'MarkerSize',mksz);
+        xlabel('V3');
+        ylabel('Mean RT chosen 1 or 2 (secs)');
+        savefigs(h, figname, plotdir, fontsize, [8, 3]);
     end
 end
-%
+legend(rtl,{'\sigma_{Exo} = .01, \sigma_{Endo} = .01',...
+    '\sigma_{Exo} = .33, \sigma_{Endo} = .01',...
+    '\sigma_{Exo} = .01, \sigma_{Endo} = 5',...
+    '\sigma_{Exo} = .33, \sigma_{Endo} = 5'},...
+    'Location','best','FontSize', fontsize-7);
+savefigs(h, figname, plotdir, fontsize, [8, 3]);
+%%
 mygray = [.9:-.9/numel(potentiation):0];
 h = figure;
 filename = 'RT_ACC_I_E';
