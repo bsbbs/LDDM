@@ -1,4 +1,4 @@
-function [rt, choice, argmaxR] = LDDM3_Rndinput_GPU(Vprior, Vinput, w, a, b,...
+function [rt, choice, argmaxR] = LDDM3_Rndinput2_GPU(Vprior, Vinput, w, a, b,...
     sgm, sgmInput, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims)
 %%%%%%%%%%%%%%%%%%
 %% GPU calculation, only binary choice is allowed. N is limited as 2.
@@ -140,36 +140,36 @@ if isequal(size(offset_of_stimuli), size(V1mat))
 end
 %% stablizing noise for 200 ms
 InoiseR1 = gpuArray.zeros(sizeComput);
-InoiseG1 = gpuArray.zeros(sizeComput);
 InoiseR2 = gpuArray.zeros(sizeComput);
-InoiseG2 = gpuArray.zeros(sizeComput);
 InoiseR3 = gpuArray.zeros(sizeComput);
-InoiseG3 = gpuArray.zeros(sizeComput);
-InoiseI1 = gpuArray.zeros(sizeComput);
-InoiseI2 = gpuArray.zeros(sizeComput);
-InoiseI3 = gpuArray.zeros(sizeComput);
+% InoiseG1 = gpuArray.zeros(sizeComput);
+% InoiseG2 = gpuArray.zeros(sizeComput);
+% InoiseG3 = gpuArray.zeros(sizeComput);
+% InoiseI1 = gpuArray.zeros(sizeComput);
+% InoiseI2 = gpuArray.zeros(sizeComput);
+% InoiseI3 = gpuArray.zeros(sizeComput);
 stablizetime = round(.2/dt);
 for kk = 1:stablizetime
     InoiseR1 = InoiseR1 + (-InoiseR1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
     InoiseR2 = InoiseR2 + (-InoiseR2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
     InoiseR3 = InoiseR3 + (-InoiseR3 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseG1 = InoiseG1 + (-InoiseG1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseG2 = InoiseG2 + (-InoiseG2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseG3 = InoiseG3 + (-InoiseG3 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseI1 = InoiseI1 + (-InoiseI1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseI2 = InoiseI2 + (-InoiseI2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseI3 = InoiseI3 + (-InoiseI3 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+%     InoiseG1 = InoiseG1 + (-InoiseG1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+%     InoiseG2 = InoiseG2 + (-InoiseG2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+%     InoiseG3 = InoiseG3 + (-InoiseG3 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+%     InoiseI1 = InoiseI1 + (-InoiseI1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+%     InoiseI2 = InoiseI2 + (-InoiseI2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+%     InoiseI3 = InoiseI3 + (-InoiseI3 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
 end
 X = gpuArray(ones(sizeComput));
 R1 = (X*initialvals(1,1)) + InoiseR1;
 R2 = (X*initialvals(1,2)) + InoiseR2;
 R3 = (X*initialvals(1,3)) + InoiseR3;
-G1 = (X*initialvals(2,1)) + InoiseG1;
-G2 = (X*initialvals(2,2)) + InoiseG2;
-G3 = (X*initialvals(2,3)) + InoiseG3;
-I1 = (X*initialvals(3,1)) + InoiseI1;
-I2 = (X*initialvals(3,2)) + InoiseI2;
-I3 = (X*initialvals(3,3)) + InoiseI3;
+G1 = (X*initialvals(2,1));% + InoiseG1;
+G2 = (X*initialvals(2,2));% + InoiseG2;
+G3 = (X*initialvals(2,3));% + InoiseG3;
+I1 = (X*initialvals(3,1));% + InoiseI1;
+I2 = (X*initialvals(3,2));% + InoiseI2;
+I3 = (X*initialvals(3,3));% + InoiseI3;
 %% initialize variables
 rt = gpuArray.zeros(sizeComput);
 choice = gpuArray.zeros(sizeComput);
@@ -245,12 +245,12 @@ for ti = -pretask_steps:max(posttask_steps(:))
     G1old = G1;
     G2old = G2;
     G3old = G3;
-    G1 = G1 + (-G1 + w11*R1 + w12*R2 + w13*R3 - I1)/Tau2*dtArray + InoiseG1;
-    G2 = G2 + (-G2 + w21*R1 + w22*R2 + w23*R3 - I2)/Tau2*dtArray + InoiseG2;
-    G3 = G3 + (-G3 + w31*R1 + w32*R2 + w33*R3 - I3)/Tau2*dtArray + InoiseG3;
-    I1 = I1 + (-I1 + beta11*R1.*Continue.*BetasUp + beta12*R2.*Continue.*BetasUp + beta13*R3.*Continue.*BetasUp)/Tau3*dtArray + InoiseI1;
-    I2 = I2 + (-I2 + beta21*R1.*Continue.*BetasUp + beta22*R2.*Continue.*BetasUp + beta23*R3.*Continue.*BetasUp)/Tau3*dtArray + InoiseI2;
-    I3 = I3 + (-I3 + beta31*R1.*Continue.*BetasUp + beta32*R2.*Continue.*BetasUp + beta33*R3.*Continue.*BetasUp)/Tau3*dtArray + InoiseI3;
+    G1 = G1 + (-G1 + w11*R1 + w12*R2 + w13*R3 - I1)/Tau2*dtArray;% + InoiseG1;
+    G2 = G2 + (-G2 + w21*R1 + w22*R2 + w23*R3 - I2)/Tau2*dtArray;% + InoiseG2;
+    G3 = G3 + (-G3 + w31*R1 + w32*R2 + w33*R3 - I3)/Tau2*dtArray;% + InoiseG3;
+    I1 = I1 + (-I1 + beta11*R1.*Continue.*BetasUp + beta12*R2.*Continue.*BetasUp + beta13*R3.*Continue.*BetasUp)/Tau3*dtArray;% + InoiseI1;
+    I2 = I2 + (-I2 + beta21*R1.*Continue.*BetasUp + beta22*R2.*Continue.*BetasUp + beta23*R3.*Continue.*BetasUp)/Tau3*dtArray;% + InoiseI2;
+    I3 = I3 + (-I3 + beta31*R1.*Continue.*BetasUp + beta32*R2.*Continue.*BetasUp + beta33*R3.*Continue.*BetasUp)/Tau3*dtArray;% + InoiseI3;
     R1 = R1 + (-R1 + (V1Array + V1prArray*(ti<0) + alpha11*R1 + alpha12*R2 + alpha13*R3).*Continue./(1+G1old))/Tau1*dtArray + InoiseR1;
     R2 = R2 + (-R2 + (V2Array + V2prArray*(ti<0) + alpha21*R1 + alpha22*R2 + alpha23*R3).*Continue./(1+G2old))/Tau1*dtArray + InoiseR2;
     R3 = R3 + (-R3 + (V3Array + V3prArray*(ti<0) + alpha31*R1 + alpha32*R2 + alpha33*R3).*Continue./(1+G3old))/Tau1*dtArray + InoiseR3;
@@ -258,12 +258,12 @@ for ti = -pretask_steps:max(posttask_steps(:))
     InoiseR1 = InoiseR1 + (-InoiseR1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
     InoiseR2 = InoiseR2 + (-InoiseR2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
     InoiseR3 = InoiseR3 + (-InoiseR3 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseG1 = InoiseG1 + (-InoiseG1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseG2 = InoiseG2 + (-InoiseG2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseG3 = InoiseG3 + (-InoiseG3 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseI1 = InoiseI1 + (-InoiseI1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseI2 = InoiseI2 + (-InoiseI2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseI3 = InoiseI3 + (-InoiseI3 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+%     InoiseG1 = InoiseG1 + (-InoiseG1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+%     InoiseG2 = InoiseG2 + (-InoiseG2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+%     InoiseG3 = InoiseG3 + (-InoiseG3 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+%     InoiseI1 = InoiseI1 + (-InoiseI1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+%     InoiseI2 = InoiseI2 + (-InoiseI2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+%     InoiseI3 = InoiseI3 + (-InoiseI3 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
     % setting lower boundary, forcing neural firing rates to be non-negative
     inside = G1 >= 0;
     G1 = G1 .* inside;
