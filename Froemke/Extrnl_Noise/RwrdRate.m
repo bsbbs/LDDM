@@ -54,6 +54,7 @@ if ~exist(output,'file')
 else
     load(output);
 end
+
 % 
 h = figure;
 subplot(2,2,1);
@@ -79,16 +80,16 @@ plot(meanRT(mask),  ACC(mask),'k-','MarkerSize',mksz,'LineWidth',lwd);
 %     plot(time,)
 %     
 % end
-xlim([-5,max(meanRT(mask))]);
+xlim([-.5,max(meanRT(mask))]);
 ylim([0, 1]);
 xlabel('RT (s)');
 ylabel('Reward in total');
 savefigs(h, ['ACCoverI-E_', filename], plotdir,fontsize, [2,1.5]);
 
 subplot(2,2,4); hold on;
-for ri = 1:5
-    RR = ACC./(meanRTc.*ACC + meanRTw.*(1 - ACC) + ri);
-    plot(potentiation(mask), RR(mask),'-','MarkerSize',mksz,'LineWidth',lwd,'Color',mygray(7-ri,:));
+for ri = 0:5
+    RR = ACC./(meanRT + ri); %(meanRTc.*ACC + meanRTw.*(1 - ACC) + ri);
+    plot(potentiation(mask), RR(mask),'-','MarkerSize',mksz,'LineWidth',lwd,'Color',mygray(6-ri,:));
 end
 xlabel('I->E weight');
 ylabel('Reward rate');
