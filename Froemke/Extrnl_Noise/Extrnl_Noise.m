@@ -1,19 +1,18 @@
 %% define paths
-Homedir = 'C:\Users\Bo';
-% Homedir = '~';
+% Homedir = 'C:\Users\Bo';
+Homedir = '~';
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Froemke')));
-Glgdir = 'G:\My Drive';
-% Glgdir = '/Volumes/GoogleDrive/My Drive';
+% Glgdir = 'G:\My Drive';
+Glgdir = '/Volumes/GoogleDrive/My Drive';
 out_dir = fullfile(Glgdir, 'LDDM/Froemke/Extrnl_Noise');
 if ~exist("out_dir",'dir')
     mkdir(out_dir);
 end
-cd(out_dir);
-plotdir = fullfile('./Graphics');
+plotdir = fullfile(out_dir,'Graphics');
 if ~exist(plotdir,'dir')
     mkdir(plotdir);
 end
-Simdir = './SimRslts';
+Simdir = fullfile(out_dir,'SimRslts');
 if ~exist(Simdir,'dir')
     mkdir(Simdir);
 end

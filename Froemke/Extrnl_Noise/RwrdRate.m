@@ -50,7 +50,7 @@ if ~exist(output,'file')
         meanRTc(pi,1) = mean((rt(pi,1,choice(pi,1,:) == 1)));
         meanRTw(pi,1) = mean((rt(pi,1,choice(pi,1,:) == 2)));
     end
-    save(output,'ACC','meanRT');
+    save(output,'ACC','meanRT','meanRTc','meanRTw');
 else
     load(output);
 end
