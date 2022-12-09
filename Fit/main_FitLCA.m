@@ -36,7 +36,7 @@ x0 = rand(1,numel(LB)) .* (PUB - PLB) + PLB;
 
 % likelihood function
 % parpool(6);
-nLLfun = @(params) LCAFitBhvr5Params_QMLE_GPU(params, dataBhvr)
+nLLfun = @(params) LCAFitBhvr5Params_QMLE_GPU(params, dataBhvr, 10240)
 [fvalbest,~,~] = nLLfun(x0)
 fprintf('test succeeded\n');
 
