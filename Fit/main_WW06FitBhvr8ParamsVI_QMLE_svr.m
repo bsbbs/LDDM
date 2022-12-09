@@ -79,34 +79,34 @@ if 0
 %% hand tuning
 % addpath('../CoreFunctions/');
 % addpath('./SvrCode/');
-Homedir = 'C:\Users\Bo';
-% Homedir = '~';
+% Homedir = 'C:\Users\Bo';
+Homedir = '~';
 addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
 addpath(fullfile(Homedir,'Documents','LDDM','utils'));
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
-% cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
-cd('G:\My Drive\LDDM\Fit');
+cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
+% cd('G:\My Drive\LDDM\Fit');
 out_dir = './Rslts/WW06FitBhvr8ParamsVI_QMLE_GPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
-plot_dir = fullfile(out_dir,'graphics');
+plot_dir = fullfile(out_dir,'graphics'); 
 if ~exist(plot_dir,'dir')
     mkdir(plot_dir);
 end
 dataDynmc = load('./Data/Data.mat');
 dataBhvr = LoadRoitmanData('../RoitmanDataCode');
 
-randseed = 88979398;
+randseed = 90033894;
 rng(randseed);
 %    JNp, JNn, I0, noise, miu0, gamma, H0, tauNMDA, nLL
 % params = [.2609, .0497, .3255, .02, 30, .64, .1]; % in the paper ww06
-params = [0.078189	0	0.379609	0.017695	22.388205	0.253382	0.517504	16570.70907];
+params = [0.263217	0.022411	0.264743	0.070874	55.634434	0.588655	2.622382	0.167199	16586.81822]; % 16586.8182 ± 4.5167
 name = sprintf('JNp%2.1f_JNn%1.2f_I0%1.2f_noise%1.2f_miu0%2.2f_gamma%1.3f_H0%2.1f_tauS%0.2f_nLL%5.2f',params);
-%% plot time course
+% plot time course
 if ~exist(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),'file')
     tic;
-    [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = WW06Dynamic_FitBhvr8ParamsVI_QMLE_GPU(params, dataDynmc, dataBhvr);
+    [n LL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = WW06Dynamic_FitBhvr8ParamsVI_QMLE_GPU(params, dataDynmc, dataBhvr);
     % [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDMDynamic_FitBhvr7ParamsIV_QMLE_GPU(params, dataDynmc, dataBhvr);
     %sm_mr1c = gather(sm_mr1c);
     save(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),...
@@ -164,19 +164,20 @@ ylim([0,17.5]);
 % legend(lg,{'0','3.2','6.4','12.8','25.6','51.2'},'Location','best','FontSize',fontsize-2);
 savefigs(h,filename,plot_dir,fontsize,aspect);
 saveas(h,fullfile(plot_dir,[filename, '.fig']),'fig');
-% %% simulation
-% if  ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
-%     tic;
-%     [nLL, Chi2, BIC, AIC, rtmat, choicemat] = WW06FitBhvr8ParamsVI_QMLE_GPU(params, dataBhvr);
-%     num2str(nLL)
-%     num2str(AIC)
-%     num2str(BIC)
-%     save(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),...
-%         'rtmat','choicemat','params','nLL','Chi2','BIC','AIC');
-%     toc
-%     else
-%         load(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)));
-% end
+%% simulation
+sims = 10240;
+if  ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
+    tic;
+    [nLL, Chi2, BIC, AIC, rtmat, choicemat] = WW06FitBhvr8ParamsVI_QMLE_GPU(params, dataBhvr, sims);
+    num2str(nLL)
+    num2str(AIC)
+    num2str(BIC)
+    save(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),...
+        'rtmat','choicemat','params','nLL','Chi2','BIC','AIC');
+    toc
+    else
+        load(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)));
+end
 %% aggregated RT & ACC
 lwd = 1;
 mksz = 3;
@@ -220,7 +221,7 @@ set(gca, 'XScale', 'log');
 % legend('boxoff');
 savefigs(h,filename,plot_dir,fontsize,[2,3.0]);
 
-%% Q-Q plot for reaction time and choice
+% Q-Q plot for reaction time and choice
 lwd = 1.0;
 mksz = 3;
 fontsize = 11;

@@ -79,13 +79,13 @@ save(fullfile(out_dir,sprintf('CollectRslts%i.mat',t)),'Collect');
 
 if 0
 %% hand tuning
-Homedir = 'C:\Users\Bo';
-% Homedir = '~';
+% Homedir = 'C:\Users\Bo';
+Homedir = '~';
 addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
 addpath(fullfile(Homedir,'Documents','LDDM','utils'));
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
-cd('G:\My Drive\LDDM\Fit');
-% cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
+% cd('G:\My Drive\LDDM\Fit');
+cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
 out_dir = './Rslts/FitBhvr7ParamsIX_QMLE_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
@@ -99,7 +99,8 @@ dataBhvr = LoadRoitmanData('../RoitmanDataCode');
 randseed = 59233912;
 rng(randseed);
 %     a,    b, noise, Rstar, tauR, tauG, tauI, nLL
-params = [16.968578	1.12789	13.601809	16	0.025217	0.155586	0.162089	16788.66382]; % 16822.4 ± 2.98148
+% params = [1.3340 1.7922 7.8764 49.9305 0.3131 0.2782 0.2519	16759]; % 16759.0003 ± 3.3596
+params = [0.813991	1.780493	6.436709	35.168278	0.05	0.369761	0.426682	16744.61644];
 name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_Rstar%2.1f_tau%1.2f_%1.2f_%1.2f_nLL%5.2f',params);
 %% plot time course
 if ~exist(fullfile(plot_dir,sprintf('PlotDynamic_%s_D0.mat',name)),'file')
@@ -159,16 +160,17 @@ legend(flip(lg),flip({'0','3.2','6.4','12.8','25.6','51.2'}),'Location','best','
 savefigs(h,filename,plot_dir,fontsize,aspect);
 saveas(h,fullfile(plot_dir,[filename, '.fig']),'fig');
 
-% %% 
-% if ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
-%     tic;
-%     [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsIX_QMLE_GPU(params, dataBhvr, sims);
-%     save(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),...
-%         'rtmat','choicemat','params','nLL','Chi2','AIC','BIC');
-%     toc
-% else
-%     load(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)));
-% end
+%%
+sims = 10240;
+if ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
+    tic;
+    [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsIX_QMLE_GPU(params, dataBhvr, sims);
+    save(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),...
+        'rtmat','choicemat','params','nLL','Chi2','AIC','BIC');
+    toc
+else
+    load(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)));
+end
 %% aggregated RT & ACC
 lwd = 1;
 mksz = 3;
@@ -256,12 +258,13 @@ lwd = 1;
 mksz = 3;
 fontsize = 11;
 rng(randseed);
-simname = sprintf('LDDM_Dynmc_a%2.2f_b%1.2f_sgm%2.1f_B0%1.3f_tau%1.2f_%1.2f_%1.2f_nLL%4.0f',params);
+simname = sprintf('LDDM_Dynmc_a%2.2f_b%1.2f_sgm%2.1f_Rstar%2.1f_tau%1.2f_%1.2f_%1.2f_nLL%5.2f',params);
 
 a = params(1)*eye(2);
 b = params(2)*eye(2);
-sgm = params(3)/5;
-B0 = params(4);
+sgm = params(3)/50;
+Rstar = params(4);
+B0 = 0;
 tauR = params(5);
 tauG = params(6);
 tauI = params(7);
@@ -278,7 +281,6 @@ thresh = 70; %70.8399; % mean(max(m_mr1cD))+1;
 stimdur = dur;
 stoprule = 1;
 w = [1 1; 1 1];
-Rstar = 32; % ~ 32 Hz at the bottom of initial fip, according to Roitman and Shadlen's data
 I0 = params(2)*Rstar;
 initialvals = [Rstar,Rstar; (sum(w(1,:)) - params(2))*Rstar,(sum(w(2,:)) - params(2))*Rstar; I0, I0];
 eqlb = Rstar; % set equilibrium value before task as R^*

@@ -3,8 +3,8 @@ Homedir = 'C:\Users\Bo';
 % Homedir = '~';
 addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
 addpath(fullfile(Homedir,'Documents','LDDM','utils'));
-addpath(fullfile(Homedir,'Documents','LDDM','Froemke/SST_Inoise'));
-cd('G:\My Drive\LDDM\Froemke\SST_Inoise');
+addpath(fullfile(Homedir,'Documents','LDDM','Froemke/Inoise_av'));
+cd('G:\My Drive\LDDM\Froemke\Inoise_av');
 % cd('/Volumes/GoogleDrive/My Drive/LDDM/Froemke');
 plotdir = fullfile('./Graphics');
 if ~exist(plotdir,'dir')
@@ -32,7 +32,7 @@ Tau = [tauR, tauG, tauI];
 w0 = ones(2);
 a0 = 40;
 b0 = 1.8;
-task = 'RT';
+task = 'VR';
 %VR, stimdur = Inf, triggert = Inf;
 %RT, stimdur = Inf, triggert = presentt;
 %FDon, stimdur = Inf, triggert = presentt + .5;
@@ -41,8 +41,8 @@ task = 'RT';
 predur = 0;
 presentt = dt;%*200;
 stimdur = Inf;
-triggert = presentt + dt;
-dur = 4.5; % second
+triggert = Inf;%presentt + dt;
+dur = 45; % second
 
 thresh = 70; % Hz
 stoprule = 1;
@@ -65,13 +65,13 @@ filename = sprintf('timeCourse_%s_iSTDP%1.1fand%1.1f_sgm%2.2f_sgmInput%.2f',task
 mycl = jet(length(boost)*10);
 for level = 1:length(boost)
     Vinput = [c1, c2]*scale;%*boost(level);
-    a = a0;%*boost(level);
+    a = a0;
     b = b0;
     w = w0;%*boost(level);
     iSTDP = boost(level);
     %initialvals = (a-1)/iSTDP./sum(w,2)'.*[1,1; sum(w,2)'; 0, 0]; % for R, G, and I variables, will be further scaled
-    initialvals = (a-1)./sum(w,2)'.*[1,1; sum(w,2)'; 0, 0];
-    [choice, rt, R, G, I, Vcourse] = LDDM_STDP_RndInput(Vprior, Vinput, iSTDP, w, a, b,...
+    initialvals = (a0-1)./sum(w,2)'.*[1,1; sum(w,2)'; 0, 0];
+    [choice, rt, R, G, I, Vcourse] = LDDM_av_RndInput(Vprior, Vinput, iSTDP, w, a, b,...
     sgm, sgmInput*scale, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
 
     % [choice, rt, R, G, I] = LDDM_STDP(Vprior, Vinput, iSTDP, w, a, b,...
@@ -101,7 +101,7 @@ lgd = legend(' ', ' ', 'V1', 'V2',...
     'Location','Northwest','NumColumns',2, 'FontSize', fontsize-8, 'Box','off');
 title(lgd, "Baseline                  iSTDP      .");
 savefigs(h, filename, plotdir,fontsize-5, [3,6]);
-%%
+%
 if dur >= 45
     h = figure;
     filename = sprintf('Vcourse_cp%.2f_sgmInput%2.2f',c,sgmInput);
@@ -120,20 +120,20 @@ if dur >= 45
     filename = sprintf('OutputHistogram_Staircase_cp%0.2f_sgmInput%2.2f',c,sgmInput);
     for level = 1:length(boost)
         Vinput = [c1, c2]*scale;%*boost(level);
-        a = a0;%*boost(level);
+        a = a0;
         b = b0;
         w = w0;%*boost(level);
         iSTDP = boost(level);
         %initialvals = (a-1)/iSTDP./sum(w,2)'.*[1,1; sum(w,2)'; 0, 0]; % for R, G, and I variables, will be further scaled
-        initialvals = (a-1)./sum(w,2)'.*[1,1; sum(w,2)'; 0, 0];
-        [choice, rt, R, G, I, Vcourse] = LDDM_STDP_RndInput(Vprior, Vinput, iSTDP, w, a, b,...
+        initialvals = (a0-1)./sum(w,2)'.*[1,1; sum(w,2)'; 0, 0];
+        [choice, rt, R, G, I, Vcourse] = LDDM_av_RndInput(Vprior, Vinput, iSTDP, w, a, b,...
             sgm, sgmInput*scale, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
         subplot(2,1,level); hold on;
         histogram(R(1000:end,1),40);
         histogram(R(1000:end,2),40);
-        xlim([12,40]);
+        xlim([12,70]);
     end
-    savefigs(h, filename, plotdir,fontsize-5, [3,5]);
+    savefigs(h, filename, plotdir,fontsize-5, [5,5]);
 end
 
 %% change iSTDP level
@@ -151,12 +151,12 @@ b = b0*eye(2);
 
 % eqlb = 32;
 % scale = 2*mean(w0,'all')*eqlb.^2 + (1-a0(1,1)).*eqlb;
-
-% predur = 0;
-% presentt = dt;
-% triggert = dt+1.3;
-% dur = 6;
-% stimdur = 1;
+task = 'RT';
+predur = 0;
+presentt = dt;
+triggert = dt;
+dur = 4.5;
+stimdur = Inf;
 thresh = 70;
 stoprule = 1;
 filename = sprintf('LDDM_%s_iSTDP%.1fto%.1f_a%1.2f_b%1.2f_sgm%1.1fsinpt%0.3f_sims%i',task,min(boost),max(boost),a0,b0,sgm,sgmInput,sims);
@@ -167,14 +167,14 @@ meanRT = [];
 clear Vinput Vprior;
 if ~exist(output,'file')
         %iSTDP = boost(level);
-        initialvals = (a(1,1)-1)./sum(w,2)'.*[1,1; sum(w,2)'; 0, 0]; % for R, G, and I variables, will be further scaled
+        initialvals = (a0-1)./sum(w,2)'.*[1,1; sum(w,2)'; 0, 0]; % for R, G, and I variables, will be further scaled
         [V1, iSTDP] = meshgrid(scale*(1+cp), boost);
         [V2, iSTDP] = meshgrid(scale*(1-cp), boost);
         Vinput.V1 = V1; %scale*[1+cp, 1-cp];%*boost(level);
         Vinput.V2 = V2;
         Vprior.V1 = ones(size(V1))*scale;
         Vprior.V2 = ones(size(V2))*scale;
-        [rt, choice, ~] = LDDM_STDP_Rndinput_GPU(Vprior, Vinput, iSTDP, w, a, b,...
+        [rt, choice, ~] = LDDM_av_Rndinput_GPU(Vprior, Vinput, iSTDP, w, a, b,...
     sgm, sgmInput*scale, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims);
         ACC = gather(mean(2-squeeze(choice),3,'omitnan'));
         meanRT = gather(mean(squeeze(rt),3,'omitnan'));
@@ -219,14 +219,14 @@ if ~exist(output,'file')
     for sgi = 1:numel(sgmInputvec)
         fprintf('sgmInput %.3f\n',sgmInput);
         sgmInput = sgmInputvec(sgi);
-        initialvals = (a(1,1)-1)./sum(w,2)'.*[1,1; sum(w,2)'; 0, 0]; % for R, G, and I variables, will be further scaled
+        initialvals = (a0-1)./sum(w,2)'.*[1,1; sum(w,2)'; 0, 0]; % for R, G, and I variables, will be further scaled
         [V1, iSTDP] = meshgrid(scale*(1+cp), boost);
         [V2, iSTDP] = meshgrid(scale*(1-cp), boost);
         Vinput.V1 = V1; %scale*[1+cp, 1-cp];%*boost(level);
         Vinput.V2 = V2;
         Vprior.V1 = ones(size(V1))*scale;
         Vprior.V2 = ones(size(V2))*scale;
-        [rt, choice, ~] = LDDM_STDP_Rndinput_GPU(Vprior, Vinput, iSTDP, w, a, b,...
+        [rt, choice, ~] = LDDM_av_Rndinput_GPU(Vprior, Vinput, iSTDP, w, a, b,...
             sgm, sgmInput*scale, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims);
         ACC(sgi,:) = gather(mean(2-squeeze(choice),2,'omitnan'));
         meanRT(sgi,:) = gather(mean(squeeze(rt),2,'omitnan'));
@@ -235,7 +235,7 @@ if ~exist(output,'file')
 else
     load(output);
 end
-%%
+%
 h = figure; hold on;
 plot(sgmInputvec, ACC(:,1));
 plot(sgmInputvec, ACC(:,2));
@@ -249,7 +249,11 @@ boost = 1:.4:4;
 sgm = 0;
 sgmInput = 0;
 triggert = Inf;
-stimdur = 
+stimdur = Inf;
+dur = 4.5;
+Rstore = [];
+h = figure;
+filename = 'R dynamic over iSTDP';
 for level = 1:length(boost)
     Vinput = [c1, c2]*scale;
     a = a0;%*boost(level);
@@ -258,7 +262,23 @@ for level = 1:length(boost)
     iSTDP = boost(level);
     %initialvals = (a-1)/iSTDP./sum(w,2)'.*[1,1; sum(w,2)'; 0, 0]; % for R, G, and I variables, will be further scaled
     initialvals = (a-1)./sum(w,2)'.*[1,1; sum(w,2)'; 0, 0];
-    [choice, rt, R, G, I, Vcourse] = LDDM_STDP_RndInput(Vprior, Vinput, iSTDP, w, a, b,...
+    [choice, rt, R, G, I, Vcourse] = LDDM_av_RndInput(Vprior, Vinput, iSTDP, w, a, b,...
     sgm, sgmInput*scale, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+    Rstore(level) = R(end,1);
+    subplot(2,4,level);
+    plot(R);
+    ylim([10,100]);
+    xlabel('Time (a.u.)');
+    ylabel('Firing rates (Hz)');
 end
+savefigs(h, [filename], plotdir,fontsize-5, [6,4]);
+
+
+h = figure;
+filename = 'SteadyFR_iSTDP';
+plot(boost,Rstore);
+%ylim([20,40]);
+xlabel('iSTDP');
+ylabel('Max Firing rates (Hz)');
+savefigs(h, [filename], plotdir,fontsize-5, [3,3]);
 
