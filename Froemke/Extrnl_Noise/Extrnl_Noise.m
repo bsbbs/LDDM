@@ -1,15 +1,10 @@
 %% define paths
-<<<<<<< HEAD
 % Homedir = 'C:\Users\Bo';
 Homedir = '~';
-addpath(genpath(fullfile(Homedir,'Documents','LDDM','Froemke')));
+% addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
+addpath(fullfile(Homedir,'Documents','LDDM','Froemke','Extrnl_Noise'));
+addpath(fullfile(Homedir,'Documents','LDDM','Froemke','utils'));
 % Glgdir = 'G:\My Drive';
-=======
-%Homedir = 'C:\Users\Bo';
-Homedir = '~';
-addpath(genpath(fullfile(Homedir,'Documents','LDDM','Froemke')));
-%Glgdir = 'G:\My Drive';
->>>>>>> 3e9b830b41bc008b6fcbd857fa597b6481a31b26
 Glgdir = '/Volumes/GoogleDrive/My Drive';
 out_dir = fullfile(Glgdir, 'LDDM/Froemke/Extrnl_Noise');
 if ~exist("out_dir",'dir')

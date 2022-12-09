@@ -1,4 +1,4 @@
-function [rt, choice, argmaxR, p1, p2] = LDDM_Rndinput_STDP_GPU(Vprior, Vinput, STDP_v, STDP_a, STDP_G, w, a, b,...
+function [rt, choice, argmaxR] = LDDM_Rndinput_STDP_GPU(Vprior, Vinput, STDP_v, STDP_a, STDP_G, w, a, b,...
     sgm, sgmInput, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims)
 %%%%%%%%%%%%%%%%%%
 %% GPU calculation, only binary choice is allowed. N is limited as 2.
@@ -161,8 +161,8 @@ R1Out = gpuArray.nan(sizeComput); % records the values at decision, or the end o
 R2Out = gpuArray.nan(sizeComput);
 Continue = gpuArray(ones(sizeComput)); % to mark the trials that choices haven't made yet
 BetasUp = gpuArray.zeros(sizeComput); % change from 0 to beta on the time of trigger
-p1 = gpuArray.zeros(sizeComput); % Pre-post spiking pairs on G1->R1
-p2 = gpuArray.zeros(sizeComput); % Pre-post spiking pairs on G2->R2
+p1 = gpuArray.nan(sizeComput); % Pre-post spiking pairs on G1->R1
+p2 = gpuArray.nan(sizeComput); % Pre-post spiking pairs on G2->R2
 %% simulation: premotion stage (ti < 0), dot motion task begin at ti = 0
 % ti = 0 sorted at the the beginning of the dot motion task, while the 
 % onset of stimuli (onset_of_stimuli) can be later than 0, which will cause
@@ -247,8 +247,8 @@ for ti = -pretask_steps:max(posttask_steps(:))
     inside = R2 >= 0;
     R2 = R2 .* inside;
     % Pre-Post STDP
-    p1 = p1 + G1old.*R1.*Continue*dt;
-    p2 = p2 + G2old.*R2.*Continue*dt;
+    p1 = p1 + G1.*R1.*Continue*dt;
+    p2 = p2 + G2.*R2.*Continue*dt;
     % threshold detecting
     inside = (R1 >= threshArray) + (R2 >= threshArray);
     flip = (inside > 0) & (choice == 0) & (ti > onset_of_trigger);
@@ -272,5 +272,3 @@ argmaxR = inside + 1; % keep consistant as other models, 1 for choose R1, 2 for 
 rt = gather(rt);
 choice = gather(choice);
 argmaxR = gather(argmaxR);
-p1 = gather(p1);
-p2 = gather(p2);

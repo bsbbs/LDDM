@@ -174,7 +174,7 @@ P1 = [];
 P2 = [];
 clear Vinput Vprior;
 if ~exist(output,'file')
-    for ti = 1:100
+    for ti = 1:1000
         V1 = scale'*(1+c);
         V2 = scale'*(1-c);
         Vinput.V1 = V1;
@@ -198,18 +198,11 @@ else
 end
 %% plot
 h = figure;
-subplot(3,1,1); hold on;
-plot(1:ti, ACC*100, 'k-', 'LineWidth', lwd);
+subplot(2,1,1); hold on;
+plot(1:ti, ACC*100, '-');
 xlabel('Trials');
 ylabel('% Correct');
-savefigs(h, filename, plotdir, fontsize - 3, [2.9,5]);
-subplot(3,1,2); hold on;
-plot(1:ti, meanRT, 'k-', 'LineWidth', lwd);
+subplot(2,1,2); hold on;
+plot(1:ti, meanRT, '-');
 xlabel('Trials');
-ylabel('RT (s)');
-savefigs(h, filename, plotdir, fontsize - 3, [2.9,5]);
-subplot(3,1,3); hold on;
-plot(1:ti, STDP, 'k-', 'LineWidth', lwd);
-xlabel('Trials');
-ylabel('G->R strength');
-savefigs(h, filename, plotdir, fontsize - 3, [2.9,5]);
+ylabel('% Correct');
