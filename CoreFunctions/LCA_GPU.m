@@ -56,7 +56,7 @@ for ti = 1:(dur/dt)
     flip = (inside > 0) & (choice == 0);
     NComput = NComput - sum(flip(:));
     rt = rt + ti.*flip*dtArray;
-    choice = choice + ((R2 > R1) - (R1 > R2) +3) .* flip; % 2 choose R1, 4 choose R2, 3 R1 = R2, 0 choice is not made
+    choice = choice + ((x2 > x1) - (x1 > x2) +3) .* flip; % 2 choose R1, 4 choose R2, 3 R1 = R2, 0 choice is not made
     % Continue = choice == 0;
     x1Out(flip) = x1(flip); % update the values at choice, keep others as nan
     x2Out(flip) = x2(flip);
