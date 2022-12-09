@@ -26,10 +26,10 @@ rng(t);
 
 % Define optimization starting point and bounds
 %     k,    beta, noise, T0, thresh
-LB = [0    0.1   .1    .1*256 [.001,.001,.001]];
-UB = [70   3	100  20*256 [1,1,1]];
-PLB = [15  .9	5    1*256 [.01 .01 .01]];
-PUB = [60   1.7	40   8*256 [.2 .2 .2]];
+LB = [-3    0   0      0    .01];
+UB = [3   10	5      2      10];
+PLB = [-1  .1	.1      0      .1];
+PUB = [1   3	.5      .2      6];
 
 % Randomize initial starting point inside plausible box
 x0 = rand(1,numel(LB)) .* (PUB - PLB) + PLB;
