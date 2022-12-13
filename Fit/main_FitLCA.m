@@ -27,9 +27,9 @@ rng(t);
 % Define optimization starting point and bounds
 %     k,    beta, noise, T0, thresh
 LB = [-3    0   0      0    .01];
-UB = [3   10	5      2      10];
-PLB = [-1  .1	.1      0      .1];
-PUB = [1   3	.5      .2      6];
+UB = [3   30	5      2      10];
+PLB = [-1  1	.1      0      .1];
+PUB = [1   10	.5      .2      6];
 
 % Randomize initial starting point inside plausible box
 x0 = rand(1,numel(LB)) .* (PUB - PLB) + PLB;
@@ -42,7 +42,7 @@ fprintf('test succeeded\n');
 
 % loop begin
 Collect = [];
-parfor i = 1:myCluster.NumWorkers*8
+parfor i = 1:myCluster.NumWorkers*8*4
     !ping -c 1 www.amazon.com
     t = datenum(clock)*10^10 - floor(datenum(clock)*100)*10^8 + sortNum*10^7 + i*10^5;
     %num2str(t);
@@ -101,7 +101,8 @@ if 0
     dataDynmc = load(fullfile(Glgdr, 'Fit', 'Data', 'Data.mat'));
     dataBhvr = LoadRoitmanData(fullfile(Glgdr, 'RoitmanDataCode'));
 
-    params = [0.3805    1.6402    0.4608    0.0803    3.2093 1.8959e+04];
+    params = [%0.3805    1.6402    0.4608    0.0803    3.2093 1.8959e+04
+        0.268202	5.265115	0.377111	0	3.800356	16634.666784];
     name = sprintf('k%.3f_b%1.2f_sgm%.3f_T0%.3f_thresh%1.2f_nLL%5.2f',params);
     %% Simulation given parameters
     sims = 10240;
@@ -307,7 +308,7 @@ if 0
     %% The dynamic of single trials
     mygray = gray(8);
     h = figure; hold on;
-    filename = 'LCA_Dynamic_sngltrials';
+    filename = sprintf('LCA_Dynamic_%s',name);
     i = 0;
     for c = [0, .032, .064, .128, .356, .512]
         i = i + 1;
