@@ -1,4 +1,4 @@
-function [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LCAFitBhvr5Params_QMLE_GPU(params, dataBhvr)
+function [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LCAFitBhvr5Params_QMLE_GPU(params, dataBhvr, sims)
 % reload Roitman's data, processed
 q = dataBhvr.q;
 On = dataBhvr.On;
@@ -12,9 +12,6 @@ T0 = params(4);
 thresh = params(5);
 
 % other fixed parameters
-% sims = 1024;
-deduction = .1;
-sims = 1024/deduction;
 Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
 dur = 5;
 dt =.001;

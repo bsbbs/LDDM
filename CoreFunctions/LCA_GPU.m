@@ -43,7 +43,7 @@ for ti = 1:(dur/dt)
     end
     % update x
     x1 = x1 + (Rho1inputArray - k11*x1 - beta12*x2)*dt_tau + gpuArray.randn(sizeComput)*sgmArray*sqrt(dt_tau);
-    x2 = x2 + (Rho1inputArray - k22*x2 - beta21*x1)*dt_tau + gpuArray.randn(sizeComput)*sgmArray*sqrt(dt_tau);
+    x2 = x2 + (Rho2inputArray - k22*x2 - beta21*x1)*dt_tau + gpuArray.randn(sizeComput)*sgmArray*sqrt(dt_tau);
     
     % setting lower boundary, forcing neural firing rates to be non-negative
     inside = x1 >= 0;
@@ -56,7 +56,7 @@ for ti = 1:(dur/dt)
     flip = (inside > 0) & (choice == 0);
     NComput = NComput - sum(flip(:));
     rt = rt + ti.*flip*dtArray;
-    choice = choice + ((R2 > R1) - (R1 > R2) +3) .* flip; % 2 choose R1, 4 choose R2, 3 R1 = R2, 0 choice is not made
+    choice = choice + ((x2 > x1) - (x1 > x2) + 3) .* flip; % 2 choose R1, 4 choose R2, 3 R1 = R2, 0 choice is not made
     % Continue = choice == 0;
     x1Out(flip) = x1(flip); % update the values at choice, keep others as nan
     x2Out(flip) = x2(flip);
