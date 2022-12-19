@@ -2,19 +2,16 @@
 % write your own help language here
 
 %% setup directory
-addpath('../../RecurrentModel');
+addpath(genpath('./SAT'));
+addpath('./utils');
 numNode = 1;
 [sortNum, myCluster] = RndCtrl(numNode);
 mypool = parpool(myCluster, myCluster.NumWorkers);
 
 
-
 %% Model fitting with Bayesian Adaptive Direct Search (BADS) optimization algorithm
-addpath(genpath('./'));
-addpath(genpath('../../RecurrentModel/bads/bads-master'));
-addpath('../CoreFunctions/');
-addpath('./SvrCode/');
-out_dir = '../../RecurrentModel/Fit/Rslts/Hanks/monkeyD_accuracy_Svr';
+addpath(genpath('../RecurrentModel/bads/bads-master'));
+out_dir = '../LDDM_Output/SAT/Hanks/monkeyD_accuracy_Svr';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
