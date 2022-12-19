@@ -304,7 +304,53 @@ if 0
     filename = sprintf('QPPlot_%s',name);
     % saveas(h,fullfile(plot_dir,filename),'epsc2');
     savefigs(h, filename, plot_dir, fontsize, [2.5 2.5]);
-
+    %% the original space of QMLE
+    acc = dataBhvr.proportionmat;
+    ON = dataBhvr.ON;
+    OP = dataBhvr.OP;
+    Oq = dataBhvr.q;
+    qntls = dataBhvr.qntls;
+    expd_qntls = [0, qntls, 1];
+    P = expd_qntls(2:end) - expd_qntls(1:end-1); % proportion in each bin
+    En = [];
+    f = [];
+    h = figure;
+    for vi = 1:length(acc)
+        subplot(6,1,vi); hold on;
+        x = 1:10;%Oq(:,1,vi);
+        y = ON(:,1,vi).*log(OP(:,1,vi));
+        plot(x,y,'gx');
+        x = 1:10;%Oq(:,2,vi);
+        y = ON(:,2,vi).*log(OP(:,2,vi));
+        plot(x,y,'rx');
+        set(gca,'YScale','log');
+        xlim([0, 11]);
+        % ylim(-[1000,1]);
+        
+        En(vi) = numel(rtmat(:,vi));
+        RT_corr = rtmat(choicemat(:,vi) == 1,vi);
+        RT_wro = rtmat(choicemat(:,vi) == 2,vi);
+        if ~all(isnan(Oq(:,1,vi)))
+            tmp = histogram(RT_corr, [0; Oq(:,1,vi); Inf], 'Visible',0);
+            EN(:,1,vi) = tmp.Values;
+        else
+            EN(:,1,vi) = NaN(numel(Oq(:,1,vi))+1,1);
+        end
+        if ~all(isnan(Oq(:,2,vi)))
+            tmp = histogram(RT_wro, [0; Oq(:,2,vi); Inf], 'Visible',0);
+            EN(:,2,vi) = tmp.Values;
+        else
+            EN(:,2,vi) =  NaN(numel(Oq(:,2,vi))+1,1);
+        end
+        f(:,:,vi) = log((EN(:,:,vi)/En(vi)));
+        plot(x,ON(:,1,vi).*f(:,1,vi),'g-');
+        plot(x,ON(:,2,vi).*f(:,2,vi),'r-');
+    end
+    h.PaperUnits = 'inches';
+    h.PaperPosition = [0 0 3 10];
+    %saveas(h,fullfile(plot_dir,sprintf('QMLE_Plot_%s.fig',name)),'fig');
+    saveas(h,fullfile(plot_dir,sprintf('QMLE_Plot_%s.eps',name)),'epsc2');
+    
     %% The dynamic of single trials
     mygray = gray(8);
     h = figure; hold on;

@@ -106,7 +106,7 @@ name = sprintf('JNp%2.1f_JNn%1.2f_I0%1.2f_noise%1.2f_miu0%2.2f_gamma%1.3f_H0%2.1
 % plot time course
 if ~exist(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),'file')
     tic;
-    [n LL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = WW06Dynamic_FitBhvr8ParamsVI_QMLE_GPU(params, dataDynmc, dataBhvr);
+    [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = WW06Dynamic_FitBhvr8ParamsVI_QMLE_GPU(params, dataDynmc, dataBhvr);
     % [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDMDynamic_FitBhvr7ParamsIV_QMLE_GPU(params, dataDynmc, dataBhvr);
     %sm_mr1c = gather(sm_mr1c);
     save(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),...
@@ -221,7 +221,7 @@ set(gca, 'XScale', 'log');
 % legend('boxoff');
 savefigs(h,filename,plot_dir,fontsize,[2,3.0]);
 
-% Q-Q plot for reaction time and choice
+% QP plot for reaction time and choice
 lwd = 1.0;
 mksz = 3;
 fontsize = 11;
@@ -229,7 +229,8 @@ x = dataBhvr.proportionmat;
 y = dataBhvr.q;
 qntls = dataBhvr.qntls;
 h = figure; hold on;
-filename = sprintf('Q-QPlot_%s',name);
+filename = sprintf('QPPlot_%s',name);
+acc = [];
 for vi = 1:length(x)
     xc = x(vi)*ones(size(y(:,1,vi)));
     xw = 1 - x(vi)*ones(size(y(:,2,vi)));
@@ -239,13 +240,13 @@ for vi = 1:length(x)
     En(vi) = numel(rtmat(:,vi));
     RT_corr = rtmat(choicemat(:,vi) == 1,vi);
     RT_wro = rtmat(choicemat(:,vi) == 2,vi);
-    xr = numel(RT_corr)/(numel(RT_corr) + numel(RT_wro));
+    acc(vi) = numel(RT_corr)/(numel(RT_corr) + numel(RT_wro));
     q(:,1,vi) = quantile(RT_corr,qntls); % RT value on quantiles, correct trial
     q(:,2,vi) = quantile(RT_wro,qntls); % RT value on quantiles, error trial
     
 end
 for qi = 1:size(q,1)
-    xq = [flip(1-x), x]';
+    xq = [flip(1-acc), acc]';
     plot(xq,[squeeze(flip(q(qi,2,:)));squeeze(q(qi,1,:))],'k-o','MarkerSize',mksz,'LineWidth',lwd/2);
 end
 xlim([-.05 1.05]);
@@ -494,9 +495,13 @@ for vi = 1:length(acc)
         EN(:,2,vi) =  NaN(numel(Oq(:,2,vi))+1,1);
     end
     f(:,:,vi) = log((EN(:,:,vi)/En(vi)));
+    f(f(:,1,vi) == -Inf,1,vi) = log(.00001/En(vi)); % set floor value of f at each point, to prevent -Inf
+    f(f(:,2,vi) == -Inf,2,vi) = log(.00001/En(vi)); % set floor value of f at each point, to prevent -Inf
     plot(x,ON(:,1,vi).*f(:,1,vi),'g-');
     plot(x,ON(:,2,vi).*f(:,2,vi),'r-');
 end
+h.PaperUnits = 'inches';
+h.PaperPosition = [0 0 3 10];
 saveas(h,fullfile(plot_dir,sprintf('QMLE_Plot_%s.eps',name)),'epsc2');
 %% Sumed Quantile loglikelihodd over coherence
 h = figure;

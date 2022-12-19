@@ -76,13 +76,13 @@ save(fullfile(out_dir,sprintf('CollectRslts%i.mat',t)),'Collect');
 
 if 0
 %% hand tuning
-Homedir = 'C:\Users\Bo';
-% Homedir = '~';
+% Homedir = 'C:\Users\Bo';
+Homedir = '~';
 addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
 addpath(fullfile(Homedir,'Documents','LDDM','utils'));
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
-cd('G:\My Drive\LDDM\Fit');
-% cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
+% cd('G:\My Drive\LDDM\Fit');
+cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
 out_dir = './Rslts/FitBhvr7ParamsIV_QMLE_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
@@ -96,9 +96,8 @@ dataBhvr = LoadRoitmanData('../RoitmanDataCode');
 randseed = 24356545;
 rng(randseed);
 % a, b, noise, scale, tauRGI, nLL
-params = [0.000056	1.433901	24.837397	3254.833078	0.183152	0.248698	0.309921	16542.77267]; % 16542.77267 ± 2.7264
-% params = [0	1.433631	25.35945	3251.289056	0.185325	0.224459	0.323132
-% 16539.138186]; % the old results
+% params = [0.000056	1.433901	24.837397	3254.833078	0.183152	0.248698	0.309921	16542.77267]; % 16542.77267 ± 2.7264
+params = [0	1.433631	25.35945	3251.289056	0.185325	0.224459	0.323132 16539.138186]; % the old results
 name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f_nLL%5.2f',params);
 if ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
     tic;
@@ -378,7 +377,7 @@ set(gca, 'XScale', 'log');
 % lgd = legend([lg3,lg1,lg4,lg2],{'','','Error','Correct'},'NumColumns',2,'Location','SouthWest','FontSize',14);
 % legend('boxoff');
 savefigs(h,filename,plot_dir,fontsize,[2,3.0]);
-%% Q-Q plot for reaction time and choice
+%% Quantile probability plot for reaction time and choice
 lwd = 1.0;
 mksz = 3;
 fontsize = 11;
@@ -386,6 +385,7 @@ x = dataBhvr.proportionmat;
 y = dataBhvr.q;
 qntls = dataBhvr.qntls;
 h = figure; hold on;
+acc = [];
 for vi = 1:length(x)
     xc = x(vi)*ones(size(y(:,1,vi)));
     xw = 1 - x(vi)*ones(size(y(:,2,vi)));
@@ -395,12 +395,12 @@ for vi = 1:length(x)
     En(vi) = numel(rtmat(:,vi));
     RT_corr = rtmat(choicemat(:,vi) == 1,vi);
     RT_wro = rtmat(choicemat(:,vi) == 2,vi);
-    xr = numel(RT_corr)/(numel(RT_corr) + numel(RT_wro));
+    acc(vi) = numel(RT_corr)/(numel(RT_corr) + numel(RT_wro));
     q(:,1,vi) = quantile(RT_corr,qntls); % RT value on quantiles, correct trial
     q(:,2,vi) = quantile(RT_wro,qntls); % RT value on quantiles, error trial
 end
 for qi = 1:size(q,1)
-    xq = [flip(1-x), x]';
+    xq = [flip(1-acc), acc]';
     plot(xq,[squeeze(flip(q(qi,2,:)));squeeze(q(qi,1,:))],'k-o','MarkerSize',mksz,'LineWidth',lwd/2);
 end
 legend([lge,lgc],{'error','correct'},"NumColumns",2,'Location','northeast','FontSize',fontsize-2);
@@ -413,7 +413,7 @@ ylabel('RT (s)');
 % h.PaperUnits = 'inches';
 % h.PaperPosition = [0 0 4 5];
 % saveas(h,fullfile(plot_dir,sprintf('Q-QPlot_%s.fig',name)),'fig');
-filename = sprintf('Q-QPlot_%s',name);
+filename = sprintf('QPPlot_%s',name);
 % saveas(h,fullfile(plot_dir,filename),'epsc2');
 savefigs(h, filename, plot_dir, fontsize, [2.5 2.5]);
 %% the original space of QMLE
