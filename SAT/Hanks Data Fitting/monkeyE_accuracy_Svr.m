@@ -10,14 +10,14 @@ mypool = parpool(myCluster, myCluster.NumWorkers);
 
 %% Model fitting with Bayesian Adaptive Direct Search (BADS) optimization algorithm
 addpath(genpath('../../../RecurrentModel/bads/bads-master'));
-out_dir = '../../../LDDM_Output/SAT/Hanks/monkeyD_speed_Svr';
+out_dir = '../../../LDDM_Output/SAT/Hanks/monkeyE_accuracy_Svr';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
 
 %% Take data from Hanks, et al., 2014
-% monkey D
-dataBhvr = load_data("behavData_dam.mat");
+% monkey E
+dataBhvr = load_data("behavData_eli.mat");
 
 %% define the range of the parameters
 % Define optimization starting point and bounds
@@ -31,7 +31,7 @@ PUB = [60   1.7 40  8*256   [.2 .2 .2]];
 x0 = rand(1,numel(LB)) .* (PUB - PLB) + PLB;
 
 %% define the negative loglikelihood function (nLLfun)
-nLLfun = @(params) LDDM_fit_speed(params, dataBhvr);
+nLLfun = @(params) LDDM_fit_accuracy(params, dataBhvr);
 
 %% first attempt to evaluate the nLLfun
 [fvalbest, ~, ~] = nLLfun(x0);

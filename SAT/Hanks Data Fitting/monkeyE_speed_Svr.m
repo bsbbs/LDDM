@@ -10,14 +10,14 @@ mypool = parpool(myCluster, myCluster.NumWorkers);
 
 %% Model fitting with Bayesian Adaptive Direct Search (BADS) optimization algorithm
 addpath(genpath('../../../RecurrentModel/bads/bads-master'));
-out_dir = '../../../LDDM_Output/SAT/Hanks/monkeyD_speed_Svr';
+out_dir = '../../../LDDM_Output/SAT/Hanks/monkeyE_speed_Svr';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
 
 %% Take data from Hanks, et al., 2014
-% monkey D
-dataBhvr = load_data("behavData_dam.mat");
+% monkey E
+dataBhvr = load_data("behavData_eli.mat");
 
 %% define the range of the parameters
 % Define optimization starting point and bounds
