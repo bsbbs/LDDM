@@ -1,0 +1,12 @@
+#!/bin/bash
+#SBATCH --partition=gpu8_medium
+#SBATCH --job-name=LDM7IV
+#SBATCH --mem-per-cpu=3G
+#SBATCH --time=3-00:00:00
+#SBATCH --tasks=1
+#SBATCH --cpus-per-task=20
+#SBATCH --nodes=1
+#SBATCH --tasks-per-node=1
+#SBATCH --gres=gpu:8
+srun /gpfs/data/glimcherlab/BoShen/LDDM/SAT/Hanks\ Data\ Fitting/batch7pars
+
