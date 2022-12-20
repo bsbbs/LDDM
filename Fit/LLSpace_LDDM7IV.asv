@@ -44,7 +44,7 @@ if ~exist(fullfile(out_dir,[filename, '.mat']), 'file')
     nLLmat = NaN(iN, jN);
     for i = 1:iN
         ival = ivec(i);
-        fprintf('%2.2f %%\n', i/iN);
+        fprintf(i/iN);
         parfor j = 1:jN
             params = bestparams;
             params(idx) = [ival, jvec(j)];
