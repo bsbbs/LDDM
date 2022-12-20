@@ -1,0 +1,72 @@
+%% set path
+Homedir = '~/Documents';
+addpath(fullfile(Homedir, 'LDDM','CoreFunctions'));
+addpath(fullfile(Homedir, 'LDDM','utils'));
+addpath(fullfile(Homedir, 'LDDM', 'Fit','SvrCode'));
+
+Glgdir = '/Volumes/GoogleDrive/My Drive/LDDM';
+out_dir = fullfile(Glgdir,'Fit/Rslts/FitBhvr7ParamsIV_QMLE_SvrGPU/LLSpace');
+if ~exist(out_dir,'dir')
+    mkdir(out_dir);
+end
+
+%% Visuliazation parameters
+lwd = 2.0;
+mksz = 18;
+fontsize = 14;
+%% load empirical data
+dataBhvr = LoadRoitmanData(fullfile(Glgdir,'RoitmanDataCode'));
+
+%% the best fitting parameters
+% a, b, noise, scale, tauR, tauG, tauD, nLL
+bestparams = [0	1.433631	25.35945	3251.289056	0.185325	0.224459	0.323132 16539.138186];
+names = {'alpha','beta','sgm','S','tauR','tauG','tauD'};
+%% Check the space of alpha and beta
+ivec = 10.^[-1:.01:3];
+jvec = linspace(0,4,401);
+idx = [1, 2];
+[filename, nLLmat] = SpaceCheck(bestparams, names, ivec, jvec, idx);
+Visualization(out_dir,filename);
+%% Check the space of scale and noise
+
+%% Check the space of tauR and tauG
+
+%% Check the space of tauR and tauD
+
+%% Check the space of tauG and tauD
+function [filename, nLLmat] = SpaceCheck(bestparams, names, ivec, jvec, idx)
+iN = length(ivec);
+jN = length(jvec);
+filename = sprintf('LLSpace_%s%i_%s%i', names{idx(1)}, iN, names{idx(2)}, jN);
+if ~exist(fullfile(out_dir,[filename, '.mat']), 'file')
+    nLLmat = NaN(iN, jN);
+    for i = 1:iN
+        ival = ivec(i);
+        parfor j = 1:jN
+            params = bestparams;
+            params(idx) = [ival, jvec(j)];
+            [nLL, ~,~,~,~,~] = LDDMFitBhvr7ParamsIV_QMLE_GPU(params, dataBhvr);
+            nLLmat(i,j) = nLL;
+        end
+    end
+    save(fullfile(out_dir,[filename, '.mat']), 'nLLmat', 'ivec','jvec','idx');
+else
+    load(fullfile(out_dir,[filename, '.mat']));
+end
+end
+
+function Visualization(out_dir,filename)
+load(fullfile(out_dir,[filename, '.mat']));
+h = figure;
+s = surf(nLLmat,'EdgeColor','none');
+ylim([1,length(ivec)]);
+xlim([1,length(jvec)]);
+xticks(linspace(1,length(jvec),5));
+xticklabels(jvec(linspace(1,length(jvec),5)));
+yticks(linspace(1,length(ivec),5));
+yticklabels(ivec(linspace(1,length(ivec),5))); % {'10^{-1}','10^0','10^1','10^2','10^3'});
+xlabel(names{idx(2)});
+ylabel(names{idx(1)});
+view(0,90);
+savefigs(h, filename, out_dir, fontsize - 2, [2.8 2.54]*.95);
+end
