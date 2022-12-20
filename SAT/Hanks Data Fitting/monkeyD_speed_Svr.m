@@ -39,7 +39,7 @@ fprintf('test succeeded\n');
 
 %% start to fit
 Collect = [];
-parfor i = 1:myCluster.NumWorkers*8
+parfor i = 1:myCluster.NumWorkers*4
     !ping -c 1 www.amazon.com
     t = datenum(clock)*10^10 - floor(datenum(clock)*100)*10^8 + sortNum*10^7 + i*10^5;
     %num2str(t);
