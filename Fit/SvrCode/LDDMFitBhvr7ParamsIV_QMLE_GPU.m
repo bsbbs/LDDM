@@ -1,4 +1,4 @@
-function [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsIV_QMLE_GPU(params, dataBhvr)
+function [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsIV_QMLE_GPU(params, dataBhvr, sims)
 % reload Roitman's data, processed
 q = dataBhvr.q;
 On = dataBhvr.On;
@@ -17,9 +17,10 @@ presentt = 0; % changed for this version to move the fitting begin after the tim
 scale = params(4);
 
 % other fixed parameters
-% sims = 1024;
-deduction = .1;
-sims = 1024/deduction;
+if nargin < 3
+    deduction = .1;
+    sims = 1024/deduction;
+end
 Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
 predur = 0;
 triggert = 0;
