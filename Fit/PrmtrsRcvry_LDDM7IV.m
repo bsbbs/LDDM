@@ -5,6 +5,7 @@ addpath(fullfile(Homedir, 'LDDM','utils'));
 addpath(fullfile(Homedir, 'LDDM', 'Fit','SvrCode'));
 
 Glgdir = '/Volumes/GoogleDrive/My Drive/LDDM';
+addpath(genpath(fullfile(Glgdir, 'Fit','bads-master')));
 out_dir = fullfile(Glgdir,'Fit/Rslts/FitBhvr7ParamsIV_QMLE_SvrGPU/PrmtrsRcvry');
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
@@ -20,7 +21,7 @@ names = {'alpha','beta','sgm','S','tauR','tauG','tauD'};
 % load empirical data - not really needed
 dataBhvr = LoadRoitmanData(fullfile(Glgdir,'RoitmanDataCode'));
 
-[nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsIV_QMLE_GPU(bestparams, dataBhvr, 102400);
+[~, ~, ~, ~, rtmat, choicemat] = LDDMFitBhvr7ParamsIV_QMLE_GPU(bestparams, dataBhvr, 102400);
 
 %% calculate indicators
 SimDataQp = Load_SimData(rtmat, choicemat);
@@ -41,6 +42,8 @@ x0 = rand(1,numel(LB)) .* (PUB - PLB) + PLB;
 nLLfun = @(params) LDDMFitBhvr7ParamsIV_QMLE_GPU(params, SimDataQp);
 [fvalbest,~,~] = nLLfun(x0)
 fprintf('test succeeded\n');
+myCluster.NumWorkers = 6;
+sortNum = 1;
 % change starting points
 Collect = [];
 parfor i = 1:myCluster.NumWorkers*8
@@ -71,7 +74,7 @@ t = datenum(clock)*10^10 - floor(datenum(clock)*100)*10^8 + sortNum*10^7 + i*10^
 save(fullfile(out_dir,sprintf('CollectRslts%i.mat',t)),'Collect');
 
 %% Function
-funciton SimDataQp = Load_SimData(rtmat, choicemat)
+function data = Load_SimData(rtmat, choicemat)
 [r, c] = size(rtmat);
 if r < c
     rtmat = rtmat';
