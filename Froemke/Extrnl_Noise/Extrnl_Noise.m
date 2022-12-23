@@ -132,7 +132,7 @@ a = a0*eye(2);
 b = b0*eye(2);
 w = w0*ones(2);
 initialvals = [1,1;2,2;0,0]*eqlb/3;
-filename = sprintf('LDDM_timeCourse_a%1.2f_b%1.2f_sgm%1.1fsinpt%0.3f',a0,b0,sgm,sgmInput);
+filename = sprintf('LDDM_timeCourse_a%1.2f_b%1.2f_sgm%1.1fsinpt%0.3f',a(1),b0,sgm,sgmInput);
 output = fullfile(Simdir,[filename, '.mat']);
 if ~exist(output, 'file')
     rng(4);

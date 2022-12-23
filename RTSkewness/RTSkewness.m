@@ -1,10 +1,10 @@
-Homedir = 'C:\Users\Bo';
-% Homedir = '~';
+%Homedir = 'C:\Users\Bo';
+Homedir = '~';
 addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
 addpath(fullfile(Homedir,'Documents','LDDM','utils'));
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
-cd('G:\My Drive\LDDM\RTSkewness');
-% cd('/Volumes/GoogleDrive/My Drive/LDDM/RTSkewness');
+%cd('G:\My Drive\LDDM\RTSkewness');
+cd('/Volumes/GoogleDrive/My Drive/LDDM/RTSkewness');
 out_dir = './';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
@@ -91,16 +91,17 @@ if ~exist(fullfile(sim_dir,sprintf('PlotData_%s.mat',name)),'file')
             KT(bi,ai) = kurtosis(simdata);
             M(bi,ai) = mean(simdata);
             SD(bi,ai) = std(simdata);
+            PrcSK(bi,ai) = (M(bi,ai) - median(simdata))/SD(bi,ai);
         end
     end
 
     save(fullfile(sim_dir,sprintf('PlotData_%s.mat',name)),...
                 'rtmat','choicemat','-v7.3');
     save(fullfile(sim_dir,sprintf('CalculatedData_%s.mat',name)),...
-                'ACC','effN','SK','KT','M','SD');
+                'ACC','effN','SK','PrcSK','KT','M','SD');
     
 else
-    % load(fullfile(sim_dir,sprintf('PlotData_%s.mat',name)));
+    load(fullfile(sim_dir,sprintf('PlotData_%s.mat',name)));
     load(fullfile(sim_dir,sprintf('CalculatedData_%s.mat',name)));
 end
 

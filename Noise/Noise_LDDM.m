@@ -1,11 +1,11 @@
 %% To test different types and magnitudes of noise to value representation and irrelavant dependence of choice
 % include packages
-Homedir = 'C:\Users\Bo';
-% Homedir = '~';
+% Homedir = 'C:\Users\Bo';
+Homedir = '~';
 addpath(fullfile(Homedir, 'Documents/LDDM/CoreFunctions'));
 addpath(fullfile(Homedir, 'Documents/LDDM/utils/'));
-Glgdir = 'G:\My Drive';
-% Glgdir = '/Volumes/GoogleDrive/My Drive';
+% Glgdir = 'G:\My Drive';
+Glgdir = '/Volumes/GoogleDrive/My Drive';
 out_dir = fullfile(Glgdir, 'LDDM/Noise');
 if ~exist("out_dir",'dir')
     mkdir(out_dir);
