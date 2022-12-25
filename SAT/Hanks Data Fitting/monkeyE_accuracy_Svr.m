@@ -9,7 +9,8 @@ mypool = parpool(myCluster, myCluster.NumWorkers);
 
 
 %% Model fitting with Bayesian Adaptive Direct Search (BADS) optimization algorithm
-addpath(genpath('../../../RecurrentModel/bads/bads-master'));
+% addpath(genpath('../../../RecurrentModel/bads/bads-master'));
+addpath(genpath('../../../bads'));
 out_dir = '../../../LDDM_Output/SAT/Hanks/monkeyE_accuracy_Svr';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
