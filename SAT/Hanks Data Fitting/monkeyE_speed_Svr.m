@@ -66,7 +66,7 @@ parfor i = 1:myCluster.NumWorkers*4
     % with ** samples (10 by default). Note that this number counts towards the budget
     % of function evaluations.
     options.NoiseFinalSamples = 20;
-    [xest,fval,~,output] = bads(nLLfun,x0,LB,UB,PLB,PUB,options);
+    [xest,fval,~,output] = bads(nLLfun,x0,LB,UB,PLB,PUB,[],options);
     dlmwrite(fullfile(out_dir,'RsltList.txt'),[sortNum, i, t, xest fval],'delimiter','\t','precision','%.6f','-append');
 
     Collect(i).rndseed = t;
