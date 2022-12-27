@@ -76,7 +76,7 @@ parfor i = 1:myCluster.NumWorkers*4
     % We also limit the number of function evaluations, knowing that this is a
     % simple example. Generally, BADS will tend to run for longer on noisy
     % problems to better explore the noisy landscape.
-    options.MaxFunEvals = 300;
+    % options.MaxFunEvals = 3000;
     
     % Finally, we tell BADS to re-evaluate the target at the returned solution
     % with ** samples (10 by default). Note that this number counts towards the budget
