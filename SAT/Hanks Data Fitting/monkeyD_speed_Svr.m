@@ -53,23 +53,7 @@ parfor i = 1:myCluster.NumWorkers*4
     options = bads('defaults');     % Default options
     options.Display = 'iter';
     % For this optimization, we explicitly tell BADS that the objective is
-    % noisy (it is not necessary, but it is a good habit% fit
-    options = bads('defaults');     % Default options
-    options.Display = 'iter';
-    % For this optimization, we explicitly tell BADS that the objective is
     % noisy (it is not necessary, but it is a good habit)
-    options.UncertaintyHandling = true;    % Function is stochastic
-    % specify a rough estimate for the value of the standard deviation of the noise in a neighborhood of the solution.
-    options.NoiseSize = 2.7;  % Optional, leave empty if unknown
-    % We also limit the number of function evaluations, knowing that this is a
-    % simple example. Generally, BADS will tend to run for longer on noisy
-    % problems to better explore the noisy landscape.
-    % options.MaxFunEvals = 3000;
-    
-    % Finally, we tell BADS to re-evaluate the target at the returned solution
-    % with ** samples (10 by default). Note that this number counts towards the budget
-    % of function evaluations.
-    options.NoiseFinalSamples = 20;
     options.UncertaintyHandling = true;    % Function is stochastic
     % specify a rough estimate for the value of the standard deviation of the noise in a neighborhood of the solution.
     options.NoiseSize = 2.7;  % Optional, leave empty if unknown
