@@ -11,7 +11,8 @@ mypool = parpool(myCluster, myCluster.NumWorkers);
 %% Model fitting with Bayesian Adaptive Direct Search (BADS) optimization algorithm
 % addpath(genpath('../../../RecurrentModel/bads/bads-master'));
 addpath(genpath('../../../bads'));
-out_dir = '../../../LDDM_Output/SAT/Hanks/monkeyD_speed_Svr';
+addpath('../../CoreFunctions');
+out_dir = '../../../LDDM_Output/SAT/Hanks_RndInput/monkeyD_speed_Svr';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -22,11 +23,11 @@ dataBhvr = load_data("behavData_dam.mat");
 
 %% define the range of the parameters
 % Define optimization starting point and bounds
-%     a,    b, noise, scale, Tau
-LB = [0    0.1   .1    .1*256 [.001,.001,.001]];
-UB = [70   3	100  20*256 [1,1,1]];
-PLB = [15  .9	5    1*256 [.01 .01 .01]];
-PUB = [60   1.7 40  8*256   [.2 .2 .2]];
+%     a,    b, noiseInput, scale, Tau
+LB = [0    0.1   .01    .1*256 [.001,.001,.001]];
+UB = [70   3	2  20*256 [1,1,1]];
+PLB = [15  .9	.3    1*256 [.01 .01 .01]];
+PUB = [60   1.7	.9   8*256 [.2 .2 .2]];
 
 % Randomize initial starting point inside plausible box
 x0 = rand(1,numel(LB)) .* (PUB - PLB) + PLB;

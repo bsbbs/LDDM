@@ -8,8 +8,7 @@ accuracy_empirical_total = dataBhvr.accuracy_observe_total;
 % parameters to fit
 a = params(1)*eye(2);
 b = params(2)*eye(2);
-sgm = .01;
-sgmInput = params(3);
+sgm = params(3);
 tauR = params(5);
 tauG = params(6);
 tauI = params(7);
@@ -43,8 +42,8 @@ V2 = (1 - Cohr)';
 Vinput = [V1, V2]*scale;
 Vprior = ones(size(Vinput))*(2*mean(w,'all')*eqlb.^2 + (1-a(1)).*eqlb);
 % tic
-[simulate_accuracy_rt, simulate_accuracy_choice, ~] = LDDM_Rndinput_GPU(Vprior, Vinput, w, a, b,...
-    sgm, sgmInput*scale, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims);
+[simulate_accuracy_rt, simulate_accuracy_choice, ~] = LDDM_GPU(Vprior, Vinput, w, a, b,...
+    sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims);
 simulate_accuracy_rt = squeeze(simulate_accuracy_rt)'+ndt;
 simulate_accuracy_choice = squeeze(simulate_accuracy_choice)';
 % toc;
