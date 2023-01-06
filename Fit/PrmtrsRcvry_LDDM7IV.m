@@ -85,6 +85,27 @@ parfor i = 1:myCluster.NumWorkers*8
 end
 t = datenum(clock)*10^10 - floor(datenum(clock)*100)*10^8 + sortNum*10^7 + i*10^5;
 save(fullfile(out_dir,sprintf('CollectRslts%i.mat',t)),'Collect');
+%% Visualization
+load('/Volumes/GoogleDrive/My Drive/LDDM/Fit/Rslts/FitBhvr7ParamsIV_QMLE_SvrGPU/PrmtrsRcvry/NewBADS_CollectRslts55536850.mat');
+Vslz(Collect);
+%% Visualization
+function h = Vslz(Collect)
+sz = length(Collect);
+Pls = nan(8,sz);
+for i = 1:sz
+    Pls(1:7,i) = Collect(i).xest;
+    Pls(8,i) = Collect(i).fval;
+end
+h = figure; hold on;
+scatter3(Pls(1,:), Pls(2,:), Pls(8,:), 190, Pls(8,:), 'Marker','.');
+loc = find(Pls(8,:) == min(Pls(8,:)));
+scatter3(Pls(1,loc), Pls(2,loc), Pls(8,loc), 190, 'r', 'Marker','*');
+xlabel('alpha');
+ylabel('beta');
+zlabel('nLL');
+grid on;
+view([20, 10]);
+end
 
 %% Function
 function data = Load_SimData(rtmat, choicemat)

@@ -98,13 +98,13 @@ dataDynmc = load('./Data/Data.mat');
 dataBhvr = LoadRoitmanData('../RoitmanDataCode');
 randseed = 24356545;
 rng(randseed);
-% a, b, noise, scale, tauRGI, nLL
-% params = [0.000056	1.433901	24.837397	3254.833078	0.183152	0.248698	0.309921	16542.77267]; % 16542.77267 ± 2.7264
-params = [0	1.433631	25.35945	3251.289056	0.185325	0.224459	0.323132 16539.138186]; % the old results
+% a, b, noiseinput, scale, tauRGI, nLL
+% params = [48.635169	1.189341	0.431659	57.487963	0.020103	1	0.021021	19624.786849];
+params = [4.16748	2.089648	0.452399	2952.53125	0.025493	0.040934	0.00896	64063.437583];
 name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f_nLL%5.2f',params);
 if ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
     tic;
-    [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsIV_QMLE_GPU(params, dataBhvr);
+    [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsX_QMLE_GPU(params, dataBhvr);
     toc
     save(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),...
         'rtmat','choicemat','params','nLL','Chi2','AIC','BIC');
@@ -122,7 +122,8 @@ simname = sprintf('LDDM_Dynmc_a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%
 
 a = params(1)*eye(2);
 b = params(2)*eye(2);
-sgm = params(3)/5;
+sgm = .01;
+sgmInput = params(3);
 tauR = params(5);
 tauG = params(6);
 tauI = params(7);
@@ -159,10 +160,8 @@ randseed = 75245522;
 rng(randseed);
 for vi = 2:6
     Vinput = cplist(vi,:)*scale;
-%     [R, G, I, rt, choice] = LcDsInhbt(Vinput, w, a, b, sgm, Tau, dur,...
-%         dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-    [~, ~, R, G, I] = LDDM(Vprior, Vinput, w, a, b, sgm, Tau, predur, dur,...
-    dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+    [~, ~, R, G, I, Vcourse] = LDDM_RndInput(Vprior, Vinput, w, a, b,...
+    sgm, sgmInput*scale, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule)
     lgd2(vi-1) = plot(R(:,2), 'k-.', 'Color', mygray(vi,:), 'LineWidth',lwd);
     lgd1(vi-1) = plot(R(R(:,1)<=thresh,1), 'k-', 'Color', mygray(vi,:), 'LineWidth',lwd);
 end
