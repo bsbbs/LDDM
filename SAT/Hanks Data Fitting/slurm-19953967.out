@@ -1,0 +1,335 @@
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2021 The MathWorks, Inc.
+             R2021a Update 4 (9.10.0.1710957) 64-bit (glnxa64)
+                                July 1, 2021
+
+ 
+To get started, type doc.
+For product information, visit www.mathworks.com.
+ 
+sortNum1 
+Hostgn-0004_85731256 
+Starting parallel pool (parpool) using the 'local' profile ...
+Connected to the parallel pool (number of workers: 40).
+test succeeded
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (18.164.122.229) 56(84) bytes of data.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.61 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.611/4.611/4.611/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.49 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.499/4.499/4.499/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.59 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.598/4.598/4.598/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.45 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.458/4.458/4.458/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.50 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.507/4.507/4.507/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.42 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.426/4.426/4.426/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.45 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.453/4.453/4.453/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.42 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.428/4.428/4.428/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.63 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.637/4.637/4.637/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.47 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.477/4.477/4.477/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.62 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.620/4.620/4.620/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.66 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.662/4.662/4.662/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.47 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.478/4.478/4.478/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.62 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.624/4.624/4.624/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.52 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.521/4.521/4.521/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.58 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.584/4.584/4.584/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.66 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.660/4.660/4.660/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.66 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.669/4.669/4.669/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.42 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.422/4.422/4.422/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.57 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.579/4.579/4.579/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.55 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.557/4.557/4.557/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.69 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.696/4.696/4.696/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.61 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.614/4.614/4.614/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.59 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.594/4.594/4.594/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.57 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.577/4.577/4.577/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.64 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.646/4.646/4.646/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.60 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.600/4.600/4.600/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.51 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.515/4.515/4.515/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.56 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.563/4.563/4.563/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.57 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.570/4.570/4.570/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.52 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.521/4.521/4.521/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.61 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.611/4.611/4.611/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.57 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.576/4.576/4.576/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-18-164-122-229.jfk50.r.cloudfront.net (18.164.122.229): icmp_seq=1 ttl=238 time=4.56 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.560/4.560/4.560/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.64 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.646/4.646/4.646/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.65 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.657/4.657/4.657/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.59 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.599/4.599/4.599/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.59 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.593/4.593/4.593/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.47 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.471/4.471/4.471/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.60 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.605/4.605/4.605/0.000 ms
+Variables (index) internally transformed to log coordinates: [5 6 7].
+Beginning optimization of a STOCHASTIC objective fcn.
