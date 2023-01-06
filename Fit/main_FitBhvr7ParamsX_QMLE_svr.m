@@ -33,7 +33,7 @@ x0 = rand(1,numel(LB)) .* (PUB - PLB) + PLB;
 
 % likelihood function
 % parpool(6);
-nLLfun = @(params) LDDMFitBhvr7ParamsIX_QMLE_GPU(params, dataBhvr, 10240);
+nLLfun = @(params) LDDMFitBhvr7ParamsX_QMLE_GPU(params, dataBhvr, 10240);
 [fvalbest,~,~] = nLLfun(x0)
 fprintf('test succeeded\n');
 % change starting points
