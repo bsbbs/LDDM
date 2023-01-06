@@ -1,20 +1,20 @@
-addpath('../../RecurrentModel');
+addpath('../utils');
 numNode = 1;
 [sortNum, myCluster] = RndCtrl(numNode);
 mypool = parpool(myCluster, myCluster.NumWorkers);
 
 %% Model fitting with Bayesian Adaptive Direct Search (BADS) optimization algorithm
-addpath(genpath('../../RecurrentModel/bads/bads-master'));
+addpath(genpath('../../bads'));% updated bads, 2022
 addpath('../CoreFunctions/');
 addpath('./SvrCode/');
-out_dir = '../../RecurrentModel/Fit/Rslts/FitBhvr7ParamsX_QMLE_SvrGPU';
+out_dir = '../../LDDM_Output/FitRoitman/FitBhvr7ParamsX_QMLE_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
 %%
 % Take data from Roitman & Shadlen, 2002
-dataDynmc = load('../../RecurrentModel/Fit/Data/Data.mat');
-dataBhvr = LoadRoitmanData('../../RecurrentModel/RoitmanDataCode');
+dataDynmc = load('./RoitmanDataCode/DynmcsData.mat');
+dataBhvr = LoadRoitmanData('./RoitmanDataCode');
 % Fix random seed for reproducibility
 % rng(1);
 % change random seed
@@ -33,7 +33,7 @@ x0 = rand(1,numel(LB)) .* (PUB - PLB) + PLB;
 
 % likelihood function
 % parpool(6);
-nLLfun = @(params) LDDMFitBhvr7ParamsIX_QMLE_GPU(params, dataBhvr);
+nLLfun = @(params) LDDMFitBhvr7ParamsIX_QMLE_GPU(params, dataBhvr, 10240);
 [fvalbest,~,~] = nLLfun(x0)
 fprintf('test succeeded\n');
 % change starting points
