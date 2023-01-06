@@ -4,6 +4,6 @@ module load cuda/10.0
 module load matlab/R2021a
 #matlab -nodisplay -r monkeyD_accuracy_Svr
 #matlab -nodisplay -r monkeyD_speed_Svr
-#matlab -nodisplay -r monkeyE_accuracy_Svr
+matlab -nodisplay -r monkeyE_accuracy_Svr
 matlab -nodisplay -r monkeyE_speed_Svr
 
