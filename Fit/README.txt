@@ -21,7 +21,7 @@ FitBhvr7ParamsV: Free parameters: a, b, sgm, scale, tauR, tauG, tauI; thresh = 7
 FitBhvr6ParamsVI: Free parameters: a, b, sgm,       tauR, tauG, tauI; thresh = 70, initial values = [42, 42; (2w-b)*42, (2w-b)*42; b*42, b*42]. scale = (2w-b)*eqlb.^2 + (1-a).*eqlb; Non-decision time = 90 + 30 ms. Strings = 10240, iterations = 20*16.
 FitBhvr7ParamsVII: Free parameters: a, b, sgm, B0,  tauR, tauG, tauI; thresh = 70, initial values = [42, 42; (2w-b)*42, (2w-b)*42; b*42, b*42]. scale = (2w-b)*eqlb.^2 + (1-a).*eqlb; Non-decision time = 90 + 30 ms. Strings = 10240, iterations = 20*16.
 FitBhvr7ParamsVIII: Free parameters: a, b, sgm, B0,  tauR, tauG, tauI; thresh = 70, initial values = [32, 32; (2w-b)*32, (2w-b)*32; b*32, b*32]. scale = (2w-b)*eqlb.^2 + (1-a).*eqlb; Non-decision time = 90 + 30 ms. Strings = 10240, iterations = 20*16.
-
+FitBhvr7ParamsIX: Free parameters: a, b, Sam, Star, tauR, tauG, tauI; thresh = 70, fitted initial values, scale = max([5, (((2*mean(w,'all') - params(2)))*eqlb.^2 + (1-a(1)).*eqlb)/(1 + B0)]); Non-decision time = 90 + 30 ms; sims = 1024*5; iters = 20*8.
 --
 AsymW series is for the model with asymmetric w weights (Li's model)
 AsymWFitBhvr4pars: assumes the accumulation process start 90ms after the stimuli onset. The initial values on R were set for 32 Hz based on Roitman&Shadlen's data. Estimated parameters are alpha, w_ii, noise amplitute, and scaling of input. w_ij was set as 1. non-decision time was considered at the side of action for 30ms. With the gap in the beginning, there was in total 100ms non-decision time.
