@@ -7,7 +7,7 @@ OP = dataBhvr.OP;
 % parameters to fit
 a = params(1)*eye(2);
 b = params(2)*eye(2);
-sgm = .01;
+sgm = 5; %.01;
 sgmInput = params(3);
 tauR = params(5);
 tauG = params(6);
