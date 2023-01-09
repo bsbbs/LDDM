@@ -86,7 +86,7 @@ addpath(fullfile(Homedir,'Documents','LDDM','utils'));
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
 % cd('G:\My Drive\LDDM\Fit');
 cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
-out_dir = './Rslts/FitBhvr7ParamsX_QMLE_SvrGPU';
+out_dir = './Rslts/FitBhvr7ParamsXsgm5_QMLE_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -100,7 +100,9 @@ randseed = 24356545;
 rng(randseed);
 % a, b, noiseinput, scale, tauRGI, nLL
 % params = [48.635169	1.189341	0.431659	57.487963	0.020103	1	0.021021	19624.786849];
-params = [4.16748	2.089648	0.452399	2952.53125	0.025493	0.040934	0.00896	64063.437583];
+% params = [4.16748	2.089648	0.452399	2952.53125	0.025493	0.040934	0.00896	64063.437583];
+% params = [33.085391	1.425642	1.100166	475.286796	0.005958	0.004824	0.948658	16631.114781];
+params = [23.744467	0.921694	0.549804	1038.429459	0.003493	0.999996	0.019412	16573.264001];
 name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f_nLL%5.2f',params);
 if ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
     tic;
