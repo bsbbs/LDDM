@@ -48,6 +48,7 @@ function [choice, rt, R, G, I, Vcourse] = LDDM_RndInput(Vprior, Vinput, w, a, b,
 % 	1 for to stop, 0 for to continue simulating until total duration set in dur. 
 %%%%%%%%%%%%%%%%%%%
 tauN =0.002; % time constant for Ornstein-Uhlenbeck process of noise
+tauInput = .001; % ossilation frequency of input values
 %% define parameters
 pretask_steps = round(predur/dt);
 onset_of_stimuli = round(presentt/dt); % align to the beginning of task as t = 0.
@@ -81,7 +82,7 @@ for ti = (-pretask_steps):posttask_steps % align the beginning of the task as ti
     if ti > -pretask_steps && ti < 0
         V = Vprior;
     elseif ti >= onset_of_stimuli && ti < offset_of_stimuli
-        if (mod(ti*dt, .005) == 0)
+        if (mod(ti*dt, tauInput) == 0)
             Vnoise = randn(sizeVinput)*sgmInput;
         end
         V = Vinput + Vnoise;

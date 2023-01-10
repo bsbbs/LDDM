@@ -62,6 +62,7 @@ function [rt, choice, argmaxR] = LDDM_Rndinput_GPU(Vprior, Vinput, w, a, b,...
 % indicated the task enters motion stage from premotion stage
 %%%%%%%%%%%%%%%%%%%
 tauN = 0.002; % time constant for Ornstein-Uhlenbeck process of noise
+tauInput = .001; % ossilation frequency of input values
 %% define parameters
 sgmArray = gpuArray(sgm);
 tauN = gpuArray(tauN);
@@ -163,7 +164,7 @@ for ti = -pretask_steps:max(posttask_steps(:))
     % update the values
     if numel(unique(onset_of_stimuli)) == 1
         if ti >= onset_of_stimuli(1)
-            if (mod(ti*dt, .005) == 0)
+            if (mod(ti*dt, tauInput) == 0)
                 V1noise = gpuArray.randn(sizeComput)*sgmInput;
                 V2noise = gpuArray.randn(sizeComput)*sgmInput;
             end
@@ -174,7 +175,7 @@ for ti = -pretask_steps:max(posttask_steps(:))
             V2Array = 0;
         end
     elseif isequal(size(onset_of_stimuli), sizeComput)
-        if (mod(ti*dt, .005) == 0)
+        if (mod(ti*dt, tauInput) == 0)
             V1noise = gpuArray.randn(sizeComput)*sgmInput;
             V2noise = gpuArray.randn(sizeComput)*sgmInput;
         end
