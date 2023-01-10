@@ -1,13 +1,14 @@
-addpath('../../RecurrentModel');
+%% set up parellel
+addpath('../utils');
 numNode = 1;
 [sortNum, myCluster] = RndCtrl(numNode);
 mypool = parpool(myCluster, myCluster.NumWorkers);
 
 %% Model fitting with Bayesian Adaptive Direct Search (BADS) optimization algorithm
-addpath(genpath('../../RecurrentModel/bads/bads-master'));
+addpath(genpath('../../bads'));% updated bads, 2022
 addpath('../CoreFunctions/');
 addpath('./SvrCode/');
-out_dir = '../../RecurrentModel/Fit/Rslts/FitBhvr7ParamsIV100K_QMLE_SvrGPU';
+out_dir = '../../RecurrentModel/Fit/Rslts/FitBhvr7ParamsIV100KNewBADS_QMLE_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -50,25 +51,27 @@ parfor i = 1:myCluster.NumWorkers*4
     % fit
     options = bads('defaults');     % Default options
     options.Display = 'iter';
-    % options.UncertaintyHandling = false;    % Function is deterministic
-    options.UncertaintyHandling = true;    % Function is deterministic
-    [xest,fval,~,output] = bads(nLLfun,x0,LB,UB,PLB,PUB,options);
-    %     xest
-    %     fval
-    %     output
+    % For this optimization, we explicitly tell BADS that the objective is
+    % noisy (it is not necessary, but it is a good habit)
+    options.UncertaintyHandling = true;    % Function is stochastic
+    % specify a rough estimate for the value of the standard deviation of the noise in a neighborhood of the solution.
+    options.NoiseSize = 1.18;  % Optional, leave empty if unknown
+    % We also limit the number of function evaluations, knowing that this is a
+    % simple example. Generally, BADS will tend to run for longer on noisy
+    % problems to better explore the noisy landscape.
+    options.MaxFunEvals = 3000;
+    
+    % Finally, we tell BADS to re-evaluate the target at the returned solution
+    % with ** samples (10 by default). Note that this number counts towards the budget
+    % of function evaluations.
+    options.NoiseFinalSamples = 20;
+    [xest,fval,~,output] = bads(nLLfun,x0,LB,UB,PLB,PUB,[],options);
     dlmwrite(fullfile(out_dir,'RsltList.txt'),[sortNum, i, t, xest fval],'delimiter','\t','precision','%.6f','-append');
-    %     if fval < fvalbest
-    %         xbest = xest;
-    %         fvalbest = fval;
-    %         outputbest = output;
-    %     end
-    % save(fullfile(out_dir,sprintf('./Rslts%i_%i.mat', sortNum, i)),'xest','fval','output');
     Collect(i).rndseed = t;
     Collect(i).x0 = x0;
     Collect(i).xest = xest;
     Collect(i).fval = fval;
     Collect(i).output = output;
-    
 end
 t = datenum(clock)*10^10 - floor(datenum(clock)*100)*10^8 + sortNum*10^7 + i*10^5;
 save(fullfile(out_dir,sprintf('CollectRslts%i.mat',t)),'Collect');
@@ -83,7 +86,7 @@ addpath(fullfile(Homedir,'Documents','LDDM','utils'));
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
 % cd('G:\My Drive\LDDM\Fit');
 cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
-out_dir = './Rslts/FitBhvr7ParamsIV100K_QMLE_SvrGPU';
+out_dir = './Rslts/FitBhvr7ParamsIV100KNewBADS_QMLE_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -627,4 +630,26 @@ end
 h.PaperUnits = 'inches';
 h.PaperPosition = [0 0 5.3 4];
 saveas(h,fullfile(plot_dir,sprintf('FittedParamsDistribution.eps')),'epsc2');
+
+%% noise on the target function
+nLLmat = [];
+sims = [1024, 1024*5, 10240, 10240*5, 102400];
+filename = ['nLLsd_', name];
+if ~exist(fullfile(plot_dir,[filename, '.mat']), 'file')
+    for sim = 1:5
+        for i = 1:10
+            [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsIV_QMLE_GPU(params, dataBhvr, sims(sim));
+            nLLmat(sim, i) = nLL;
+        end
+    end
+    save(fullfile(plot_dir,[filename, '.mat']), 'nLLmat','sims','params');
+else
+    load(fullfile(plot_dir,[filename, '.mat']));
+end
+h = figure;
+plot(sims, std(nLLmat'),'.', 'MarkerSize',18);
+set(gca, 'XScale', 'log');
+xlabel('N of repetition');
+ylabel('Std of nLL');
+savefigs(h, filename, plot_dir, fontsize, [2 3]);
 end
