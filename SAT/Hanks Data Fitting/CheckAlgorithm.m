@@ -38,24 +38,47 @@ VslzHanks(Collect,  h, 7);
 load('/Volumes/GoogleDrive/My Drive/LDDM/SAT/Hanks/monkeyD_accuracy_Svr/MnkyD_Accuracy_CollectRslts84289691.mat');
 VslzHanks(Collect,  h, 8);
 
-%% Visualization
+
+%% Visualization - sd of nLL
 function h = VslzHanks(Collect, h, hi)
 figure(h);
 subplot(4,2,hi); hold on;
-Pls = nan(8,160);
-for i = 1:160
+sz = length(Collect);
+Pls = nan(9,sz);
+for i = 1:sz
     Pls(1:7,i) = Collect(i).xest;
     Pls(8,i) = Collect(i).fval;
+    Pls(9,i) = Collect(i).output.fsd;
 end
 % h = figure; hold on;
-scatter3(Pls(1,:), Pls(2,:), Pls(8,:), 190, Pls(8,:), 'Marker','.');
+scatter3(Pls(1,:), Pls(2,:), Pls(9,:), 190, Pls(9,:), 'Marker','.');
 loc = find(Pls(8,:) == min(Pls(8,:)));
-scatter3(Pls(1,loc), Pls(2,loc), Pls(8,loc), 190, 'r', 'Marker','*');
+scatter3(Pls(1,loc), Pls(2,loc), Pls(9,loc), 190, 'r', 'Marker','*');
 xlabel('alpha');
 ylabel('beta');
-zlabel('nLL');
+zlabel('sd(nLL)');
 grid on;
 view([20, 10]);
 end
+
+%% Visualization - nLL
+% function h = VslzHanks(Collect, h, hi)
+% figure(h);
+% subplot(4,2,hi); hold on;
+% Pls = nan(8,160);
+% for i = 1:160
+%     Pls(1:7,i) = Collect(i).xest;
+%     Pls(8,i) = Collect(i).fval;
+% end
+% % h = figure; hold on;
+% scatter3(Pls(1,:), Pls(2,:), Pls(8,:), 190, Pls(8,:), 'Marker','.');
+% loc = find(Pls(8,:) == min(Pls(8,:)));
+% scatter3(Pls(1,loc), Pls(2,loc), Pls(8,loc), 190, 'r', 'Marker','*');
+% xlabel('alpha');
+% ylabel('beta');
+% zlabel('nLL');
+% grid on;
+% view([20, 10]);
+% end
 
 

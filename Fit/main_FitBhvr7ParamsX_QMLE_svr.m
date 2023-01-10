@@ -124,7 +124,7 @@ simname = sprintf('LDDM_Dynmc_a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%
 
 a = params(1)*eye(2);
 b = params(2)*eye(2);
-sgm = .01;
+sgm = 5; %.01;
 sgmInput = params(3);
 tauR = params(5);
 tauG = params(6);
@@ -459,6 +459,8 @@ for vi = 1:length(acc)
         EN(:,2,vi) =  NaN(numel(Oq(:,2,vi))+1,1);
     end
     f(:,:,vi) = log((EN(:,:,vi)/En(vi)));
+    f(f(:,1,vi) == -Inf,1,vi) = log(1e-10); % set floor value of f at each point, to prevent -Inf
+    f(f(:,2,vi) == -Inf,2,vi) = log(1e-10); % set floor value of f at each point, to prevent -Inf
     plot(x,ON(:,1,vi).*f(:,1,vi),'g-');
     plot(x,ON(:,2,vi).*f(:,2,vi),'r-');
 end
@@ -632,3 +634,25 @@ h.PaperUnits = 'inches';
 h.PaperPosition = [0 0 5.3 4];
 saveas(h,fullfile(plot_dir,sprintf('FittedParamsDistribution.eps')),'epsc2');
 end
+
+%% noise on the target function
+nLLmat = [];
+sims = [1024, 1024*5, 10240, 10240*5, 102400];
+filename = ['nLLsd_', name];
+if ~exist(fullfile(plot_dir,[filename, '.mat']), 'file')
+    for sim = 1:5
+        for i = 1:10
+            [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsX_QMLE_GPU(params, dataBhvr, sims(sim));
+            nLLmat(sim, i) = nLL;
+        end
+    end
+    save(fullfile(plot_dir,[filename, '.mat']), 'nLLmat','sims','params');
+else
+    load(fullfile(plot_dir,[filename, '.mat']));
+end
+h = figure;
+plot(sims, std(nLLmat'),'.', 'MarkerSize',18);
+set(gca, 'XScale', 'log');
+xlabel('N of repetition');
+ylabel('Std of nLL');
+savefigs(h, filename, plot_dir, fontsize, [2 3]);
