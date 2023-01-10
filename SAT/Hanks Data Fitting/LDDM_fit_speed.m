@@ -82,8 +82,8 @@ for vi = 1: length(speed_coh)
     end
 
     speed_f(:, :, vi) = log(speed_estimate_qnum(:, :, vi) / speed_simulate_total(vi));
-    speed_f(speed_f(:, 1, vi)==-Inf, 1, vi) = log(.1/speed_simulate_total(vi));
-    speed_f(speed_f(:, 2, vi)==-Inf, 2, vi) = log(.1/speed_simulate_total(vi));
+    speed_f(speed_f(:, 1, vi)==-Inf, 1, vi) = log(1e-10); %log(.1/speed_simulate_total(vi));
+    speed_f(speed_f(:, 2, vi)==-Inf, 2, vi) = log(1e-10); %log(.1/speed_simulate_total(vi));
     speed_empirical_adj = speed_empirical_num(:, :, vi) * speed_simulate_total(vi) ./ speed_empirical_total(vi);
 end
 close(speed_h);

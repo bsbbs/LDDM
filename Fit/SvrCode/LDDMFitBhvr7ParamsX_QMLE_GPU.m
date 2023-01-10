@@ -7,7 +7,7 @@ OP = dataBhvr.OP;
 % parameters to fit
 a = params(1)*eye(2);
 b = params(2)*eye(2);
-sgm = .01;
+sgm = 5; %.01;
 sgmInput = params(3);
 tauR = params(5);
 tauG = params(6);
@@ -73,8 +73,8 @@ for vi = 1:6
         EN(:,2,vi) =  NaN(numel(q(:,2,vi))+1,1);
     end
     f(:,:,vi) = log((EN(:,:,vi)/En(vi)));
-    f(f(:,1,vi) == -Inf,1,vi) = log(.1/En(vi)); % set floor value of f at each point, to prevent -Inf
-    f(f(:,2,vi) == -Inf,2,vi) = log(.1/En(vi)); % set floor value of f at each point, to prevent -Inf
+    f(f(:,1,vi) == -Inf,1,vi) = log(1e-10); % set floor value of f at each point, to prevent -Inf
+    f(f(:,2,vi) == -Inf,2,vi) = log(1e-10); % set floor value of f at each point, to prevent -Inf
     ON_adj(:,:,vi) = ON(:,:,vi)*En(vi)./On(vi);
 end
 close(h);

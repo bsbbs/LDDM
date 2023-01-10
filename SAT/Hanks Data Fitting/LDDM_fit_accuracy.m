@@ -81,8 +81,8 @@ for vi = 1: length(accuracy_coh)
     end
 
     accuracy_f(:, :, vi) = log(accuracy_estimate_qnum(:, :, vi) / accuracy_simulate_total(vi));
-    accuracy_f(accuracy_f(:, 1, vi)==-Inf, 1, vi) = log(.1/accuracy_simulate_total(vi));
-    accuracy_f(accuracy_f(:, 2, vi)==-Inf, 2, vi) = log(.1/accuracy_simulate_total(vi));
+    accuracy_f(accuracy_f(:, 1, vi)==-Inf, 1, vi) = log(1e-10); %log(.1/accuracy_simulate_total(vi));
+    accuracy_f(accuracy_f(:, 2, vi)==-Inf, 2, vi) = log(1e-10); %log(.1/accuracy_simulate_total(vi));
     accuracy_empirical_adj = accuracy_empirical_num(:, :, vi) * accuracy_simulate_total(vi) ./ accuracy_empirical_total(vi);
 end
 close(accuracy_h);

@@ -7,7 +7,7 @@ mypool = parpool(myCluster, myCluster.NumWorkers);
 addpath(genpath('../../bads'));% updated bads, 2022
 addpath('../CoreFunctions/');
 addpath('./SvrCode/');
-out_dir = '../../LDDM_Output/FitRoitman/FitBhvr7ParamsX_QMLE_SvrGPU';
+out_dir = '../../LDDM_Output/FitRoitman/FitBhvr7ParamsXsgm5_QMLE_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -33,12 +33,12 @@ x0 = rand(1,numel(LB)) .* (PUB - PLB) + PLB;
 
 % likelihood function
 % parpool(6);
-nLLfun = @(params) LDDMFitBhvr7ParamsIX_QMLE_GPU(params, dataBhvr, 10240);
+nLLfun = @(params) LDDMFitBhvr7ParamsX_QMLE_GPU(params, dataBhvr, 10240);
 [fvalbest,~,~] = nLLfun(x0)
 fprintf('test succeeded\n');
 % change starting points
 Collect = [];
-parfor i = 1:myCluster.NumWorkers*8
+parfor i = 1:myCluster.NumWorkers*6
     !ping -c 1 www.amazon.com
     t = datenum(clock)*10^10 - floor(datenum(clock)*100)*10^8 + sortNum*10^7 + i*10^5;
     %num2str(t);
@@ -86,7 +86,7 @@ addpath(fullfile(Homedir,'Documents','LDDM','utils'));
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
 % cd('G:\My Drive\LDDM\Fit');
 cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
-out_dir = './Rslts/FitBhvr7ParamsX_QMLE_SvrGPU';
+out_dir = './Rslts/FitBhvr7ParamsXsgm5_QMLE_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -98,13 +98,15 @@ dataDynmc = load('./Data/Data.mat');
 dataBhvr = LoadRoitmanData('../RoitmanDataCode');
 randseed = 24356545;
 rng(randseed);
-% a, b, noise, scale, tauRGI, nLL
-% params = [0.000056	1.433901	24.837397	3254.833078	0.183152	0.248698	0.309921	16542.77267]; % 16542.77267 ± 2.7264
-params = [0	1.433631	25.35945	3251.289056	0.185325	0.224459	0.323132 16539.138186]; % the old results
+% a, b, noiseinput, scale, tauRGI, nLL
+% params = [48.635169	1.189341	0.431659	57.487963	0.020103	1	0.021021	19624.786849];
+% params = [4.16748	2.089648	0.452399	2952.53125	0.025493	0.040934	0.00896	64063.437583];
+% params = [33.085391	1.425642	1.100166	475.286796	0.005958	0.004824	0.948658	16631.114781];
+params = [23.744467	0.921694	0.549804	1038.429459	0.003493	0.999996	0.019412	16573.264001];
 name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f_nLL%5.2f',params);
 if ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
     tic;
-    [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsIV_QMLE_GPU(params, dataBhvr);
+    [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsX_QMLE_GPU(params, dataBhvr);
     toc
     save(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),...
         'rtmat','choicemat','params','nLL','Chi2','AIC','BIC');
@@ -122,7 +124,8 @@ simname = sprintf('LDDM_Dynmc_a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%
 
 a = params(1)*eye(2);
 b = params(2)*eye(2);
-sgm = params(3)/5;
+sgm = .01;
+sgmInput = params(3);
 tauR = params(5);
 tauG = params(6);
 tauI = params(7);
@@ -159,10 +162,8 @@ randseed = 75245522;
 rng(randseed);
 for vi = 2:6
     Vinput = cplist(vi,:)*scale;
-%     [R, G, I, rt, choice] = LcDsInhbt(Vinput, w, a, b, sgm, Tau, dur,...
-%         dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-    [~, ~, R, G, I] = LDDM(Vprior, Vinput, w, a, b, sgm, Tau, predur, dur,...
-    dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+    [~, ~, R, G, I, Vcourse] = LDDM_RndInput(Vprior, Vinput, w, a, b,...
+    sgm, sgmInput*scale, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule)
     lgd2(vi-1) = plot(R(:,2), 'k-.', 'Color', mygray(vi,:), 'LineWidth',lwd);
     lgd1(vi-1) = plot(R(R(:,1)<=thresh,1), 'k-', 'Color', mygray(vi,:), 'LineWidth',lwd);
 end
