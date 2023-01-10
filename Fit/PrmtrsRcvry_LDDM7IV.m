@@ -87,7 +87,9 @@ t = datenum(clock)*10^10 - floor(datenum(clock)*100)*10^8 + sortNum*10^7 + i*10^
 save(fullfile(out_dir,sprintf('CollectRslts%i.mat',t)),'Collect');
 %% Visualization
 load('/Volumes/GoogleDrive/My Drive/LDDM/Fit/Rslts/FitBhvr7ParamsIV_QMLE_SvrGPU/PrmtrsRcvry/NewBADS_CollectRslts55536850.mat');
-Vslz(Collect);
+filename = 'NewBADS_CollectRslts55536850';
+h = Vslz(Collect);
+savefig(h, fullfile(out_dir,filename));
 %% Visualization
 function h = Vslz(Collect)
 sz = length(Collect);

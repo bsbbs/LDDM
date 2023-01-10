@@ -110,5 +110,5 @@ clb = colorbar;
 ylabel(clb, 'Negative Log likelihood');
 savefig(h, fullfile(out_dir,filename));
 savefigs(h, filename, out_dir, fontsize - 2, [9 3]);
-%close(h);
+close(h);
 end
