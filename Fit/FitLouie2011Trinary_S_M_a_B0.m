@@ -1,11 +1,9 @@
 % Fit the mean firing rates from Louie, et al., 2011
 % cd('G:\My Drive\LDDM\Fit');
+addpath(genpath('~/Documents/LDDM/utils'));
 cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
 addpath(genpath('./bads-master_2019'));
-addpath(genpath('../utils'));
-% addpath(genpath('C:\Users\Bo\Documents\LDDM'));
-addpath(genpath('~/Documents/LDDM'));
-out_dir = './Rslts/FitLouie2011/TrinaryS_a_I0_M';
+out_dir = './Rslts/FitLouie2011/TrinaryS_M-a_B0';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -27,14 +25,14 @@ Vilist = unique(Vi);
 V1list = unique(V1);
 %% Values in equilibirum
 S = 1;
+M = 1;
 a = 50;
 I0 = 0.1;
-M = 1;
-x = [S,a,I0,M];
-LB = [0.1,  0,  0,      0];
-UB = [500,  80, 140,    500];
-PLB = [1,   5,  30,     1];
-PUB = [5,   40, 100,    40];
+x = [S,a-M,I0];
+LB = [0.0001,  -10,  0];
+UB = [.1,  10, 1];
+PLB = [.001,   -5,  .1];
+PUB = [.02,   0, .5];
 tic;
 [RSS, R1s] = OLS(x,V1,V2,V3,FR);
 toc
@@ -60,8 +58,8 @@ for i = 1:20
     fprintf('Fit # %i: ',i);
     if size(summaries,1) < i
         x0 = randomX(PLB,PUB);
-        % [x,fval,~,report] = bads(f,x0,LB,UB,PLB,PUB,options);
-        [x, fval, ~, report] = fmincon(f, x0, [],[],[],[], LB, UB, [], opt); % 
+        [x,fval,~,report] = bads(f,x0,LB,UB,PLB,PUB,options);
+%         [x, fval, ~, report] = fmincon(f, x0, [],[],[],[], LB, UB, [], opt); % 
         Rsquared = 1 - fval/var(FR)/(numel(FR)-1);
         summaries(end+1,:)  = [x fval Rsquared];
         reports{i} = report;
@@ -70,52 +68,49 @@ for i = 1:20
         fval = summaries(i,end-1);
         Rsquared = summaries(i,end);
     end
-    %%
-    if visulize
-        h = figure(i);  hold on;
-        filename = sprintf('FitLouie_bads_%i_M50_a%1.2f_I0%3.1f_S%1.2f_fval%1.3f_Rsqd%1.4f',i,x,fval,Rsquared);
-        [RSS, R1s] = OLS(x,V1,V2,V3,FR);
-        for ii = 1:numel(V1list)
-            mask = V1 == V1list(ii);
-            Vo = V2 + V3;
-            pts(ii) = plot(Vo(mask),FR(mask),'.','MarkerSize',mksz-6);
-            [ord, I] = sort(Vo(mask));
-            R1 = R1s(mask);
-            ln(ii) = plot(ord,R1(I),'-','Color',pts(ii).Color,'LineWidth',lwd);
-        end
-        ylabel('Rescaled activity');
-        xlabel('V_{out}');
-        legend(flip(ln),flip({'V_{in} = 0','V_{in} = 50','V_{in} = 100','V_{in} = 200'}),'Box','off','fontsize',7);
-        legend([flip(pts) flip(ln)],flip({'V_{in} = 0','V_{in} = 50','V_{in} = 100','V_{in} = 200','','','',''}),'NumColumns', 2, 'Box','off','fontsize',7);
-        savefigs(h, filename, plot_dir, 12, [3, 3]);
-        saveas(h,fullfile(plot_dir,[filename, '.fig']));
-    end
-    %%
-    fprintf('\n');
-    pause(.3);
+    
     if ~isnan(fval) && (count == 0 || (fval < RSS_min && sum(x ~= xBest)>0))
         xBest = x;
+        S = xBest(1);
+        B = xBest(3)/xBest(1);
+        M_a = -xBest(2);
         RSS_min = fval;
         count = count + 1;
         %              sprintf(['Subject %d\t: Round-%d ' repmat('%8.3f\t', 1, length(XBest)) '\n'], jj, i, XBest)
     end
-    save(fullfile(out_dir,'FitRslt.mat'),'summaries','xBest','RSS_min','reports');
+    save(fullfile(out_dir,'FitRslt.mat'),'summaries','xBest', 'S', 'M_a','B','RSS_min','reports');
 end
-
 %%
-
+if visulize
+    h = figure;  hold on;
+    filename = sprintf('FitLouie_bads_%i_S%0.3e_M-a%1.3f_B%2.1f_fval%1.3e_Rsqd%1.6f',i,S,M_a,B,fval,Rsquared);
+    [RSS, R1s] = OLS(xBest,V1,V2,V3,FR);
+    for ii = 1:numel(V1list)
+        mask = V1 == V1list(ii);
+        Vo = V2 + V3;
+        pts(ii) = plot(Vo(mask),FR(mask),'.','MarkerSize',mksz-6);
+        [ord, I] = sort(Vo(mask));
+        R1 = R1s(mask);
+        ln(ii) = plot(ord,R1(I),'-','Color',pts(ii).Color,'LineWidth',lwd);
+    end
+    ylabel('Rescaled activity');
+    xlabel('V_{out}');
+    legend(flip(ln),flip({'V_{in} = 0','V_{in} = 50','V_{in} = 100','V_{in} = 200'}),'Box','off','fontsize',7);
+    legend([flip(pts) flip(ln)],flip({'V_{in} = 0','V_{in} = 50','V_{in} = 100','V_{in} = 200','','','',''}),'NumColumns', 2, 'Box','off','fontsize',7);
+    savefigs(h, filename, plot_dir, 12, [3, 3]);
+    saveas(h,fullfile(plot_dir,[filename, '.fig']));
+end
 %%
 function [RSS, R1s] = OLS(x,V1,V2,V3,FR)
 S = x(1);
-a = x(2);
+a_M = x(2);
 I0 = x(3);
-M = x(4);
 idx = 1;
 R1s = [];
 for i = 1:numel(V1)
     % fprintf('%i.',i)
     V = (S.*[V1(i) V2(i) V3(i)]+I0).^idx;
-    tmp = SolveEqlb(V,a,M);
+    tmp = SolveEqlb(V,a_M);
     if numel(tmp) > 1
         warning('Real positive solution more than 1. Recorded only the first value.');
     end
@@ -125,34 +120,38 @@ end
 RSS = sum((R1s - FR).^2);
 end
 %%
-function R1 = SolveEqlb(V,a,M)
+function R1 = SolveEqlb(V,a_M)
 w = 1;
 v = 1;
 b = 0;
 syms R1 R2 R3
 if V(1) > 0 && V(2) > 0 && V(3) > 0
-    eqns = [(V(1)/R1 - (w - b)*R1 - (M-a) - v*R3)/v == R2, ... % dR1/dt = 0: R2 = (V(1)./R1 - (w - b)*R1 - (1-a) - v*R3)/v
-        (V(2)/R2 - (w - b)*R2 - (M-a) - v*R1)/v == R3, ... % dR2/dt = 0: R3 = (V(2)./R2 - (w - b)*R2 - (1-a) - v*R1)/v
-        (V(3)/R3 - (w - b)*R3 - (M-a) - v*R2)/v == R1]; % dR3/dt = 0: R1 = (V(3)./R3 - (w - b)*R3 - (1-a) - v*R2)/v;
+    eqns = [(V(1)/R1 - (w - b)*R1 + a_M - v*R3)/v == R2, ... % dR1/dt = 0: R2 = (V(1)./R1 - (w - b)*R1 - (1-a) - v*R3)/v
+        (V(2)/R2 - (w - b)*R2 + a_M - v*R1)/v == R3, ... % dR2/dt = 0: R3 = (V(2)./R2 - (w - b)*R2 - (1-a) - v*R1)/v
+        (V(3)/R3 - (w - b)*R3 + a_M - v*R2)/v == R1]; % dR3/dt = 0: R1 = (V(3)./R3 - (w - b)*R3 - (1-a) - v*R2)/v;
     vars = [R1 R2 R3];
     [AnswR1, ~, ~] = solve(eqns, vars);
 elseif V(1) > 0 && (V(2) <= 0 || V(3) <= 0)
     if V(2) <= 0 && V(3) > 0
-        eqns = [(V(1)/R1 - (w - b)*R1 - (M-a) - v*R3)/v == 0, ... % dR1/dt = 0: R2 = (V(1)./R1 - (w - b)*R1 - (1-a) - v*R3)/v
-            (V(3)/R3 - (w - b)*R3 - (M-a))/v == R1]; % dR3/dt = 0: R1 = (V(3)./R3 - (w - b)*R3 - (1-a) - v*R2)/v;
+        warning('V2 <= 0');
+        eqns = [(V(1)/R1 - (w - b)*R1 + a_M - v*R3)/v == 0, ... % dR1/dt = 0: R2 = (V(1)./R1 - (w - b)*R1 - (1-a) - v*R3)/v
+            (V(3)/R3 - (w - b)*R3 + a_M)/v == R1]; % dR3/dt = 0: R1 = (V(3)./R3 - (w - b)*R3 - (1-a) - v*R2)/v;
         vars = [R1 R3];
         [AnswR1, ~] = solve(eqns, vars);
     elseif V(3) <= 0 && V(2) > 0
-        eqns = [(V(1)/R1 - (w - b)*R1 - (M-a))/v == 0, ... % dR1/dt = 0: R2 = (V(1)./R1 - (w - b)*R1 - (1-a) - v*R3)/v
-            (V(2)/R2 - (w - b)*R2 - (M-a) - v*R1)/v == 0]; % dR2/dt = 0: R3 = (V(2)./R2 - (w - b)*R2 - (1-a) - v*R1)/v
+        warning('V3 <= 0');
+        eqns = [(V(1)/R1 - (w - b)*R1 + a_M)/v == 0, ... % dR1/dt = 0: R2 = (V(1)./R1 - (w - b)*R1 - (1-a) - v*R3)/v
+            (V(2)/R2 - (w - b)*R2 + a_M - v*R1)/v == 0]; % dR2/dt = 0: R3 = (V(2)./R2 - (w - b)*R2 - (1-a) - v*R1)/v
         vars = [R1 R2];
         [AnswR1, ~] = solve(eqns, vars);
     elseif V(2) <= 0 && V(3) <= 0
-        eqns = [(V(1)/R1 - (w - b)*R1 - (M-a))/v == 0]; % dR1/dt = 0: R2 = (V(1)./R1 - (w - b)*R1 - (1-a) - v*R3)/v
+        warning('V2, V3 <= 0');
+        eqns = [(V(1)/R1 - (w - b)*R1 + a_M)/v == 0]; % dR1/dt = 0: R2 = (V(1)./R1 - (w - b)*R1 - (1-a) - v*R3)/v
         vars = [R1];
         [AnswR1] = solve(eqns, vars);
     end
 elseif V(1) <= 0
+    warning('V1 <= 0');
     AnswR1 = 0;
 end
 PositiveRealAnsw = double(AnswR1) >=0 & double(imag(AnswR1)) == 0;
