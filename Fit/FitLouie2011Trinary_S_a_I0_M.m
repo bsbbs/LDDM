@@ -1,11 +1,11 @@
 % Fit the mean firing rates from Louie, et al., 2011
 % cd('G:\My Drive\LDDM\Fit');
 cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
-addpath(genpath('./bads-master'));
+addpath(genpath('./bads-master_2019'));
 addpath(genpath('../utils'));
 % addpath(genpath('C:\Users\Bo\Documents\LDDM'));
 addpath(genpath('~/Documents/LDDM'));
-out_dir = './Rslts/FitLouie2011/TrinaryalphaI0';
+out_dir = './Rslts/FitLouie2011/TrinaryS_a_I0_M';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -26,14 +26,15 @@ FR = LIPMeanData_TrinaryConditions.FR;
 Vilist = unique(Vi);
 V1list = unique(V1);
 %% Values in equilibirum
+S = 1;
 a = 50;
 I0 = 0.1;
-S = 1;
-x = [a,I0,S];
-LB = [0,  0.1, .6];
-UB = [80, 500, 1.7];
-PLB = [5, 80, .9];
-PUB = [40, 120, 1.1];
+M = 1;
+x = [S,a,I0,M];
+LB = [0.1,  0,  0,      0];
+UB = [500,  80, 140,    500];
+PLB = [1,   5,  30,     1];
+PUB = [5,   40, 100,    40];
 tic;
 [RSS, R1s] = OLS(x,V1,V2,V3,FR);
 toc
@@ -103,30 +104,29 @@ end
 
 %%
 function [RSS, R1s] = OLS(x,V1,V2,V3,FR)
-a = x(1);
-I0 = x(2);
-S = x(3);
-idx = 2;
+S = x(1);
+a = x(2);
+I0 = x(3);
+M = x(4);
+idx = 1;
 R1s = [];
 for i = 1:numel(V1)
     % fprintf('%i.',i)
-    V = ([V1(i) V2(i) V3(i)]+I0).^idx;
-    tmp = SolveEqlb(a,V);
+    V = (S.*[V1(i) V2(i) V3(i)]+I0).^idx;
+    tmp = SolveEqlb(V,a,M);
     if numel(tmp) > 1
         warning('Real positive solution more than 1. Recorded only the first value.');
     end
     R1s(i,:) = tmp(1);
 end
 % fprintf('\n');
-R1s = S*R1s/max(R1s)*max(FR);
 RSS = sum((R1s - FR).^2);
 end
 %%
-function R1 = SolveEqlb(a,V)
+function R1 = SolveEqlb(V,a,M)
 w = 1;
 v = 1;
 b = 0;
-M = 50;
 syms R1 R2 R3
 if V(1) > 0 && V(2) > 0 && V(3) > 0
     eqns = [(V(1)/R1 - (w - b)*R1 - (M-a) - v*R3)/v == R2, ... % dR1/dt = 0: R2 = (V(1)./R1 - (w - b)*R1 - (1-a) - v*R3)/v
