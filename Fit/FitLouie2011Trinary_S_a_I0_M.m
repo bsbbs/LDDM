@@ -49,6 +49,9 @@ options = bads('defaults');     % Default options
 options.Display = 'iter';
 options.UncertaintyHandling = false;    % Function is deterministic
 % options.UncertaintyHandling = true;    % Function is deterministic
+opt = optimoptions('fmincon');
+opt.Display = 'iter';
+opt.StepTolerance = .001;
 %% 
 if exist(fullfile(out_dir,'FitRslt.mat'),'file')
     load(fullfile(out_dir,'FitRslt.mat'));
@@ -56,10 +59,9 @@ end
 for i = 1:20
     fprintf('Fit # %i: ',i);
     if size(summaries,1) < i
-        x0 = randomX(LB,UB);
-        [x,fval,~,report] = bads(f,x0,LB,UB,PLB,PUB,options);
-        
-        % [X, tMin] = fmincon(f, X0, [],[],[],[], lowerBd, upperBd, [], opt);
+        x0 = randomX(PLB,PUB);
+        % [x,fval,~,report] = bads(f,x0,LB,UB,PLB,PUB,options);
+        [x, fval, ~, report] = fmincon(f, x0, [],[],[],[], LB, UB, [], opt); % 
         Rsquared = 1 - fval/var(FR)/(numel(FR)-1);
         summaries(end+1,:)  = [x fval Rsquared];
         reports{i} = report;
