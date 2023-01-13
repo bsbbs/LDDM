@@ -114,26 +114,26 @@ time_spcD = 200; % ms, to exclude activity within 200 msecs of motion onset in c
 %% stablizing noise for 200 ms
 InoiseR1 = gpuArray(zeros(sizeComput));
 InoiseG1 = gpuArray(zeros(sizeComput));
-InoiseI1 = gpuArray(zeros(sizeComput));
+InoiseD1 = gpuArray(zeros(sizeComput));
 InoiseR2 = gpuArray(zeros(sizeComput));
 InoiseG2 = gpuArray(zeros(sizeComput));
-InoiseI2 = gpuArray(zeros(sizeComput));
+InoiseD2 = gpuArray(zeros(sizeComput));
 stablizetime = round(.2/dt);
 for kk = 1:stablizetime
     InoiseR1 = InoiseR1 + (-InoiseR1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
     InoiseR2 = InoiseR2 + (-InoiseR2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
     InoiseG1 = InoiseG1 + (-InoiseG1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
     InoiseG2 = InoiseG2 + (-InoiseG2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseI1 = InoiseI1 + (-InoiseI1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseI2 = InoiseI2 + (-InoiseI2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+    InoiseD1 = InoiseD1 + (-InoiseD1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+    InoiseD2 = InoiseD2 + (-InoiseD2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
 end
 X = gpuArray(ones(sizeComput));
 R1 = (X*initialvals(1,1)) + InoiseR1;
 R2 = (X*initialvals(1,2)) + InoiseR2;
 G1 = (X*initialvals(2,1)) + InoiseG1;
 G2 = (X*initialvals(2,2)) + InoiseG2;
-I1 = (X*initialvals(3,1)) + InoiseI1;
-I2 = (X*initialvals(3,2)) + InoiseI2;
+D1 = (X*initialvals(3,1)) + InoiseD1;
+D2 = (X*initialvals(3,2)) + InoiseD2;
 
 %% initialize variables
 mr1c = gpuArray.nan([numel(dot_ax), sizeComput]); % mean rates sorted at beginning of the dot motion task
@@ -207,10 +207,10 @@ for ti = -pretask_steps:max(posttask_steps(:))
     end
     % update R, G, I
     G1old = G1; G2old = G2;
-    G1 = G1 + (-G1 + w11*R1 + w12*R2 - I1)/Tau2*dtArray + InoiseG1;
-    G2 = G2 + (-G2 + w21*R1 + w22*R2  - I2)/Tau2*dtArray + InoiseG2;
-    I1 = I1 + (-I1 + beta11*R1.*Continue.*BetasUp + beta12*R2.*Continue.*BetasUp)/Tau3*dtArray + InoiseI1;
-    I2 = I2 + (-I2 + beta21*R1.*Continue.*BetasUp + beta22*R2.*Continue.*BetasUp)/Tau3*dtArray + InoiseI2;
+    G1 = G1 + (-G1 + w11*R1 + w12*R2 - D1)/Tau2*dtArray + InoiseG1;
+    G2 = G2 + (-G2 + w21*R1 + w22*R2  - D2)/Tau2*dtArray + InoiseG2;
+    D1 = D1 + (-D1 + beta11*R1.*Continue.*BetasUp + beta12*R2.*Continue.*BetasUp)/Tau3*dtArray + InoiseD1;
+    D2 = D2 + (-D2 + beta21*R1.*Continue.*BetasUp + beta22*R2.*Continue.*BetasUp)/Tau3*dtArray + InoiseD2;
     R1 = R1 + (-R1 + (V1Array + V1prArray*(ti<0) + alpha11*R1+alpha12*R2).*Continue./(1+G1old))/Tau1*dtArray + InoiseR1;
     R2 = R2 + (-R2 + (V2Array + V2prArray*(ti<0) + alpha21*R1+alpha22*R2).*Continue./(1+G2old))/Tau1*dtArray + InoiseR2;
     % update noise
@@ -218,17 +218,17 @@ for ti = -pretask_steps:max(posttask_steps(:))
     InoiseR2 = InoiseR2 + (-InoiseR2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
     InoiseG1 = InoiseG1 + (-InoiseG1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
     InoiseG2 = InoiseG2 + (-InoiseG2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseI1 = InoiseI1 + (-InoiseI1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseI2 = InoiseI2 + (-InoiseI2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+    InoiseD1 = InoiseD1 + (-InoiseD1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+    InoiseD2 = InoiseD2 + (-InoiseD2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
     % setting lower boundary, forcing neural firing rates to be non-negative
     inside = G1 >= 0;
     G1 = G1 .* inside;
     inside = G2 >= 0;
     G2 = G2 .* inside;
-    inside = I1 >= 0;
-    I1 = I1 .* inside;
-    inside = I2 >= 0;
-    I2 = I2 .* inside;
+    inside = D1 >= 0;
+    D1 = D1 .* inside;
+    inside = D2 >= 0;
+    D2 = D2 .* inside;
     inside = R1 >= 0;
     R1 = R1 .* inside;
     inside = R2 >= 0;
@@ -271,7 +271,7 @@ for ti = -pretask_steps:max(posttask_steps(:))
         mr2cD(-min(sac_ax)+1,flip) = R2(flip);
         tpafterward(flip) = 1; % mark the time stamp at decision as 0, after decision, push the time stamp one step forward
         % for chains already stopped, sample according to sac_ax untill max(sac_ax)
-        smpl = (ti == onset_of_trigger + rt + sac_ax(find(sac_ax == 0)+min(tpafterward,sum(sac_ax>0)))) & (tpafterward <= sum(sac_ax>0));
+        smpl = (ti == onset_of_trigger + rt + sac_ax(sum(sac_ax<=0)+min(tpafterward,sum(sac_ax>0)))) & (tpafterward <= sum(sac_ax>0));
         tplist = unique(tpafterward(smpl));
         for si = 1:numel(tplist) % loop over different time stamps
             updatecells = smpl & (tpafterward == tplist(si));
@@ -290,7 +290,7 @@ choice(choice == 0) = NaN; %1 choose R1, 2 choose R2, 1.5 R1 = R2, NaN choice is
 inside = R1Out < R2Out;
 inside = inside + (R1Out == R2Out)/2;% R1 < R2 recorded as 1, R1 > R2 recorded as 0, R1 == R2 recorded as .5;
 argmaxR = gather(inside) + 1; % keep consistant as other models, 1 for choose R1, 2 for choose R2, and 1.5 for equal
-%% post calculus
+%% post calculus, only preserve the correct trials
 m_mr1c = gpuArray.nan([numel(dot_ax), sizeComput(1), sizeComput(2)]); % average over all trials of the same condition
 m_mr2c = gpuArray.nan([numel(dot_ax), sizeComput(1), sizeComput(2)]);
 m_mr1cD = gpuArray.nan([numel(sac_ax), sizeComput(1), sizeComput(2)]);

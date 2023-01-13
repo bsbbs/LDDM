@@ -1,20 +1,20 @@
-addpath('../../RecurrentModel');
+addpath('../utils');
 numNode = 1;
 [sortNum, myCluster] = RndCtrl(numNode);
 mypool = parpool(myCluster, myCluster.NumWorkers);
 
 %% Model fitting with Bayesian Adaptive Direct Search (BADS) optimization algorithm
-addpath(genpath('../../RecurrentModel/bads/bads-master'));
+addpath(genpath('../../bads'));% updated bads, 2022
 addpath('../CoreFunctions/');
 addpath('./SvrCode/');
-out_dir = '../../RecurrentModel/Fit/Rslts/FitBhvr6ParamsVI_QMLE_SvrGPU';
+out_dir = '../../LDDM_Output/FitRoitman/FitDynmc_QMLE_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
 %%
 % Take data from Roitman & Shadlen, 2002
-dataDynmc = load('../../RecurrentModel/Fit/Data/Data.mat');
-dataBhvr = LoadRoitmanData('../../RecurrentModel/RoitmanDataCode');
+dataDynmc = load('./RoitmanDataCode/DynmcsData.mat');
+dataBhvr = LoadRoitmanData('./RoitmanDataCode');
 % Fix random seed for reproducibility
 % rng(1);
 % change random seed
@@ -22,23 +22,25 @@ t = datenum(clock)*10^10 - floor(datenum(clock)*100)*10^8 + sortNum*10^7;
 num2str(t);
 rng(t);
 % Define optimization starting point and bounds
-%     a,    b, noise, Tau
-LB = [0    0.1   .1    [.001,.001,.001]];
-UB = [70   3	100  [1,1,1]];
-PLB = [15  .9	5  [.01 .01 .01]];
-PUB = [60   1.7	40  [.2 .2 .2]];
+%     a,    b, noise, tauR, tauG, tauD, thresh
+LB = [0    0.1   .1   [.001,.001,.001], 65];
+UB = [70   3	100  [1,1,1], 80];
+PLB = [15  .9	5    [.01 .01 .01], 68];
+PUB = [60   1.7	40   [.2 .2 .2], 74];
+
 
 % Randomize initial starting point inside plausible box
 x0 = rand(1,numel(LB)) .* (PUB - PLB) + PLB;
 
 % likelihood function
 % parpool(6);
-nLLfun = @(params) LDDMFitBhvr6ParamsVI_QMLE_GPU(params, dataBhvr);
-[fvalbest,~,~] = nLLfun(x0)
+% nLLfun = @(params) LDDMFitBhvr7ParamsX_QMLE_GPU(params, dataBhvr, 102400);
+OLS = @(params) LDDM_FitDynmc7Params_QMLE_GPU(params, dataDynmc, dataBhvr, 1024);
+[fvalbest,~,~] = OLS(x0)
 fprintf('test succeeded\n');
 % change starting points
 Collect = [];
-parfor i = 1:myCluster.NumWorkers*16
+parfor i = 1:myCluster.NumWorkers*4
     !ping -c 1 www.amazon.com
     t = datenum(clock)*10^10 - floor(datenum(clock)*100)*10^8 + sortNum*10^7 + i*10^5;
     %num2str(t);
@@ -49,26 +51,29 @@ parfor i = 1:myCluster.NumWorkers*16
     dlmwrite(fullfile(out_dir,'x0List.txt'),[sortNum, i, t, x0],'delimiter','\t','precision','%.6f','-append');
     % fit
     options = bads('defaults');     % Default options
-    options.Display = 'iter';LDDMFitBhvr6ParamsVI_QMLE_GPU
-    % options.UncertaintyHandling = false;    % Function is deterministic
-    options.UncertaintyHandling = true;    % Function is deterministic
-    [xest,fval,~,output] = bads(nLLfun,x0,LB,UB,PLB,PUB,options);
-    %     xest
-    %     fval
-    %     output
+    options.Display = 'iter';
+    % For this optimization, we explicitly tell BADS that the objective is
+    % noisy (it is not necessary, but it is a good habit)
+    options.UncertaintyHandling = true;    % Function is stochastic
+    % specify a rough estimate for the value of the standard deviation of the noise in a neighborhood of the solution.
+    % options.NoiseSize = 1.81;  % Optional, leave empty if unknown
+    % We also limit the number of function evaluations, knowing that this is a
+    % simple example. Generally, BADS will tend to run for longer on noisy
+    % problems to better explore the noisy landscape.
+    % options.MaxFunEvals = 3000;
+    
+    % Finally, we tell BADS to re-evaluate the target at the returned solution
+    % with ** samples (10 by default). Note that this number counts towards the budget
+    % of function evaluations.
+    options.NoiseFinalSamples = 20;
+    [xest,fval,~,output] = bads(OLS,x0,LB,UB,PLB,PUB,[],options);
     dlmwrite(fullfile(out_dir,'RsltList.txt'),[sortNum, i, t, xest fval],'delimiter','\t','precision','%.6f','-append');
-    %     if fval < fvalbest
-    %         xbest = xest;
-    %         fvalbest = fval;
-    %         outputbest = output;
-    %     end
-    % save(fullfile(out_dir,sprintf('./Rslts%i_%i.mat', sortNum, i)),'xest','fval','output');
+
     Collect(i).rndseed = t;
     Collect(i).x0 = x0;
     Collect(i).xest = xest;
     Collect(i).fval = fval;
-    Collect(i).output = output;
-    
+    Collect(i).output = output;    
 end
 t = datenum(clock)*10^10 - floor(datenum(clock)*100)*10^8 + sortNum*10^7 + i*10^5;
 save(fullfile(out_dir,sprintf('CollectRslts%i.mat',t)),'Collect');
@@ -83,7 +88,7 @@ addpath(fullfile(Homedir,'Documents','LDDM','utils'));
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
 % cd('G:\My Drive\LDDM\Fit');
 cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
-out_dir = './Rslts/FitBhvr6ParamsVI_QMLE_SvrGPU';
+out_dir = './Rslts/FitDynmc7Params_QMLE_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -91,19 +96,19 @@ plot_dir = fullfile(out_dir,'graphics');
 if ~exist(plot_dir,'dir')
     mkdir(plot_dir);
 end
-dataDynmc = load('./Data/Data.mat');
+dataDynmc = load('../RoitmanDataCode/DynmcsData.mat');
 dataBhvr = LoadRoitmanData('../RoitmanDataCode');
-randseed = 72284006;
+randseed = 24356545;
 rng(randseed);
-% a, b, noise, tauRGI, nLL
-params = [0.001773	1.812852	6.082312	0.017669	0.279181	0.633919	16728.81362]; % 16822.4 ± 2.98148
-name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_tau%1.2f_%1.2f_%1.2f_nLL%5.2f',params(1:7));
+% a, b, noiseinput, scale, tauRGI, nLL
+params = [17.90482	1.33787	1.891267	780.842199	0.006212	0.069079	0.721249	16457.938945];
+name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f_nLL%5.2f',params);
 if ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
     tic;
-    [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr6ParamsVI_QMLE_GPU(params, dataBhvr);
+    [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsX_QMLE_GPU(params, dataBhvr,102400);
+    toc
     save(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),...
         'rtmat','choicemat','params','nLL','Chi2','AIC','BIC');
-    toc
 else
     load(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)));
 end
@@ -112,23 +117,22 @@ end
 lwd = 1;
 mksz = 3;
 fontsize = 11;
-randseed = 24356545;
 rng(randseed);
 % a, b, noise, scale, tauRGI, nLL
-% params = [0.000056	1.433901	24.837397	3254.833078	0.183152	0.248698	0.309921	16542.77267];
-% params = [0	1.433631	25.35945	3251.289056	0.185325	0.224459	0.323132	16539.138186];
-simname = sprintf('LDDM_Dynmc_a%2.2f_b%1.2f_sgm%2.1f_tau%1.2f_%1.2f_%1.2f_nLL%4.0f',params);
+simname = sprintf('LDDM_Dynmc_a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f_nLL%4.0f',params);
 
 a = params(1)*eye(2);
 b = params(2)*eye(2);
-sgm = params(3)/5;
-tauR = params(4);
-tauG = params(5);
-tauI = params(6);
+sgm = 5; %.01;
+sgmInput = params(3);
+tauR = params(5);
+tauG = params(6);
+tauI = params(7);
 Tau = [tauR tauG tauI];
 ndt = .09 + .03; % sec, 90ms after stimuli onset, resort to the saccade side,
 % the activities reaches peak 30ms before initiation of saccade, according to Roitman & Shadlen
 presentt = 0; % changed for this version to move the fitting begin after the time point of recovery
+scale = params(4);
 
 predur = 0;
 triggert = 0;
@@ -139,20 +143,14 @@ stimdur = dur;
 stoprule = 1;
 w = [1 1; 1 1];
 Rstar = 32; % ~ 32 Hz at the bottom of initial fip, according to Roitman and Shadlen's data
-I0 = params(2)*Rstar;
-initialvals = [Rstar,Rstar; (sum(w(1,:)) - params(2))*Rstar,(sum(w(2,:)) - params(2))*Rstar; I0, I0];
+initialvals = [Rstar,Rstar; sum(w(1,:))*Rstar,sum(w(2,:))*Rstar; 0,0];
 eqlb = Rstar; % set equilibrium value before task as R^*
-scale = ((2*mean(w,'all') - params(2)))*eqlb.^2 + (1-a(1)).*eqlb;
+Vprior = [1, 1]*(2*mean(w,'all')*eqlb.^2 + (1-a(1)).*eqlb);
+
 Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
 c1 = (1 + Cohr)';
 c2 = (1 - Cohr)';
 cplist = [c1, c2];
-V1 = (1 + Cohr)';
-V2 = (1 - Cohr)';
-Vinput = [V1, V2]*scale;
-Vprior = ones(size(Vinput))*scale;
-
-
 mygray = flip(gray(length(cplist)));
 
 h = figure; 
@@ -163,10 +161,8 @@ randseed = 75245522;
 rng(randseed);
 for vi = 2:6
     Vinput = cplist(vi,:)*scale;
-%     [R, G, I, rt, choice] = LcDsInhbt(Vinput, w, a, b, sgm, Tau, dur,...
-%         dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-    [~, ~, R, G, I] = LDDM(Vprior, Vinput, w, a, b, sgm, Tau, predur, dur,...
-    dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+    [~, ~, R, G, I, Vcourse] = LDDM_RndInput(Vprior, Vinput, w, a, b,...
+    sgm, sgmInput*scale, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule)
     lgd2(vi-1) = plot(R(:,2), 'k-.', 'Color', mygray(vi,:), 'LineWidth',lwd);
     lgd1(vi-1) = plot(R(R(:,1)<=thresh,1), 'k-', 'Color', mygray(vi,:), 'LineWidth',lwd);
 end
@@ -384,7 +380,7 @@ set(gca, 'XScale', 'log');
 % lgd = legend([lg3,lg1,lg4,lg2],{'','','Error','Correct'},'NumColumns',2,'Location','SouthWest','FontSize',14);
 % legend('boxoff');
 savefigs(h,filename,plot_dir,fontsize,[2,3.0]);
-%% Q-Q plot for reaction time and choice
+%% Quantile probability plot for reaction time and choice
 lwd = 1.0;
 mksz = 3;
 fontsize = 11;
@@ -392,6 +388,7 @@ x = dataBhvr.proportionmat;
 y = dataBhvr.q;
 qntls = dataBhvr.qntls;
 h = figure; hold on;
+acc = [];
 for vi = 1:length(x)
     xc = x(vi)*ones(size(y(:,1,vi)));
     xw = 1 - x(vi)*ones(size(y(:,2,vi)));
@@ -401,12 +398,12 @@ for vi = 1:length(x)
     En(vi) = numel(rtmat(:,vi));
     RT_corr = rtmat(choicemat(:,vi) == 1,vi);
     RT_wro = rtmat(choicemat(:,vi) == 2,vi);
-    xr = numel(RT_corr)/(numel(RT_corr) + numel(RT_wro));
+    acc(vi) = numel(RT_corr)/(numel(RT_corr) + numel(RT_wro));
     q(:,1,vi) = quantile(RT_corr,qntls); % RT value on quantiles, correct trial
     q(:,2,vi) = quantile(RT_wro,qntls); % RT value on quantiles, error trial
 end
 for qi = 1:size(q,1)
-    xq = [flip(1-x), x]';
+    xq = [flip(1-acc), acc]';
     plot(xq,[squeeze(flip(q(qi,2,:)));squeeze(q(qi,1,:))],'k-o','MarkerSize',mksz,'LineWidth',lwd/2);
 end
 legend([lge,lgc],{'error','correct'},"NumColumns",2,'Location','northeast','FontSize',fontsize-2);
@@ -419,7 +416,7 @@ ylabel('RT (s)');
 % h.PaperUnits = 'inches';
 % h.PaperPosition = [0 0 4 5];
 % saveas(h,fullfile(plot_dir,sprintf('Q-QPlot_%s.fig',name)),'fig');
-filename = sprintf('Q-QPlot_%s',name);
+filename = sprintf('QPPlot_%s',name);
 % saveas(h,fullfile(plot_dir,filename),'epsc2');
 savefigs(h, filename, plot_dir, fontsize, [2.5 2.5]);
 %% the original space of QMLE
@@ -461,6 +458,8 @@ for vi = 1:length(acc)
         EN(:,2,vi) =  NaN(numel(Oq(:,2,vi))+1,1);
     end
     f(:,:,vi) = log((EN(:,:,vi)/En(vi)));
+    f(f(:,1,vi) == -Inf,1,vi) = log(1e-10); % set floor value of f at each point, to prevent -Inf
+    f(f(:,2,vi) == -Inf,2,vi) = log(1e-10); % set floor value of f at each point, to prevent -Inf
     plot(x,ON(:,1,vi).*f(:,1,vi),'g-');
     plot(x,ON(:,2,vi).*f(:,2,vi),'r-');
 end
@@ -496,28 +495,24 @@ h.PaperPosition = [0 0 3 10];
 saveas(h,fullfile(plot_dir,sprintf('Proportion_Plot_%s.eps',name)),'epsc2');
 
 %% plot time course
-if ~exist(fullfile(plot_dir,sprintf('PlotDynamic_%s_D0.mat',name)),'file')
+params = [9E-06	1.438371	25.389358	3243.067494	0.183473	0.229657	0.324556	16535.000107];
+name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f_nLL%5.2f',params);
+if ~exist(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),'file')
     tic;
-    [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDMDynamic_FitBhvr6ParamsVI_QMLE_GPU(params, dataDynmc, dataBhvr);
+    [Chi2, N, nLL, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDM_FitDynmc7Params_QMLE_GPU(params, dataDynmc, dataBhvr, 1024);
     %sm_mr1c = gather(sm_mr1c);
-    save(fullfile(plot_dir,sprintf('PlotDynamic_%s_D0.mat',name)),...
+    save(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),...
         'rtmat','choicemat','sm_mr1c','sm_mr2c','sm_mr1cD','sm_mr2cD','params');
     toc
 else
-    load(fullfile(plot_dir, sprintf('PlotDynamic_%s_D0.mat',name)));
+    load(fullfile(plot_dir, sprintf('PlotDynamic_%s.mat',name)));
 end
-load('./Data/Data.mat');
-m_mr1c = m_mr1c';
-m_mr2c = m_mr2c';
-m_mr1cD = m_mr1cD';
-m_mr2cD = m_mr2cD';
-dot_ax = dot_ax';
-sac_ax = sac_ax';
+load('../RoitmanDataCode/DynmcsData.mat');
 h = figure;
 aspect = [3, 2.5];
 fontsize = 10;
 lwd = 1;
-filename = sprintf('FittedTimeCourse_%s_D0',name);
+filename = sprintf('FittedTimeCourse_%s',name);
 subplot(1,2,1);hold on;
 clear flip;
 colvec = flip({[218,166,109]/256,[155 110 139]/256,'#32716d','#af554d','#708d57','#3b5d64'});
@@ -554,18 +549,18 @@ savefigs(h,filename,plot_dir,fontsize,aspect);
 saveas(h,fullfile(plot_dir,[filename, '.fig']),'fig');
 
 %% raw data time course
-% h = figure;
+h = figure;hold on;
 % subplot(1,2,1);hold on;
-% plot(dot_ax, m_mr1c,'LineWidth',1.5);
-% plot(dot_ax, m_mr2c,'--','LineWidth',1.5);
-% set(gca,'FontSize',18);
-% subplot(1,2,2);hold on;
-% plot(sac_ax, m_mr1cD,'LineWidth',1.5);
-% plot(sac_ax, m_mr2cD,'--','LineWidth',1.5);
-% set(gca,'FontSize',18);
-% h.PaperUnits = 'inches';
-% h.PaperPosition = [0 0 5.3 4];
-% saveas(h,fullfile(plot_dir,sprintf('Data.eps')),'epsc2');
+plot(dot_ax, m_mr1c,'o-','LineWidth',1.5);
+plot(dot_ax, m_mr2c,'.-','LineWidth',1.5);
+set(gca,'FontSize',18);
+subplot(1,2,2);hold on;
+plot(sac_ax, m_mr1cD,'LineWidth',1.5);
+plot(sac_ax, m_mr2cD,'--','LineWidth',1.5);
+set(gca,'FontSize',18);
+h.PaperUnits = 'inches';
+h.PaperPosition = [0 0 5.3 4];
+saveas(h,fullfile(plot_dir,sprintf('Data.eps')),'epsc2');
 %% plot firing rates at position a,b,c,d 
 Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
 h = figure;
@@ -634,3 +629,25 @@ h.PaperUnits = 'inches';
 h.PaperPosition = [0 0 5.3 4];
 saveas(h,fullfile(plot_dir,sprintf('FittedParamsDistribution.eps')),'epsc2');
 end
+
+%% noise on the target function
+nLLmat = [];
+sims = [1024, 1024*5, 10240, 10240*5, 102400];
+filename = ['nLLsd_', name];
+if ~exist(fullfile(plot_dir,[filename, '.mat']), 'file')
+    for sim = 1:5
+        for i = 1:10
+            [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsX_QMLE_GPU(params, dataBhvr, sims(sim));
+            nLLmat(sim, i) = nLL;
+        end
+    end
+    save(fullfile(plot_dir,[filename, '.mat']), 'nLLmat','sims','params');
+else
+    load(fullfile(plot_dir,[filename, '.mat']));
+end
+h = figure;
+plot(sims, std(nLLmat'),'.', 'MarkerSize',18);
+set(gca, 'XScale', 'log');
+xlabel('N of repetition');
+ylabel('Std of nLL');
+savefigs(h, filename, plot_dir, fontsize, [2 3]);
