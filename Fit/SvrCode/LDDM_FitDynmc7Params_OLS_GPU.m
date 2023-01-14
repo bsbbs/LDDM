@@ -1,4 +1,4 @@
-function [Chi2, N, nLL, BIC, AIC, rtmat, choicemat, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDM_FitDynmc7Params_QMLE_GPU(params, dataDynmc, dataBhvr, sims)
+function [Chi2, N, nLL, BIC, AIC, rtmat, choicemat, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDM_FitDynmc7Params_OLS_GPU(params, dataDynmc, dataBhvr, sims)
 % reload Roitman's data, processed
 dot_ax = dataDynmc.dot_ax;
 sac_ax = dataDynmc.sac_ax;
@@ -22,24 +22,21 @@ Tau = [tauR tauG tauD];
 thresh = params(7); % mean(mean(m_mr1cD(sac_ax == -20 | sac_ax == -40,:))); % = 68.6391 % mean(max(m_mr1cD))+1 = 70.8399; 
 
 % other fixed parameters
+dot_gap = .19;
+sac_gap = .03;
 ndt = .19 + .03; % sec, 190ms after stimuli onset, resort to the saccade side,
 % the activities reaches peak 30ms before initiation of saccade, according to Roitman & Shadlen
-presentt = 0; % changed for this version to move the fitting begin after the time point of recovery
 if nargin < 4
     sims = 10240;
 end
 w = ones(2);
 Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
-predur = 0;
-triggert = 0;
 dur = 5;
 dt =.001;
-stimdur = dur;
 stoprule = 1;
 Rstar = mean(mean(m_mr1c(dot_ax == 180 | dot_ax == 200,:))); % = 43.1026 % ~ 32 Hz at the bottom of initial fip, according to Roitman and Shadlen's data
 scale = (1-params(1))*Rstar + (sum(w(1,:)) - params(2))*Rstar^2;
 initialvals = [Rstar,Rstar; (sum(w(1,:)) - b(1,1))*Rstar,(sum(w(2,:)) - b(2,2))*Rstar; b(1,1)*Rstar,b(2,2)*Rstar];
-Vprior = ones(6,2)*scale;
 V1 = (1 + Cohr)';
 V2 = (1 - Cohr)';
 Vinput = [V1, V2]*scale;
@@ -47,9 +44,9 @@ Vinput = [V1, V2]*scale;
 % simulation
 % fprintf('GPU Simulations %i chains ...\t', sims);
 % tic;
-[rtmat, choicemat, ~, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDM_Dynmc_Trim_GPU(Vprior, Vinput, w, a, b,...
-    sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims, dot_ax-190, sac_ax+30);
-rtmat = squeeze(rtmat)'+ndt;
+[rtmat, choicemat, ~, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDM_Dynmc_gap_GPU(Vinput, w, a, b,...
+    sgm, Tau, dur, dt, thresh, initialvals, stoprule, sims, dot_ax, sac_ax, dot_gap, sac_gap);
+rtmat = squeeze(rtmat)';
 choicemat = squeeze(choicemat)';
 % toc;
 
@@ -59,17 +56,17 @@ N = 0;
 for i = 1:4
     switch i
         case 1
-            fit = sm_mr1c(dot_ax>=190,:);
-            dat = m_mr1c(dot_ax>=190,:);
+            fit = sm_mr1c(dot_ax>=round(dot_gap/dt),:);
+            dat = m_mr1c(dot_ax>=round(dot_gap/dt),:);
         case 2
-            fit = sm_mr2c(dot_ax>=190,:);
-            dat = m_mr2c(dot_ax>=190,:);
+            fit = sm_mr2c(dot_ax>=round(dot_gap/dt),:);
+            dat = m_mr2c(dot_ax>=round(dot_gap/dt),:);
         case 3
-            fit = sm_mr1cD(sac_ax<=-30,:);
-            dat = m_mr1cD(sac_ax<=-30,:);
+            fit = sm_mr1cD(sac_ax<=-round(sac_gap/dt),:);
+            dat = m_mr1cD(sac_ax<=-round(sac_gap/dt),:);
         case 4
-            fit = sm_mr2cD(sac_ax<=-30,:);
-            dat = m_mr2cD(sac_ax<=-30,:);
+            fit = sm_mr2cD(sac_ax<=-round(sac_gap/dt),:);
+            dat = m_mr2cD(sac_ax<=-round(sac_gap/dt),:);
     end
     fit(isnan(fit)) = 0; % replace the missing values as zero, which will drive a large deviance from the data values
     sse = (fit - dat).^2;
