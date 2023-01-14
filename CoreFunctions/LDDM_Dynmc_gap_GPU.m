@@ -87,13 +87,9 @@ if isstruct(Vinput)
     V1mat = Vinput.(name{1});
     V2mat = Vinput.(name{2});
     name = fieldnames(Vprior);
-    V1prmat = Vprior.(name{1});
-    V2prmat = Vprior.(name{2});
 else
     V1mat = Vinput(:,1);
     V2mat = Vinput(:,2);
-    V1prmat = Vprior(:,1);
-    V2prmat = Vprior(:,2);
 end
 sizeVinput = size(V1mat);
 sizeComput = [sizeVinput, sims];

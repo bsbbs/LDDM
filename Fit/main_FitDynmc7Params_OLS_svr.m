@@ -7,7 +7,7 @@ mypool = parpool(myCluster, myCluster.NumWorkers);
 addpath(genpath('../../bads'));% updated bads, 2022
 addpath('../CoreFunctions/');
 addpath('./SvrCode/');
-out_dir = '../../LDDM_Output/FitRoitman/FitDynmc_QMLE_SvrGPU';
+out_dir = '../../LDDM_Output/FitRoitman/FitDynmc_OLS_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -23,10 +23,10 @@ num2str(t);
 rng(t);
 % Define optimization starting point and bounds
 %     a,    b, noise, tauR, tauG, tauD, thresh
-LB = [0    0.1   .1   [.001,.001,.001], 65];
-UB = [70   3	100  [1,1,1], 80];
-PLB = [15  .9	5    [.01 .01 .01], 68];
-PUB = [60   1.7	40   [.2 .2 .2], 74];
+LB = [0    0.6   .1   [.01,.01,.01], 65];
+UB = [60   2	100  [.5,.5,.5], 100];
+PLB = [15  .9	5    [.05 .1 .2], 75];
+PUB = [40   1.7	40   [.2 .3 .4], 80];
 
 
 % Randomize initial starting point inside plausible box
@@ -35,12 +35,12 @@ x0 = rand(1,numel(LB)) .* (PUB - PLB) + PLB;
 % likelihood function
 % parpool(6);
 % nLLfun = @(params) LDDMFitBhvr7ParamsX_QMLE_GPU(params, dataBhvr, 102400);
-OLS = @(params) LDDM_FitDynmc7Params_QMLE_GPU(params, dataDynmc, dataBhvr, 1024);
+OLS = @(params) LDDM_FitDynmc7Params_OLS_GPU(params, dataDynmc, dataBhvr, 10240);
 [fvalbest,~,~] = OLS(x0)
 fprintf('test succeeded\n');
 % change starting points
 Collect = [];
-parfor i = 1:myCluster.NumWorkers*4
+parfor i = 1:myCluster.NumWorkers*1
     !ping -c 1 www.amazon.com
     t = datenum(clock)*10^10 - floor(datenum(clock)*100)*10^8 + sortNum*10^7 + i*10^5;
     %num2str(t);

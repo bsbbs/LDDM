@@ -1,4 +1,4 @@
-function [Chi2, N, nLL, BIC, AIC, rtmat, choicemat, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDM_FitDynmc7Params_QMLE_GPU(params, dataDynmc, dataBhvr, sims)
+function [Chi2, N, nLL, BIC, AIC, rtmat, choicemat, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDM_FitDynmc7Params_OSL_GPU(params, dataDynmc, dataBhvr, sims)
 % reload Roitman's data, processed
 dot_ax = dataDynmc.dot_ax;
 sac_ax = dataDynmc.sac_ax;
@@ -24,22 +24,17 @@ thresh = params(7); % mean(mean(m_mr1cD(sac_ax == -20 | sac_ax == -40,:))); % = 
 % other fixed parameters
 ndt = .19 + .03; % sec, 190ms after stimuli onset, resort to the saccade side,
 % the activities reaches peak 30ms before initiation of saccade, according to Roitman & Shadlen
-presentt = 0; % changed for this version to move the fitting begin after the time point of recovery
 if nargin < 4
     sims = 10240;
 end
 w = ones(2);
 Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
-predur = 0;
-triggert = 0;
 dur = 5;
 dt =.001;
-stimdur = dur;
 stoprule = 1;
 Rstar = mean(mean(m_mr1c(dot_ax == 180 | dot_ax == 200,:))); % = 43.1026 % ~ 32 Hz at the bottom of initial fip, according to Roitman and Shadlen's data
 scale = (1-params(1))*Rstar + (sum(w(1,:)) - params(2))*Rstar^2;
 initialvals = [Rstar,Rstar; (sum(w(1,:)) - b(1,1))*Rstar,(sum(w(2,:)) - b(2,2))*Rstar; b(1,1)*Rstar,b(2,2)*Rstar];
-Vprior = ones(6,2)*scale;
 V1 = (1 + Cohr)';
 V2 = (1 - Cohr)';
 Vinput = [V1, V2]*scale;
