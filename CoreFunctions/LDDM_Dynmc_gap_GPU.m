@@ -1,5 +1,5 @@
-function [rt, choice, argmaxR, m_mr1c, m_mr2c, m_mr1cD, m_mr2cD] = LDDM_Dynmc_Trim_GPU(Vprior, Vinput, w, a, b,...
-    sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims, dot_ax, sac_ax)
+function [rt, choice, argmaxR, m_mr1c, m_mr2c, m_mr1cD, m_mr2cD] = LDDM_Dynmc_gap_GPU(Vinput, w, a, b,...
+    sgm, Tau, dur, dt, thresh, initialvals, stoprule, sims, dot_ax, sac_ax, dot_gap, sac_gap)
 %%%%%%%%%%%%%%%%%%
 %% GPU calculation, only binary choice is allowed. N is limited as 2.
 % Created by Bo Shen, NYU, 2019
@@ -98,19 +98,19 @@ end
 sizeVinput = size(V1mat);
 sizeComput = [sizeVinput, sims];
 NComput = prod(sizeComput);
-pretask_steps = round(predur/dt);
-onset_of_stimuli = gpuArray(round(presentt/dt));
-onset_of_trigger = gpuArray(round(triggert/dt));
-if isequal(size(onset_of_trigger), size(V1mat))
-    onset_of_trigger = gpuArray(repmat(onset_of_trigger,1,1,sims));
-end
+V1Array = gpuArray(repmat(V1mat,1,1,sims));
+V2Array = gpuArray(repmat(V2mat,1,1,sims));
 posttask_steps = gpuArray(round(dur/dt));
-stim_duration = gpuArray(round(stimdur/dt));
-offset_of_stimuli = onset_of_stimuli + stim_duration;
+dot_gap = round(dot_gap/dt);
+sac_gap = round(sac_gap/dt);
 % dot_ax = [-100:20:1000];
 % sac_ax = [-1000:20:300];
 time_spc = 100; % ms, to exclude activity within 100 msecs of eye movement initiation in calculating mrc
+% since there is a delay (sac_gap) between the dynamic hit boundry and
+% saccade behavior, the gap is counted.
 time_spcD = 200; % ms, to exclude activity within 200 msecs of motion onset in calculating mrcD
+% since there is a delay (dot_gap) between the stimuli onset and the
+% starting of WTA dynamics, the gap is counted.
 %% stablizing noise for 200 ms
 InoiseR1 = gpuArray(zeros(sizeComput));
 InoiseG1 = gpuArray(zeros(sizeComput));
@@ -146,16 +146,12 @@ choice = gpuArray(zeros(sizeComput));
 
 %% simulation: premotion stage (ti < 0), dot motion task begin at ti = 0
 % ti = 0 sorted at the the beginning of the dot motion task, while the 
-% onset of stimuli (onset_of_stimuli) can be later than 0, which will cause
-% initial dip
-V1prArray = gpuArray(repmat(V1prmat,1,1,sims));
-V2prArray = gpuArray(repmat(V2prmat,1,1,sims));
+% beginning of simulation will be later, determined by dot_gap
 R1Out = gpuArray.nan(sizeComput); % records the values at decision, or the end of simulation if choice was not made
 R2Out = gpuArray.nan(sizeComput);
 Continue = gpuArray(ones(sizeComput)); % to mark the trials that choices haven't made yet
-BetasUp = gpuArray(zeros(sizeComput)); % change from 0 to beta on the time of trigger
 tpafterward = gpuArray(zeros(sizeComput)); % time stamp intermediate variable after decision
-for ti = -pretask_steps:max(posttask_steps(:))
+for ti = dot_gap:max(posttask_steps(:))
     % sample mrc according to dot_ax
     if any(ti == dot_ax)
         rec_axi = find(ti == (dot_ax));
@@ -170,49 +166,15 @@ for ti = -pretask_steps:max(posttask_steps(:))
             break;
         end
     end
-    
-    % update the input values
-    if numel(unique(onset_of_stimuli)) == 1
-        if ti >= onset_of_stimuli(1)
-            V1Array = gpuArray(repmat(V1mat,1,1,sims));
-            V2Array = gpuArray(repmat(V2mat,1,1,sims));
-        else
-            V1Array = gpuArray(zeros(sizeComput));
-            V2Array = gpuArray(zeros(sizeComput));
-        end
-    elseif all(size(onset_of_stimuli) == size(V1mat))
-        flip = ti >= onset_of_stimuli;
-        V1Array = gpuArray(repmat(V1mat.*flip,1,1,sims));
-        V2Array = gpuArray(repmat(V2mat.*flip,1,1,sims));
-    end
 
-    if numel(unique(offset_of_stimuli)) == 1
-        if ti >= offset_of_stimuli(1)
-            V1Array = gpuArray(zeros(sizeComput));
-            V2Array = gpuArray(zeros(sizeComput));
-        end
-    elseif all(size(offset_of_stimuli) == size(V1mat))
-        flip = ti >= offset_of_stimuli;
-        V1Array(flip,:) = 0;
-        V2Array(flip,:) = 0;
-    end
-
-    if numel(unique(onset_of_trigger)) == 1
-        if ti >= onset_of_trigger(1)
-            BetasUp = gpuArray(ones(sizeComput));
-        end
-    elseif all(size(onset_of_trigger) == sizeComput)
-        flip = ti >= onset_of_trigger;
-        BetasUp(flip) = 1;
-    end
     % update R, G, I
     G1old = G1; G2old = G2;
     G1 = G1 + (-G1 + w11*R1 + w12*R2 - D1)/Tau2*dtArray + InoiseG1;
     G2 = G2 + (-G2 + w21*R1 + w22*R2  - D2)/Tau2*dtArray + InoiseG2;
-    D1 = D1 + (-D1 + beta11*R1.*Continue.*BetasUp + beta12*R2.*Continue.*BetasUp)/Tau3*dtArray + InoiseD1;
-    D2 = D2 + (-D2 + beta21*R1.*Continue.*BetasUp + beta22*R2.*Continue.*BetasUp)/Tau3*dtArray + InoiseD2;
-    R1 = R1 + (-R1 + (V1Array + V1prArray*(ti<0) + alpha11*R1+alpha12*R2).*Continue./(1+G1old))/Tau1*dtArray + InoiseR1;
-    R2 = R2 + (-R2 + (V2Array + V2prArray*(ti<0) + alpha21*R1+alpha22*R2).*Continue./(1+G2old))/Tau1*dtArray + InoiseR2;
+    D1 = D1 + (-D1 + beta11*R1.*Continue + beta12*R2.*Continue)/Tau3*dtArray + InoiseD1;
+    D2 = D2 + (-D2 + beta21*R1.*Continue + beta22*R2.*Continue)/Tau3*dtArray + InoiseD2;
+    R1 = R1 + (-R1 + (V1Array + alpha11*R1+alpha12*R2).*Continue./(1+G1old))/Tau1*dtArray + InoiseR1;
+    R2 = R2 + (-R2 + (V2Array + alpha21*R1+alpha22*R2).*Continue./(1+G2old))/Tau1*dtArray + InoiseR2;
     % update noise
     InoiseR1 = InoiseR1 + (-InoiseR1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
     InoiseR2 = InoiseR2 + (-InoiseR2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
@@ -235,31 +197,24 @@ for ti = -pretask_steps:max(posttask_steps(:))
     R2 = R2 .* inside;
     % threshold detecting
     inside = (R1 >= threshArray) + (R2 >= threshArray);
-    flip = (inside > 0) & (rt == Inf) & (BetasUp == 1);
+    flip = (inside > 0) & (rt == Inf);
     NComput = NComput - sum(flip(:));
-    if numel(unique(onset_of_trigger)) == 1
-        rt(flip) = ti-onset_of_trigger(1);
-    elseif all(size(onset_of_trigger) == sizeComput)
-        rt(flip) = ti - onset_of_trigger(flip);
-    end
-    
+    rt(flip) = ti + sac_gap;
+        
     choice = choice + ((R2 > R1) - (R1 > R2) +3) .* flip; % 2 choose R1, 4 choose R2, 3 R1 = R2, 0 choice is not made
     Continue = choice == 0;
     R1Out(flip) = R1(flip); % update the values at choice, keep others as nan
     R2Out(flip) = R2(flip);
     % exclude data in mrc 100 ms before decision (defined in time_spc)
+    % count the gap from the boundary hitting to saccade
     loc = find(flip);
     for excl = 1:numel(loc)
-        if numel(unique(onset_of_trigger)) == 1
-            excldt = rt(loc(excl)) + onset_of_trigger(1) - time_spc;
-        elseif all(size(onset_of_trigger) == sizeComput)
-            excldt = rt(loc(excl)) + onset_of_trigger(loc(excl)) - time_spc;
-        end
+        excldt = rt(loc(excl)) - time_spc;
         mr1c(dot_ax > excldt,loc(excl)) = NaN;
         mr2c(dot_ax > excldt,loc(excl)) = NaN;
     end
     % sample mrcD according to sac_ax
-    if ti > onset_of_stimuli + time_spcD % wait for recording until 200ms after stimuli on
+    if ti > time_spcD % wait for recording until 200ms after stimuli on
         % so automatically exclude data in m_mrcD within 200 ms of onset_of_stimuli (defined in time_spcD)
         % for chains are still going, update the values saved before sac
         mr1cD(1:(-min(sac_ax)-1), Continue) = mr1cD(2:-min(sac_ax),Continue); % push the values into the queue
@@ -271,7 +226,7 @@ for ti = -pretask_steps:max(posttask_steps(:))
         mr2cD(-min(sac_ax)+1,flip) = R2(flip);
         tpafterward(flip) = 1; % mark the time stamp at decision as 0, after decision, push the time stamp one step forward
         % for chains already stopped, sample according to sac_ax untill max(sac_ax)
-        smpl = (ti == onset_of_trigger + rt + sac_ax(sum(sac_ax<=0)+min(tpafterward,sum(sac_ax>0)))) & (tpafterward <= sum(sac_ax>0));
+        smpl = (ti == rt + sac_ax(sum(sac_ax<=0)+min(tpafterward,sum(sac_ax>0)))) & (tpafterward <= sum(sac_ax>0));
         tplist = unique(tpafterward(smpl));
         for si = 1:numel(tplist) % loop over different time stamps
             updatecells = smpl & (tpafterward == tplist(si));
@@ -303,11 +258,11 @@ for i = 1:size(rt,1)
         m_mr1cD(:,i,j) = mean(mr1cD([-min(sac_ax) + sac_ax(sac_ax < 0)' + 1, -min(sac_ax)+(1:sum(sac_ax>=0))],i,j,choose1),4,'omitnan');
         m_mr2cD(:,i,j) = mean(mr2cD([-min(sac_ax) + sac_ax(sac_ax < 0)' + 1, -min(sac_ax)+(1:sum(sac_ax>=0))],i,j,choose1),4,'omitnan');
         % only look at the data more than half numbers of trials
-        mRT = median(rt(i,j,choose1)) + round(mean(triggert - presentt,'all')/dt); % median rt for trials choosing R1,  noticing rt = Inf in non-choice trials
-        m_mr1c(dot_ax >= mRT + time_spc,i,j) = NaN;
-        m_mr2c(dot_ax >= mRT + time_spc,i,j) = NaN;
-        m_mr1cD(sac_ax <= -mRT + time_spcD,i,j) = NaN;
-        m_mr2cD(sac_ax <= -mRT + time_spcD,i,j) = NaN;
+        % mRT = median(rt(i,j,choose1)); % median rt for trials choosing R1,  noticing rt = Inf in non-choice trials
+        % m_mr1c(dot_ax >= mRT + time_spc,i,j) = NaN;
+        % m_mr2c(dot_ax >= mRT + time_spc,i,j) = NaN;
+        % m_mr1cD(sac_ax <= -mRT + time_spcD,i,j) = NaN;
+        % m_mr2cD(sac_ax <= -mRT + time_spcD,i,j) = NaN;
     end
 end
 m_mr1c = gather(squeeze(m_mr1c));

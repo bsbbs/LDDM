@@ -1,4 +1,4 @@
-function [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDM_FitDynmc7Params_QMLE_GPU(params, dataDynmc, dataBhvr, sims)
+function [Chi2, N, nLL, BIC, AIC, rtmat, choicemat, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDM_FitDynmc7Params_QMLE_GPU(params, dataDynmc, dataBhvr, sims)
 % reload Roitman's data, processed
 dot_ax = dataDynmc.dot_ax;
 sac_ax = dataDynmc.sac_ax;
@@ -71,22 +71,20 @@ for i = 1:4
             fit = sm_mr2cD(sac_ax<=-30,:);
             dat = m_mr2cD(sac_ax<=-30,:);
     end
-    fit(isnan(fit)) = 0; % replace the missing values as zero, which will drive a large devi
+    fit(isnan(fit)) = 0; % replace the missing values as zero, which will drive a large deviance from the data values
     sse = (fit - dat).^2;
-    % Nsse = sum(~isnan(sse(:)),1);
     Nsse = sum(~isnan(sse(:)));
     Chi2 = Chi2 + sum(sse(:), 'omitnan');
-    N = N + gather(Nsse);
+    N = N + Nsse;
 end
-weight = 1; % give weight of the dynamic in the cost function
-Chi2 = gather(Chi2)*weight;
+
 
 %% for reaction time by histogram
 % QMLE, quantile maximum likelihood estimation
 % reference: Heathcote & Australia, and Mewhort, 2002.
 % Chi-square, reference: Ratcliff & McKoon, 2007.
 LL = log(0);
-Chi2 = 0;
+%Chi2 = 0;
 h = figure;
 for vi = 1:6
     En(vi) = numel(rtmat(:,vi));
@@ -111,8 +109,8 @@ for vi = 1:6
 end
 close(h);
 LL = sum(ON(:).*f(:),'omitnan');
-Chi2vec = (EN - ON_adj).^2./EN;
-Chi2 = sum(Chi2vec(:),'omitnan');
+%Chi2vec = (EN - ON_adj).^2./EN;
+%Chi2 = sum(Chi2vec(:),'omitnan');
 n = sum(~isnan(ON(:).*f(:)));
 k = numel(params);
 BIC = k*log(n) - 2*LL;
