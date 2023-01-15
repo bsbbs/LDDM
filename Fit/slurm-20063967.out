@@ -1,0 +1,261 @@
+ERROR: Unable to locate a modulefile for 'cuda/11.0'
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2021 The MathWorks, Inc.
+             R2021a Update 4 (9.10.0.1710957) 64-bit (glnxa64)
+                                July 1, 2021
+
+ 
+To get started, type doc.
+For product information, visit www.mathworks.com.
+ 
+sortNum1 
+Hostgpu-0003_90287238 
+Starting parallel pool (parpool) using the 'local' profile ...
+Connected to the parallel pool (number of workers: 20).
+
+fvalbest =
+
+   7.4160e+04
+
+test succeeded
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.77.174.71) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.77.174.71) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.77.174.71) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.77.174.71) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.77.174.71) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.77.174.71) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.77.174.71) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.77.174.71) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.77.174.71) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.77.174.71) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.77.174.71) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+64 bytes from a23-77-174-71.deploy.static.akamaitechnologies.com (23.77.174.71): icmp_seq=1 ttl=42 time=4.93 ms
+
+--- e15316.dsca.akamaiedge.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.936/4.936/4.936/0.000 ms
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from a23-77-174-71.deploy.static.akamaitechnologies.com (23.77.174.71): icmp_seq=1 ttl=42 time=5.04 ms
+
+--- e15316.dsca.akamaiedge.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 5.041/5.041/5.041/0.000 ms
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.57 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.576/4.576/4.576/0.000 ms
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from a23-77-174-71.deploy.static.akamaitechnologies.com (23.77.174.71): icmp_seq=1 ttl=42 time=4.93 ms
+
+--- e15316.dsca.akamaiedge.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.930/4.930/4.930/0.000 ms
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from a23-77-174-71.deploy.static.akamaitechnologies.com (23.77.174.71): icmp_seq=1 ttl=42 time=5.04 ms
+
+--- e15316.dsca.akamaiedge.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 5.044/5.044/5.044/0.000 ms
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from a23-77-174-71.deploy.static.akamaitechnologies.com (23.77.174.71): icmp_seq=1 ttl=42 time=4.92 ms
+
+--- e15316.dsca.akamaiedge.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.926/4.926/4.926/0.000 ms
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from a23-77-174-71.deploy.static.akamaitechnologies.com (23.77.174.71): icmp_seq=1 ttl=42 time=4.94 ms
+
+--- e15316.dsca.akamaiedge.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.947/4.947/4.947/0.000 ms
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.63 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.631/4.631/4.631/0.000 ms
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from a23-77-174-71.deploy.static.akamaitechnologies.com (23.77.174.71): icmp_seq=1 ttl=42 time=5.00 ms
+
+--- e15316.dsca.akamaiedge.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 5.005/5.005/5.005/0.000 ms
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.54 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.546/4.546/4.546/0.000 ms
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from a23-77-174-71.deploy.static.akamaitechnologies.com (23.77.174.71): icmp_seq=1 ttl=42 time=4.89 ms
+
+--- e15316.dsca.akamaiedge.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.895/4.895/4.895/0.000 ms
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from a23-77-174-71.deploy.static.akamaitechnologies.com (23.77.174.71): icmp_seq=1 ttl=42 time=5.02 ms
+
+--- e15316.dsca.akamaiedge.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 5.029/5.029/5.029/0.000 ms
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from a23-77-174-71.deploy.static.akamaitechnologies.com (23.77.174.71): icmp_seq=1 ttl=42 time=4.97 ms
+
+--- e15316.dsca.akamaiedge.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.979/4.979/4.979/0.000 ms
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.56 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.561/4.561/4.561/0.000 ms
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from a23-77-174-71.deploy.static.akamaitechnologies.com (23.77.174.71): icmp_seq=1 ttl=42 time=4.88 ms
+
+--- e15316.dsca.akamaiedge.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.889/4.889/4.889/0.000 ms
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.75 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.750/4.750/4.750/0.000 ms
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.73 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.736/4.736/4.736/0.000 ms
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.62 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.621/4.621/4.621/0.000 ms
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.64 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.649/4.649/4.649/0.000 ms
+Beginning optimization of a STOCHASTIC objective fcn.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=4.63 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.632/4.632/4.632/0.000 ms
+Beginning optimization of a STOCHASTIC objective fcn.
+ Iteration    f-count      E[f(x)]        SD[f(x)]           MeshScale          Method          Actions
+     0           1         74159.4             NaN               1                              
+     0          21         7746.57             NaN               1            Initial mesh      
+ Iteration    f-count      E[f(x)]        SD[f(x)]           MeshScale          Method          Actions
+     0           1         20409.6             NaN               1                              
+     0          21         7839.86             NaN               1            Initial mesh      
+ Iteration    f-count      E[f(x)]        SD[f(x)]           MeshScale          Method          Actions
+     0           1           11423             NaN               1                              
+     0          21         7874.09             NaN               1            Initial mesh      
+ Iteration    f-count      E[f(x)]        SD[f(x)]           MeshScale          Method          Actions
+     0           1          281430             NaN               1                              
+     0          21         8495.36             NaN               1            Initial mesh      
+ Iteration    f-count      E[f(x)]        SD[f(x)]           MeshScale          Method          Actions
+     0           1         11041.4             NaN               1                              
+     0          21         8112.57             NaN               1            Initial mesh      
+ Iteration    f-count      E[f(x)]        SD[f(x)]           MeshScale          Method          Actions
+     0           1         14685.7             NaN               1                              
+     0          21         8017.55             NaN               1            Initial mesh      
+ Iteration    f-count      E[f(x)]        SD[f(x)]           MeshScale          Method          Actions
+     0           1         11830.7             NaN               1                              
+     0          21         8794.53             NaN               1            Initial mesh      
+ Iteration    f-count      E[f(x)]        SD[f(x)]           MeshScale          Method          Actions
+     0           1         19241.7             NaN               1                              
+     0          21         8280.57             NaN               1            Initial mesh      
+ Iteration    f-count      E[f(x)]        SD[f(x)]           MeshScale          Method          Actions
+     0           1         8996.82             NaN               1                              
+     0          21         7931.12             NaN               1            Initial mesh      
+ Iteration    f-count      E[f(x)]        SD[f(x)]           MeshScale          Method          Actions
+     0           1         14059.3             NaN               1                              
+     0          21         7546.42             NaN               1            Initial mesh      
+ Iteration    f-count      E[f(x)]        SD[f(x)]           MeshScale          Method          Actions
+     0           1         8633.74             NaN               1                              
+     0          21          8220.1             NaN               1            Initial mesh      
+ Iteration    f-count      E[f(x)]        SD[f(x)]           MeshScale          Method          Actions
+     0           1         36539.6             NaN               1                              
+     0          21         7635.78             NaN               1            Initial mesh      
+ Iteration    f-count      E[f(x)]        SD[f(x)]           MeshScale          Method          Actions
+     0           1         76523.4             NaN               1                              
+     0          21         8757.05             NaN               1            Initial mesh      
+ Iteration    f-count      E[f(x)]        SD[f(x)]           MeshScale          Method          Actions
+     0           1          149807             NaN               1                              
+     0          21         7318.16             NaN               1            Initial mesh      
+ Iteration    f-count      E[f(x)]        SD[f(x)]           MeshScale          Method          Actions
+     0           1         11618.6             NaN               1                              
+     0          21         7158.76             NaN               1            Initial mesh      
+ Iteration    f-count      E[f(x)]        SD[f(x)]           MeshScale          Method          Actions
+     0           1         19789.3             NaN               1                              
+     0          21         8361.26             NaN               1            Initial mesh      
+ Iteration    f-count      E[f(x)]        SD[f(x)]           MeshScale          Method          Actions
+     0           1         11286.7             NaN               1                              
+     0          21         8976.69             NaN               1            Initial mesh      
+ Iteration    f-count      E[f(x)]        SD[f(x)]           MeshScale          Method          Actions
+     0           1         19381.6             NaN               1                              
+     0          21         7488.56             NaN               1            Initial mesh      
+ Iteration    f-count      E[f(x)]        SD[f(x)]           MeshScale          Method          Actions
+     0           1         10190.3             NaN               1                              
+     0          21         8202.55             NaN               1            Initial mesh      
+ Iteration    f-count      E[f(x)]        SD[f(x)]           MeshScale          Method          Actions
+     0           1          110846             NaN               1                              
+     0          21          8715.5             NaN               1            Initial mesh      
+     1          23         6822.71         144.756               1         Successful poll      Train
+     2          24         5320.81         144.749               1    Successful search (ES-wcm)      
+     1          34         7269.34         144.747               1         Successful poll      Train
+     1          34         6195.41         144.749               1         Successful poll      Train
+     1          34          7463.4        0.980837               1         Successful poll      Train
+     1          33         7790.74          1.0064               1         Successful poll      Train
+     1          34         7032.14        0.993402               1         Successful poll      Train
+     1          35         7001.89         1.36777               1         Successful poll      Train
+     1          35         8017.55               1             0.5             Refine grid      Train
+     1          35         7396.02        0.985075               1         Successful poll      Train
+     2          36         6685.23        0.980837               1    Successful search (ES-wcm)      
+     2          38         6092.12         1.00291               1    Successful search (ES-wcm)      
+     2          36         6487.26        0.985074               1    Successful search (ES-wcm)      
+     2          38         7572.07        0.992745             0.5    Successful search (ES-wcm)      
+     2          36         7275.45          1.0064               1    Successful search (ES-wcm)      
+     2          38          5675.8        0.992457               1    Successful search (ES-ell)      
+     2          39         7426.76        0.992745             0.5    Successful search (ES-wcm)      
+     2          41         5621.19         1.00291               1    Successful search (ES-wcm)      
+     2          40         7014.44        0.992745             0.5    Successful search (ES-wcm)      
+     2          38         6875.74         0.96858               1    Successful search (ES-ell)      
+     2          40         6871.78        0.992673               1    Successful search (ES-ell)      
+     2          41         6723.88        0.992763               1    Successful search (ES-ell)      
+     2          42         6801.09        0.992745             0.5    Successful search (ES-ell)      
+     2          42         6716.16        0.992673               1    Successful search (ES-ell)      
+     2          40         6432.18        0.968578               1    Successful search (ES-ell)      
+     1          32         7542.97         5.30528               1         Successful poll      Train
+     1          34            7077        0.964447               1         Successful poll      Train
+     2          44         5965.23        0.992763               1    Successful search (ES-ell)      
+     1          35         6842.93         9.52323               1         Successful poll      Train
+     2          45          5183.8        0.992458               1    Successful search (ES-ell)      
+     1          34         7118.81         144.749               1         Successful poll      Train
+     1          35         7406.82         144.749               1         Successful poll      Train
+     1          34          6653.5         15.5831               1         Successful poll      Train
+     1          34            7016         6.48205               1         Successful poll      Train
+     2          36         6566.33         9.52323               1    Successful search (ES-wcm)      
+     1          35         7138.43         144.749               1         Successful poll      Train
+     1          35         6580.75        0.969895               1         Successful poll      Train
+     2          43         6033.44         0.96858               1    Successful search (ES-wcm)      
+     2          47         6542.06        0.992672               1    Successful search (ES-ell)      
+     2          47         5033.82        0.992457               1    Successful search (ES-ell)      

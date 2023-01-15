@@ -1,0 +1,99 @@
+ERROR: Unable to locate a modulefile for 'cuda/11.0'
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2021 The MathWorks, Inc.
+             R2021a Update 4 (9.10.0.1710957) 64-bit (glnxa64)
+                                July 1, 2021
+
+ 
+To get started, type doc.
+For product information, visit www.mathworks.com.
+ 
+sortNum1 
+Hostgpu-0003_7832845 
+Starting parallel pool (parpool) using the 'local' profile ...
+Connected to the parallel pool (number of workers: 40).
+
+fvalbest =
+
+   9.5897e+03
+
+test succeeded
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.120.209) 56(84) bytes of data.
+64 bytes from server-108-138-120-209.jfk50.r.cloudfront.net (108.138.120.209): icmp_seq=1 ttl=238 time=5.69 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 5.694/5.694/5.694/0.000 ms
+Warning: Error in executing the logged function '@(params)LDDM_FitDynmc7Params_OLS_GPU(params,dataDynmc,dataBhvr,10240)' with input: [18.60107421875 1.301171875 30.83984375 0.187255859375 0.10439453125 0.2380859375 79.033203125]
+> In funlogger (line 113)
+In evalinitmesh (line 31)
+In bads (line 421)
+In parallel_function>make_general_channel/channel_general (line 832)
+In remoteParallelFunction (line 67)
+{Error using LDDM_Dynmc_gap_GPU (line 216)
+Out of memory on device. To view more detail about available memory on the GPU,
+use 'gpuDevice()'. If the problem persists, reset the GPU by calling
+'gpuDevice(1)'.
+
+Error in LDDM_FitDynmc7Params_OLS_GPU (line 47)
+[rtmat, choicemat, ~, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] =
+LDDM_Dynmc_gap_GPU(Vinput, w, a, b,...
+
+Error in
+main_FitDynmc7Params_OLS_svr>@(params)LDDM_FitDynmc7Params_OLS_GPU(params,dataDynmc,dataBhvr,10240)
+(line 38)
+OLS = @(params) LDDM_FitDynmc7Params_OLS_GPU(params, dataDynmc, dataBhvr,
+10240);
+
+Error in funlogger (line 98)
+                fval = fun(x);
+
+Error in evalinitmesh (line 31)
+    [yval,optimState] = funlogger(funwrapper,u0,optimState,'iter');
+
+Error in bads (line 421)
+    evalinitmesh(u0,funwrapper,optimState,options,prnt);
+
+Error in main_FitDynmc7Params_OLS_svr (line 43)
+parfor i = 1:myCluster.NumWorkers*1
+} 

@@ -2,5 +2,5 @@
 cd /gpfs/data/glimcherlab/BoShen/LDDM/Fit
 module load cuda/11.0
 module load matlab/R2021a
-matlab -nodisplay -r main_FitBhvr7ParamsX100K_QMLE_svr
+matlab -nodisplay -r main_FitDynmc7Params_OLS_svr
 
