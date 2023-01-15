@@ -259,3 +259,7 @@ Beginning optimization of a STOCHASTIC objective fcn.
      2          43         6033.44         0.96858               1    Successful search (ES-wcm)      
      2          47         6542.06        0.992672               1    Successful search (ES-ell)      
      2          47         5033.82        0.992457               1    Successful search (ES-ell)      
+     2          36         6642.74         144.749               1    Successful search (ES-wcm)      
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd-gpu-0003: error: *** STEP 20063967.0 ON gpu-0003 CANCELLED AT 2023-01-15T15:24:26 ***
+slurmstepd-gpu-0003: error: *** JOB 20063967 ON gpu-0003 CANCELLED AT 2023-01-15T15:24:26 ***
