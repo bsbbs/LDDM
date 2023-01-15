@@ -86,7 +86,6 @@ if isstruct(Vinput)
     name = fieldnames(Vinput);
     V1mat = Vinput.(name{1});
     V2mat = Vinput.(name{2});
-    name = fieldnames(Vprior);
 else
     V1mat = Vinput(:,1);
     V2mat = Vinput(:,2);
@@ -101,6 +100,7 @@ dot_gap = round(dot_gap/dt);
 sac_gap = round(sac_gap/dt);
 % dot_ax = [-100:20:1000];
 % sac_ax = [-1000:20:300];
+sac_axp = sac_ax + sac_gap;
 time_spc = 100; % ms, to exclude activity within 100 msecs of eye movement initiation in calculating mrc
 % since there is a delay (sac_gap) between the dynamic hit boundry and
 % saccade behavior, the gap is counted.
@@ -134,8 +134,8 @@ D2 = (X*initialvals(3,2)) + InoiseD2;
 %% initialize variables
 mr1c = gpuArray.nan([numel(dot_ax), sizeComput]); % mean rates sorted at beginning of the dot motion task
 mr2c = gpuArray.nan([numel(dot_ax), sizeComput]);
-mr1cD = gpuArray.nan([-min(sac_ax)+sum(sac_ax >= 0), sizeComput]); 
-mr2cD = gpuArray.nan([-min(sac_ax)+sum(sac_ax >= 0), sizeComput]); % mean rates sorted at the time of decision,
+mr1cD = gpuArray.nan([-min(sac_axp)+1+sum(sac_axp > 0), sizeComput]); 
+mr2cD = gpuArray.nan([-min(sac_axp)+1+sum(sac_axp > 0), sizeComput]); % mean rates sorted at the time of decision,
 % buffering sample rate before decision is at 1ms, after decision is based on sac_ax
 rt = gpuArray.Inf(sizeComput);
 choice = gpuArray(zeros(sizeComput));
@@ -158,7 +158,7 @@ for ti = dot_gap:max(posttask_steps(:))
 
     % when all of the channel hit the decision boundary or timed out, stop simulation
     if stoprule == 1
-        if NComput == 0 && all(tpafterward(:) > sum(sac_ax>0))
+        if NComput == 0 && all(tpafterward(:) > sum(sac_axp>0))
             break;
         end
     end
@@ -195,7 +195,7 @@ for ti = dot_gap:max(posttask_steps(:))
     inside = (R1 >= threshArray) + (R2 >= threshArray);
     flip = (inside > 0) & (rt == Inf);
     NComput = NComput - sum(flip(:));
-    rt(flip) = ti + sac_gap;
+    rt(flip) = ti;
         
     choice = choice + ((R2 > R1) - (R1 > R2) +3) .* flip; % 2 choose R1, 4 choose R2, 3 R1 = R2, 0 choice is not made
     Continue = choice == 0;
@@ -205,7 +205,7 @@ for ti = dot_gap:max(posttask_steps(:))
     % count the gap from the boundary hitting to saccade
     loc = find(flip);
     for excl = 1:numel(loc)
-        excldt = rt(loc(excl)) - time_spc;
+        excldt = rt(loc(excl)) - time_spc + sac_gap;
         mr1c(dot_ax > excldt,loc(excl)) = NaN;
         mr2c(dot_ax > excldt,loc(excl)) = NaN;
     end
@@ -213,21 +213,21 @@ for ti = dot_gap:max(posttask_steps(:))
     if ti > time_spcD % wait for recording until 200ms after stimuli on
         % so automatically exclude data in m_mrcD within 200 ms of onset_of_stimuli (defined in time_spcD)
         % for chains are still going, update the values saved before sac
-        mr1cD(1:(-min(sac_ax)-1), Continue) = mr1cD(2:-min(sac_ax),Continue); % push the values into the queue
-        mr1cD(-min(sac_ax),Continue) = R1(Continue); % update R1 from saved buffer
-        mr2cD(1:(-min(sac_ax)-1), Continue) = mr2cD(2:-min(sac_ax),Continue); % push into the queue
-        mr2cD(-min(sac_ax),Continue) = R2(Continue);
+        mr1cD(1:(-min(sac_axp)-1), Continue) = mr1cD(2:-min(sac_axp),Continue); % push the values into the queue
+        mr1cD(-min(sac_axp),Continue) = R1(Continue); % update R1 from saved buffer
+        mr2cD(1:(-min(sac_axp)-1), Continue) = mr2cD(2:-min(sac_axp),Continue); % push into the queue
+        mr2cD(-min(sac_axp),Continue) = R2(Continue);
         % for chains just made decision
-        mr1cD(-min(sac_ax)+1,flip) = R1(flip);
-        mr2cD(-min(sac_ax)+1,flip) = R2(flip);
+        mr1cD(-min(sac_axp)+1,flip) = R1(flip);
+        mr2cD(-min(sac_axp)+1,flip) = R2(flip);
         tpafterward(flip) = 1; % mark the time stamp at decision as 0, after decision, push the time stamp one step forward
         % for chains already stopped, sample according to sac_ax untill max(sac_ax)
-        smpl = (ti == rt + sac_ax(sum(sac_ax<=0)+min(tpafterward,sum(sac_ax>0)))) & (tpafterward <= sum(sac_ax>0));
+        smpl = (ti == rt + sac_axp(sum(sac_axp<=0)+min(tpafterward,sum(sac_axp>0)))) & (tpafterward <= sum(sac_axp>0));
         tplist = unique(tpafterward(smpl));
         for si = 1:numel(tplist) % loop over different time stamps
             updatecells = smpl & (tpafterward == tplist(si));
-            mr1cD(-min(sac_ax)+1+tplist(si), updatecells) = R1(updatecells);
-            mr2cD(-min(sac_ax)+1+tplist(si), updatecells) = R2(updatecells);
+            mr1cD(-min(sac_axp)+1+tplist(si), updatecells) = R1(updatecells);
+            mr2cD(-min(sac_axp)+1+tplist(si), updatecells) = R2(updatecells);
         end
         tpafterward = tpafterward + smpl; % push forward the time step after recorded
     end
@@ -251,8 +251,8 @@ for i = 1:size(rt,1)
         choose1 = choice(i,j,:) == 1; % mr1cD(memolen,i,j,:) > mr2cD(memolen,i,j,:); % argmaxR(i,j,:) == 1;
         m_mr1c(:,i,j) = mean(mr1c(:,i,j,choose1),4,'omitnan');
         m_mr2c(:,i,j) = mean(mr2c(:,i,j,choose1),4,'omitnan');
-        m_mr1cD(:,i,j) = mean(mr1cD([-min(sac_ax) + sac_ax(sac_ax < 0)' + 1, -min(sac_ax)+(1:sum(sac_ax>=0))],i,j,choose1),4,'omitnan');
-        m_mr2cD(:,i,j) = mean(mr2cD([-min(sac_ax) + sac_ax(sac_ax < 0)' + 1, -min(sac_ax)+(1:sum(sac_ax>=0))],i,j,choose1),4,'omitnan');
+        m_mr1cD(:,i,j) = mean(mr1cD([(-min(sac_axp) + 1) + sac_axp(sac_axp <= 0)', -min(sac_axp)+1+(1:sum(sac_axp>0))],i,j,choose1),4,'omitnan');
+        m_mr2cD(:,i,j) = mean(mr2cD([(-min(sac_axp) + 1) + sac_axp(sac_axp <= 0)', -min(sac_axp)+1+(1:sum(sac_axp>0))],i,j,choose1),4,'omitnan');
         % only look at the data more than half numbers of trials
         % mRT = median(rt(i,j,choose1)); % median rt for trials choosing R1,  noticing rt = Inf in non-choice trials
         % m_mr1c(dot_ax >= mRT + time_spc,i,j) = NaN;
@@ -265,6 +265,6 @@ m_mr1c = gather(squeeze(m_mr1c));
 m_mr2c = gather(squeeze(m_mr2c));
 m_mr1cD = gather(squeeze(m_mr1cD));
 m_mr2cD = gather(squeeze(m_mr2cD));
-rt = gather(rt)*dt;
+rt = gather(rt)*dt + sac_gap*dt;
 rt(rt == Inf) = nan;
 choice = gather(choice);
