@@ -24,7 +24,7 @@ thresh = params(7); % mean(mean(m_mr1cD(sac_ax == -20 | sac_ax == -40,:))); % = 
 % other fixed parameters
 dot_gap = .19;
 sac_gap = .03;
-ndt = .19 + .03; % sec, 190ms after stimuli onset, resort to the saccade side,
+% ndt = .19 + .03; % sec, 190ms after stimuli onset, resort to the saccade side,
 % the activities reaches peak 30ms before initiation of saccade, according to Roitman & Shadlen
 if nargin < 4
     sims = 10240;

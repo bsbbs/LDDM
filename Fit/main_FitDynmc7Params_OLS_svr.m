@@ -88,7 +88,7 @@ addpath(fullfile(Homedir,'Documents','LDDM','utils'));
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
 % cd('G:\My Drive\LDDM\Fit');
 cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
-out_dir = './Rslts/FitDynmc7Params_QMLE_SvrGPU';
+out_dir = './Rslts/FitDynmc7Params_OLS_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -101,8 +101,9 @@ dataBhvr = LoadRoitmanData('./RoitmanDataCode');
 randseed = 24356545;
 rng(randseed);
 % a, b, noiseinput, scale, tauRGI, nLL
-params = [14, 1.4, 25, .1, .2, .3, 70];
-params = [17.90482	1.33787	1.891267	780.842199	0.006212	0.069079	0.721249	16457.938945];
+params = [0.0000    0.6040   48.8001    0.0869    0.4686    0.4994   92.8301];
+%params = [14, 1.4, 25, .1, .2, .3, 70];
+%params = [17.90482	1.33787	1.891267	780.842199	0.006212	0.069079	0.721249	16457.938945];
 name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f_nLL%5.2f',params);
 if ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
     tic;
@@ -497,10 +498,11 @@ saveas(h,fullfile(plot_dir,sprintf('Proportion_Plot_%s.eps',name)),'epsc2');
 
 %% plot time course
 params = [9E-06	1.438371	25.389358	3243.067494	0.183473	0.229657	0.324556	16535.000107];
-name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f_nLL%5.2f',params);
+params = [0.0000    0.6040   48.8001    0.0869    0.4686    0.4994   92.8301];
+name = sprintf('a%2.2f_b%1.2f_sgm%2.3_tau%1.2f_%1.2f_%1.2f_thresh%5.2f',params);
 if ~exist(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),'file')
     tic;
-    [Chi2, N, nLL, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDM_FitDynmc7Params_QMLE_GPU(params, dataDynmc, dataBhvr, 1024);
+    [Chi2, N, nLL, BIC, AIC, rtmat, choicemat, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDM_FitDynmc7Params_OLS_GPU(params, dataDynmc, dataBhvr, 10240);
     %sm_mr1c = gather(sm_mr1c);
     save(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),...
         'rtmat','choicemat','sm_mr1c','sm_mr2c','sm_mr1cD','sm_mr2cD','params');
@@ -518,8 +520,10 @@ subplot(1,2,1);hold on;
 clear flip;
 colvec = flip({[218,166,109]/256,[155 110 139]/256,'#32716d','#af554d','#708d57','#3b5d64'});
 for ci = 1:6
-    lg(ci) = plot(dot_ax/1000, sm_mr1c(:,ci),'Color',colvec{ci},'LineWidth',lwd);
+    lg(ci) = plot(dot_ax/1000, sm_mr1c(:,ci),'-','Color',colvec{ci},'LineWidth',lwd);
     plot(dot_ax/1000, sm_mr2c(:,ci),'--','Color',colvec{ci},'LineWidth',lwd);
+    plot(dot_ax(dot_ax > 190)/1000, m_mr1c(dot_ax > 190,ci),'o','Color',colvec{ci},'MarkerSize',4);
+    plot(dot_ax(dot_ax > 190)/1000, m_mr2c(dot_ax > 190,ci),'o','Color',colvec{ci},'MarkerSize',4);
 end
 set(gca,'TickDir','out');
 H = gca;
@@ -537,6 +541,8 @@ plot([0,0],[20,71],'-k');
 for ci = 1:6
     lg(ci) = plot(sac_ax/1000, sm_mr1cD(:,ci),'Color',colvec{ci},'LineWidth',lwd);
     plot(sac_ax/1000, sm_mr2cD(:,ci),'--','Color',colvec{ci},'LineWidth',lwd);
+    plot(sac_ax(sac_ax < -30)/1000, m_mr1cD(sac_ax < -30,ci),'o','Color',colvec{ci},'MarkerSize',4);
+    plot(sac_ax(sac_ax < -30)/1000, m_mr2cD(sac_ax < -30,ci),'o','Color',colvec{ci},'MarkerSize',4);
 end
 xlim([-.8, .05]);
 set(gca,'TickDir','out');
