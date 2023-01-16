@@ -101,10 +101,9 @@ dataBhvr = LoadRoitmanData('./RoitmanDataCode');
 randseed = 24356545;
 rng(randseed);
 % a, b, noiseinput, scale, tauRGI, nLL
-params = [0.0000    0.6040   48.8001    0.0869    0.4686    0.4994   92.8301];
-%params = [14, 1.4, 25, .1, .2, .3, 70];
-%params = [17.90482	1.33787	1.891267	780.842199	0.006212	0.069079	0.721249	16457.938945];
-name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f_nLL%5.2f',params);
+params = [0.0036    1.6646   19.1890    0.1944    0.2150    0.1470   78.8105];
+%params = [0.0000    0.6040   48.8001    0.0869    0.4686    0.4994   92.8301];
+name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_tau%1.2f_%1.2f_%1.2f_thresh%5.2f',params);
 if ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
     tic;
     [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsX_QMLE_GPU(params, dataBhvr,102400);
@@ -499,6 +498,7 @@ saveas(h,fullfile(plot_dir,sprintf('Proportion_Plot_%s.eps',name)),'epsc2');
 %% plot time course
 params = [9E-06	1.438371	25.389358	3243.067494	0.183473	0.229657	0.324556	16535.000107];
 params = [0.0000    0.6040   48.8001    0.0869    0.4686    0.4994   92.8301];
+params = [0.0036    1.6646   19.1890    0.1944    0.2150    0.1470   78.8105];
 name = sprintf('a%2.2f_b%1.2f_sgm%2.3_tau%1.2f_%1.2f_%1.2f_thresh%5.2f',params);
 if ~exist(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),'file')
     tic;
@@ -556,8 +556,8 @@ savefigs(h,filename,plot_dir,fontsize,aspect);
 saveas(h,fullfile(plot_dir,[filename, '.fig']),'fig');
 
 %% raw data time course
-h = figure;hold on;
-% subplot(1,2,1);hold on;
+h = figure;
+subplot(1,2,1);hold on;
 plot(dot_ax, m_mr1c,'o-','LineWidth',1.5);
 plot(dot_ax, m_mr2c,'.-','LineWidth',1.5);
 set(gca,'FontSize',18);

@@ -10,8 +10,20 @@ q = dataBhvr.q;
 On = dataBhvr.On;
 ON = dataBhvr.ON;
 OP = dataBhvr.OP;
-
-% parameters to fit
+%% cut the dynamic data to save computatioanl power
+dot_gap = 190; % ms
+sac_gap = 30; % ms
+Lcut = find(dot_ax <= dot_gap, 1, 'last' )+1; % start right from the time point to fit
+Rcut = find(isnan(m_mr1c(:,1)), 1 )-1; % exclude time points where m_mr*c are nans
+dot_axcut = dot_ax(Lcut:Rcut); 
+m_mr1ccut = m_mr1c(Lcut:Rcut,:);
+m_mr2ccut = m_mr2c(Lcut:Rcut,:);
+LcutD = find(isnan(m_mr1cD(:,1)), 1, 'last' )+1; % exclude time points where m_mr*c are nans
+RcutD = find(sac_ax <= -sac_gap, 1, 'last' ); % stop right after the time point to fit
+sac_axcut = sac_ax(LcutD:RcutD);
+m_mr1cDcut = m_mr1cD(LcutD:RcutD,:);
+m_mr2cDcut = m_mr2cD(LcutD:RcutD,:);
+%% parameters to fit
 a = params(1)*eye(2);
 b = params(2)*eye(2);
 sgm = params(3);
@@ -22,8 +34,6 @@ Tau = [tauR tauG tauD];
 thresh = params(7); % mean(mean(m_mr1cD(sac_ax == -20 | sac_ax == -40,:))); % = 68.6391 % mean(max(m_mr1cD))+1 = 70.8399; 
 
 % other fixed parameters
-dot_gap = .19;
-sac_gap = .03;
 % ndt = .19 + .03; % sec, 190ms after stimuli onset, resort to the saccade side,
 % the activities reaches peak 30ms before initiation of saccade, according to Roitman & Shadlen
 if nargin < 4
@@ -45,7 +55,7 @@ Vinput = [V1, V2]*scale;
 % fprintf('GPU Simulations %i chains ...\t', sims);
 % tic;
 [rtmat, choicemat, ~, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDM_Dynmc_gap_GPU(Vinput, w, a, b,...
-    sgm, Tau, dur, dt, thresh, initialvals, stoprule, sims, dot_ax, sac_ax, dot_gap, sac_gap);
+    sgm, Tau, dur, dt, thresh, initialvals, stoprule, sims, dot_axcut, sac_axcut, dot_gap, sac_gap);
 rtmat = squeeze(rtmat)';
 choicemat = squeeze(choicemat)';
 % toc;
@@ -56,17 +66,17 @@ N = 0;
 for i = 1:4
     switch i
         case 1
-            fit = sm_mr1c(dot_ax>=round(dot_gap/dt),:);
-            dat = m_mr1c(dot_ax>=round(dot_gap/dt),:);
+            fit = sm_mr1c(dot_axcut>=dot_gap,:);
+            dat = m_mr1ccut(dot_axcut>=dot_gap,:);
         case 2
-            fit = sm_mr2c(dot_ax>=round(dot_gap/dt),:);
-            dat = m_mr2c(dot_ax>=round(dot_gap/dt),:);
+            fit = sm_mr2c(dot_axcut>=dot_gap,:);
+            dat = m_mr2ccut(dot_axcut>=dot_gap,:);
         case 3
-            fit = sm_mr1cD(sac_ax<=-round(sac_gap/dt),:);
-            dat = m_mr1cD(sac_ax<=-round(sac_gap/dt),:);
+            fit = sm_mr1cD(sac_axcut<=-sac_gap,:);
+            dat = m_mr1cDcut(sac_axcut<=-sac_gap,:);
         case 4
-            fit = sm_mr2cD(sac_ax<=-round(sac_gap/dt),:);
-            dat = m_mr2cD(sac_ax<=-round(sac_gap/dt),:);
+            fit = sm_mr2cD(sac_axcut<=-sac_gap,:);
+            dat = m_mr2cDcut(sac_axcut<=-sac_gap,:);
     end
     fit(isnan(fit)) = 0; % replace the missing values as zero, which will drive a large deviance from the data values
     sse = (fit - dat).^2;
@@ -74,8 +84,10 @@ for i = 1:4
     Chi2 = Chi2 + sum(sse(:), 'omitnan');
     N = N + Nsse;
 end
-
-
+sm_mr1c = [nans(Lcut-1,6); sm_mr1c; nans(numel(dot_ax)-Rcut,6)];
+sm_mr2c = [nans(Lcut-1,6); sm_mr2c; nans(numel(dot_ax)-Rcut,6)];
+sm_mr1cD = [nans(LcutD-1,6); sm_mr1cD; nans(numel(sac_ax)-RcutD,6)];
+sm_mr2cD = [nans(LcutD-1,6); sm_mr2cD; nans(numel(sac_ax)-RcutD,6)];
 %% for reaction time by histogram
 % QMLE, quantile maximum likelihood estimation
 % reference: Heathcote & Australia, and Mewhort, 2002.
