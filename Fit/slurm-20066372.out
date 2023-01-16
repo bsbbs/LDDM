@@ -1,0 +1,29 @@
+ERROR: Unable to locate a modulefile for 'cuda/11.0'
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2021 The MathWorks, Inc.
+             R2021a Update 4 (9.10.0.1710957) 64-bit (glnxa64)
+                                July 1, 2021
+
+ 
+To get started, type doc.
+For product information, visit www.mathworks.com.
+ 
+sortNum1 
+Hostgpu-0003_45254437 
+Starting parallel pool (parpool) using the 'local' profile ...
+Connected to the parallel pool (number of workers: 20).
+{Unrecognized function or variable 'nans'.
+
+Error in LDDM_FitDynmc7Params_OLS_GPU (line 87)
+sm_mr1c = [nans(Lcut-1,6); sm_mr1c; nans(numel(dot_ax)-Rcut,6)];
+
+Error in
+main_FitDynmc7Params_OLS_svr>@(params)LDDM_FitDynmc7Params_OLS_GPU(params,dataDynmc,dataBhvr,10240)
+(line 38)
+OLS = @(params) LDDM_FitDynmc7Params_OLS_GPU(params, dataDynmc, dataBhvr,
+10240);
+
+Error in main_FitDynmc7Params_OLS_svr (line 39)
+[fvalbest,~,~] = OLS(x0)
+} 

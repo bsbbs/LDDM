@@ -10,13 +10,13 @@ To get started, type doc.
 For product information, visit www.mathworks.com.
  
 sortNum1 
-Hostgpu-0003_23978126 
+Hostgpu-0002_64441583 
 Starting parallel pool (parpool) using the 'local' profile ...
 Connected to the parallel pool (number of workers: 20).
 
 fvalbest =
 
-   7.4205e+03
+   8.4164e+03
 
 test succeeded
 PING d3ag4hukkh62yn.cloudfront.net (13.35.94.236) 56(84) bytes of data.
@@ -34,14 +34,3 @@ PING d3ag4hukkh62yn.cloudfront.net (13.35.94.236) 56(84) bytes of data.
 PING d3ag4hukkh62yn.cloudfront.net (13.35.94.236) 56(84) bytes of data.
 PING d3ag4hukkh62yn.cloudfront.net (13.35.94.236) 56(84) bytes of data.
 PING d3ag4hukkh62yn.cloudfront.net (13.35.94.236) 56(84) bytes of data.
-PING d3ag4hukkh62yn.cloudfront.net (13.35.94.236) 56(84) bytes of data.
-PING d3ag4hukkh62yn.cloudfront.net (13.35.94.236) 56(84) bytes of data.
-PING d3ag4hukkh62yn.cloudfront.net (13.35.94.236) 56(84) bytes of data.
-PING d3ag4hukkh62yn.cloudfront.net (13.35.94.236) 56(84) bytes of data.
-PING d3ag4hukkh62yn.cloudfront.net (13.35.94.236) 56(84) bytes of data.
-64 bytes from server-13-35-94-236.jfk50.r.cloudfront.net (13.35.94.236): icmp_seq=1 ttl=238 time=4.66 ms
-
---- d3ag4hukkh62yn.cloudfront.net ping statistics ---
-1 packets transmitted, 1 received, 0% packet loss, time 0ms
-rtt min/avg/max/mdev = 4.663/4.663/4.663/0.000 ms
-Beginning optimization of a STOCHASTIC objective fcn.
