@@ -84,10 +84,10 @@ for i = 1:4
     Chi2 = Chi2 + sum(sse(:), 'omitnan');
     N = N + Nsse;
 end
-sm_mr1c = [nans(Lcut-1,6); sm_mr1c; nans(numel(dot_ax)-Rcut,6)];
-sm_mr2c = [nans(Lcut-1,6); sm_mr2c; nans(numel(dot_ax)-Rcut,6)];
-sm_mr1cD = [nans(LcutD-1,6); sm_mr1cD; nans(numel(sac_ax)-RcutD,6)];
-sm_mr2cD = [nans(LcutD-1,6); sm_mr2cD; nans(numel(sac_ax)-RcutD,6)];
+sm_mr1c = [nan(Lcut-1,6); sm_mr1c; nan(numel(dot_ax)-Rcut,6)];
+sm_mr2c = [nan(Lcut-1,6); sm_mr2c; nan(numel(dot_ax)-Rcut,6)];
+sm_mr1cD = [nan(LcutD-1,6); sm_mr1cD; nan(numel(sac_ax)-RcutD,6)];
+sm_mr2cD = [nan(LcutD-1,6); sm_mr2cD; nan(numel(sac_ax)-RcutD,6)];
 %% for reaction time by histogram
 % QMLE, quantile maximum likelihood estimation
 % reference: Heathcote & Australia, and Mewhort, 2002.
