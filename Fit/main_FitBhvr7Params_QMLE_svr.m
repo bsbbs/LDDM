@@ -7,13 +7,13 @@ mypool = parpool(myCluster, myCluster.NumWorkers);
 addpath(genpath('../../bads'));% updated bads, 2022
 addpath('../CoreFunctions/');
 addpath('./SvrCode/');
-out_dir = '../../LDDM_Output/FitRoitman/FitDynmc_QMLE_SvrGPU';
+out_dir = '../../LDDM_Output/FitRoitman/FitBhvr_QMLE_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
 %%
 % Take data from Roitman & Shadlen, 2002
-dataDynmc = load('./RoitmanDataCode/DynmcsData.mat');
+% dataDynmc = load('./RoitmanDataCode/DynmcsData.mat');
 dataBhvr = LoadRoitmanData('./RoitmanDataCode');
 % Fix random seed for reproducibility
 % rng(1);
@@ -23,10 +23,10 @@ num2str(t);
 rng(t);
 % Define optimization starting point and bounds
 %     a,    b, noise, tauR, tauG, tauD, thresh
-LB = [0    0.1   .1   [.001,.001,.001], 65];
-UB = [70   3	100  [1,1,1], 80];
-PLB = [15  .9	5    [.01 .01 .01], 68];
-PUB = [60   1.7	40   [.2 .2 .2], 74];
+LB = [0    0.6   .1   [.01,.01,.01], 65];
+UB = [60   2	100  [.5,.5,.5], 100];
+PLB = [15  .9	5    [.05 .1 .2], 75];
+PUB = [40   1.7	40   [.2 .3 .4], 80];
 
 
 % Randomize initial starting point inside plausible box
@@ -34,13 +34,12 @@ x0 = rand(1,numel(LB)) .* (PUB - PLB) + PLB;
 
 % likelihood function
 % parpool(6);
-% nLLfun = @(params) LDDMFitBhvr7ParamsX_QMLE_GPU(params, dataBhvr, 102400);
-OLS = @(params) LDDM_FitDynmc7Params_QMLE_GPU(params, dataDynmc, dataBhvr, 1024);
-[fvalbest,~,~] = OLS(x0)
+nLLfun = @(params) LDDM_FitBhvr7Params_QMLE_GPU(params, dataBhvr, 10240);
+[fvalbest,~,~] = nLLfun(x0)
 fprintf('test succeeded\n');
 % change starting points
 Collect = [];
-parfor i = 1:myCluster.NumWorkers*4
+parfor i = 1:myCluster.NumWorkers*1
     !ping -c 1 www.amazon.com
     t = datenum(clock)*10^10 - floor(datenum(clock)*100)*10^8 + sortNum*10^7 + i*10^5;
     %num2str(t);
@@ -66,7 +65,7 @@ parfor i = 1:myCluster.NumWorkers*4
     % with ** samples (10 by default). Note that this number counts towards the budget
     % of function evaluations.
     options.NoiseFinalSamples = 20;
-    [xest,fval,~,output] = bads(OLS,x0,LB,UB,PLB,PUB,[],options);
+    [xest,fval,~,output] = bads(nLLfun,x0,LB,UB,PLB,PUB,[],options);
     dlmwrite(fullfile(out_dir,'RsltList.txt'),[sortNum, i, t, xest fval],'delimiter','\t','precision','%.6f','-append');
 
     Collect(i).rndseed = t;
@@ -88,7 +87,7 @@ addpath(fullfile(Homedir,'Documents','LDDM','utils'));
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
 % cd('G:\My Drive\LDDM\Fit');
 cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
-out_dir = './Rslts/FitDynmc7Params_QMLE_SvrGPU';
+out_dir = './Rslts/FitBhvr_QMLE_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -101,9 +100,9 @@ dataBhvr = LoadRoitmanData('./RoitmanDataCode');
 randseed = 24356545;
 rng(randseed);
 % a, b, noiseinput, scale, tauRGI, nLL
-params = [14, 1.4, 25, .1, .2, .3, 70];
-params = [17.90482	1.33787	1.891267	780.842199	0.006212	0.069079	0.721249	16457.938945];
-name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f_nLL%5.2f',params);
+params = [0.0036    1.6646   19.1890    0.1944    0.2150    0.1470   78.8105];
+%params = [0.0000    0.6040   48.8001    0.0869    0.4686    0.4994   92.8301];
+name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_tau%1.2f_%1.2f_%1.2f_thresh%5.2f',params);
 if ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
     tic;
     [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsX_QMLE_GPU(params, dataBhvr,102400);
@@ -497,10 +496,12 @@ saveas(h,fullfile(plot_dir,sprintf('Proportion_Plot_%s.eps',name)),'epsc2');
 
 %% plot time course
 params = [9E-06	1.438371	25.389358	3243.067494	0.183473	0.229657	0.324556	16535.000107];
-name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f_nLL%5.2f',params);
+params = [0.0000    0.6040   48.8001    0.0869    0.4686    0.4994   92.8301];
+params = [0.0036    1.6646   19.1890    0.1944    0.2150    0.1470   78.8105];
+name = sprintf('a%2.2f_b%1.2f_sgm%2.3_tau%1.2f_%1.2f_%1.2f_thresh%5.2f',params);
 if ~exist(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),'file')
     tic;
-    [Chi2, N, nLL, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDM_FitDynmc7Params_QMLE_GPU(params, dataDynmc, dataBhvr, 1024);
+    [Chi2, N, nLL, BIC, AIC, rtmat, choicemat, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDM_FitDynmc7Params_OLS_GPU(params, dataDynmc, dataBhvr, 10240);
     %sm_mr1c = gather(sm_mr1c);
     save(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),...
         'rtmat','choicemat','sm_mr1c','sm_mr2c','sm_mr1cD','sm_mr2cD','params');
@@ -518,8 +519,10 @@ subplot(1,2,1);hold on;
 clear flip;
 colvec = flip({[218,166,109]/256,[155 110 139]/256,'#32716d','#af554d','#708d57','#3b5d64'});
 for ci = 1:6
-    lg(ci) = plot(dot_ax/1000, sm_mr1c(:,ci),'Color',colvec{ci},'LineWidth',lwd);
+    lg(ci) = plot(dot_ax/1000, sm_mr1c(:,ci),'-','Color',colvec{ci},'LineWidth',lwd);
     plot(dot_ax/1000, sm_mr2c(:,ci),'--','Color',colvec{ci},'LineWidth',lwd);
+    plot(dot_ax(dot_ax > 190)/1000, m_mr1c(dot_ax > 190,ci),'o','Color',colvec{ci},'MarkerSize',4);
+    plot(dot_ax(dot_ax > 190)/1000, m_mr2c(dot_ax > 190,ci),'o','Color',colvec{ci},'MarkerSize',4);
 end
 set(gca,'TickDir','out');
 H = gca;
@@ -537,6 +540,8 @@ plot([0,0],[20,71],'-k');
 for ci = 1:6
     lg(ci) = plot(sac_ax/1000, sm_mr1cD(:,ci),'Color',colvec{ci},'LineWidth',lwd);
     plot(sac_ax/1000, sm_mr2cD(:,ci),'--','Color',colvec{ci},'LineWidth',lwd);
+    plot(sac_ax(sac_ax < -30)/1000, m_mr1cD(sac_ax < -30,ci),'o','Color',colvec{ci},'MarkerSize',4);
+    plot(sac_ax(sac_ax < -30)/1000, m_mr2cD(sac_ax < -30,ci),'o','Color',colvec{ci},'MarkerSize',4);
 end
 xlim([-.8, .05]);
 set(gca,'TickDir','out');
@@ -550,8 +555,8 @@ savefigs(h,filename,plot_dir,fontsize,aspect);
 saveas(h,fullfile(plot_dir,[filename, '.fig']),'fig');
 
 %% raw data time course
-h = figure;hold on;
-% subplot(1,2,1);hold on;
+h = figure;
+subplot(1,2,1);hold on;
 plot(dot_ax, m_mr1c,'o-','LineWidth',1.5);
 plot(dot_ax, m_mr2c,'.-','LineWidth',1.5);
 set(gca,'FontSize',18);
