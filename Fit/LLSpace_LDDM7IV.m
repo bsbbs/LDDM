@@ -12,7 +12,7 @@ end
 
 
 %% load empirical data
-dataBhvr = LoadRoitmanData(fullfile(Glgdir,'RoitmanDataCode'));
+dataBhvr = LoadRoitmanData(fullfile(Glgdir,'Fit','RoitmanDataCode'));
 
 %% the best fitting parameters
 % a, b, noise, scale, tauR, tauG, tauD, nLL
@@ -52,7 +52,7 @@ Visualization(out_dir,filename, names, idx, 4);
 function [filename, nLLmat] = SpaceCheck(bestparams, names, ivec, jvec, idx, dataBhvr, out_dir)
 iN = length(ivec);
 jN = length(jvec);
-filename = sprintf('LLSpace_%s%i_%s%i', names{idx(1)}, iN, names{idx(2)}, jN);
+filename = sprintf('LLSpaceG20_%s%i_%s%i', names{idx(1)}, iN, names{idx(2)}, jN);
 if ~exist(fullfile(out_dir,[filename, '.mat']), 'file')
     nLLmat = NaN(iN, jN);
     for i = 1:iN

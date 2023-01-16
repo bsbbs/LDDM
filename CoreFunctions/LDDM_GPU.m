@@ -138,8 +138,8 @@ R1 = (X*initialvals(1,1)) + InoiseR1;
 R2 = (X*initialvals(1,2)) + InoiseR2;
 G1 = (X*initialvals(2,1)) + InoiseG1;
 G2 = (X*initialvals(2,2)) + InoiseG2;
-I1 = (X*initialvals(3,1)) + InoiseI1;
-I2 = (X*initialvals(3,2)) + InoiseI2;
+D1 = (X*initialvals(3,1)) + InoiseI1;
+D2 = (X*initialvals(3,2)) + InoiseI2;
 
 %% initialize variables
 rt = gpuArray.zeros(sizeComput);
@@ -195,10 +195,10 @@ for ti = -pretask_steps:max(posttask_steps(:))
     % update R, G, I
     G1old = G1;
     G2old = G2;
-    G1 = G1 + (-G1 + w11*R1 + w12*R2 - I1)/Tau2*dtArray + InoiseG1;
-    G2 = G2 + (-G2 + w21*R1 + w22*R2  - I2)/Tau2*dtArray + InoiseG2;
-    I1 = I1 + (-I1 + beta11*R1.*Continue.*BetasUp + beta12*R2.*Continue.*BetasUp)/Tau3*dtArray + InoiseI1;
-    I2 = I2 + (-I2 + beta21*R1.*Continue.*BetasUp + beta22*R2.*Continue.*BetasUp)/Tau3*dtArray + InoiseI2;
+    G1 = G1 + (-G1 + w11*R1 + w12*R2 - D1)/Tau2*dtArray + InoiseG1;
+    G2 = G2 + (-G2 + w21*R1 + w22*R2  - D2)/Tau2*dtArray + InoiseG2;
+    D1 = D1 + (-D1 + beta11*R1.*Continue.*BetasUp + beta12*R2.*Continue.*BetasUp)/Tau3*dtArray + InoiseI1;
+    D2 = D2 + (-D2 + beta21*R1.*Continue.*BetasUp + beta22*R2.*Continue.*BetasUp)/Tau3*dtArray + InoiseI2;
     R1 = R1 + (-R1 + (V1Array + V1prArray*(ti<0) + alpha11*R1+alpha12*R2).*Continue./(1+G1old))/Tau1*dtArray + InoiseR1;
     R2 = R2 + (-R2 + (V2Array + V2prArray*(ti<0) + alpha21*R1+alpha22*R2).*Continue./(1+G2old))/Tau1*dtArray + InoiseR2;
     % update noise
@@ -213,10 +213,10 @@ for ti = -pretask_steps:max(posttask_steps(:))
     G1 = G1 .* inside;
     inside = G2 >= 0;
     G2 = G2 .* inside;
-    inside = I1 >= 0;
-    I1 = I1 .* inside;
-    inside = I2 >= 0;
-    I2 = I2 .* inside;
+    inside = D1 >= 0;
+    D1 = D1 .* inside;
+    inside = D2 >= 0;
+    D2 = D2 .* inside;
     inside = R1 >= 0;
     R1 = R1 .* inside;
     inside = R2 >= 0;
