@@ -14,12 +14,12 @@ end
 
 
 %% load empirical data
-dataBhvr = LoadRoitmanData(fullfile(Glgdir,'RoitmanDataCode'));
+dataBhvr = LoadRoitmanData(fullfile(Glgdir,'Fit','RoitmanDataCode'));
 
 %% the best fitting parameters
-% a, b, noise, scale, tauR, tauG, tauD, nLL
-bestparams = [0	1.433631	25.35945	3251.289056	0.185325	0.224459	0.323132 16539.138186];
-names = {'alpha','beta','sgm','S','tauR','tauG','tauD'};
+% a, b, noise, scale, tauR, tauG, tauD, G0
+bestparams = [0	1.433631	25.35945	3251.289056	0.185325	0.224459	0.323132 0];
+names = {'alpha','beta','sgm','S','tauR','tauG','tauD', 'G0'};
 %% Check the space of alpha and beta
 ivec = linspace(0,100,41); % [0, 10.^[-1:.1:3]]; %10.^[-1:.01:3];
 jvec = linspace(0,4,41); %linspace(0,4,401);
@@ -50,6 +50,12 @@ jvec = 10.^[-2:.1:1]; %linspace(.025,1.025,41); % tauD, best fit = .32
 idx = [6, 7];
 [filename, nLLmat] = SpaceCheck(bestparams, names, ivec, jvec, idx, dataBhvr, out_dir);
 Visualization(out_dir,filename, names, idx, 4);
+%% Check the space of alpha and G0
+ivec = linspace(0,100,41); % [0, 10.^[-1:.1:3]]; %10.^[-1:.01:3];
+jvec = linspace(0,100,41); %
+idx = [1, 8];
+[filename, nLLmat] = SpaceCheck(bestparams, names, ivec, jvec, idx, dataBhvr, out_dir);
+Visualization(out_dir,filename, names, idx, 5);
 %% functions
 function [filename, nLLmat] = SpaceCheck(bestparams, names, ivec, jvec, idx, dataBhvr, out_dir)
 iN = length(ivec);

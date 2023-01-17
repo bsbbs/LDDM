@@ -15,6 +15,7 @@ ndt = .09 + .03; % sec, 90ms after stimuli onset, resort to the saccade side,
 % the activities reaches peak 30ms before initiation of saccade, according to Roitman & Shadlen
 presentt = 0; % changed for this version to move the fitting begin after the time point of recovery
 scale = params(4);
+G0 = params(8);
 
 % other fixed parameters
 if nargin < 3
@@ -33,7 +34,6 @@ w = [1 1; 1 1];
 Rstar = 32; % ~ 32 Hz at the bottom of initial fip, according to Roitman and Shadlen's data
 initialvals = [Rstar,Rstar; sum(w(1,:))*Rstar,sum(w(2,:))*Rstar; 0,0];
 eqlb = Rstar; % set equilibrium value before task as R^*
-G0 = 20;
 
 Tau = [tauR tauG tauI];
 % simulation
