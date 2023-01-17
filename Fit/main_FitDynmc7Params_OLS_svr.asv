@@ -500,7 +500,6 @@ saveas(h,fullfile(plot_dir,sprintf('Proportion_Plot_%s.eps',name)),'epsc2');
 params = [9E-06	1.438371	25.389358	3243.067494	0.183473	0.229657	0.324556	16535.000107];
 params = [0.0000    0.6040   48.8001    0.0869    0.4686    0.4994   92.8301];
 params = [0.0036    1.6646   19.1890    0.1944    0.2150    0.1470   78.8105];
-params = [14.6702    1.2822    6.0202    0.0414    0.4747    0.0101   70.5402];
 name = sprintf('a%2.2f_b%1.2f_sgm%2.3_tau%1.2f_%1.2f_%1.2f_thresh%5.2f',params);
 if ~exist(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),'file')
     tic;

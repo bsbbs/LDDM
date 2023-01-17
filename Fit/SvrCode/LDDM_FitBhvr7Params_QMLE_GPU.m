@@ -31,7 +31,8 @@ initialvals = [Rstar,Rstar; (sum(w(1,:)) - b(1,1))*Rstar,(sum(w(2,:)) - b(2,2))*
 V1 = (1 + Cohr)';
 V2 = (1 - Cohr)';
 Vinput = [V1, V2]*scale;
-
+dot_gap = 190;
+sac_gap = 30;
 % simulation
 % fprintf('GPU Simulations %i chains ...\t', sims);
 % tic;
