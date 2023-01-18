@@ -1,4 +1,4 @@
-function [nll1, BIC, AIC, rtmat, choicemat, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDM_FitDynmc7Params_OLS_GPU(params, dataDynmc, dataBhvr, sims)
+function [nLL, BIC, AIC, rtmat, choicemat, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDM_FitBoth9Params_GPU(params, dataDynmc, dataBhvr, sims)
 % reload Roitman's data, processed
 dot_ax = dataDynmc.dot_ax;
 sac_ax = dataDynmc.sac_ax;
@@ -31,7 +31,8 @@ tauG = params(5);
 tauD = params(6);
 Tau = [tauR tauG tauD];
 thresh = params(7); % mean(mean(m_mr1cD(sac_ax == -20 | sac_ax == -40,:))); % = 68.6391 % mean(max(m_mr1cD))+1 = 70.8399; 
-
+B0 = params(8);
+G0 = params(9);
 % other fixed parameters
 % ndt = .19 + .03; % sec, 190ms after stimuli onset, resort to the saccade side,
 % the activities reaches peak 30ms before initiation of saccade, according to Roitman & Shadlen
@@ -44,17 +45,19 @@ dur = 5;
 dt =.001;
 stoprule = 1;
 Rstar = mean(mean(m_mr1c(dot_ax == 180 | dot_ax == 200,:))); % = 43.1026 % ~ 32 Hz at the bottom of initial fip, according to Roitman and Shadlen's data
-scale = (1-params(1))*Rstar + (sum(w(1,:)) - params(2))*Rstar^2;
-initialvals = [Rstar,Rstar; (sum(w(1,:)) - b(1,1))*Rstar,(sum(w(2,:)) - b(2,2))*Rstar; b(1,1)*Rstar,b(2,2)*Rstar];
-V1 = (1 + Cohr)';
-V2 = (1 - Cohr)';
-Vinput = [V1, V2]*scale;
+scale = (1-trace(a)/2+G0)*Rstar + (mean(sum(w)) - trace(b)/2)*Rstar^2;
+initialvals = [Rstar,   Rstar;
+    (sum(w(1,:)) - b(1,1))*Rstar + G0,(sum(w(2,:)) - b(2,2))*Rstar + G0;
+    b(1,1)*Rstar, b(2,2)*Rstar];
+V1 = (1 + B0 + Cohr)';
+V2 = (1 + B0 - Cohr)';
+Vinput = [V1, V2]*scale/(1+B0);
 
 % simulation
 % fprintf('GPU Simulations %i chains ...\t', sims);
 % tic;
-[rtmat, choicemat, ~, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDM_Dynmc_gap_GPU(Vinput, w, a, b,...
-    sgm, Tau, dur, dt, thresh, initialvals, stoprule, sims, dot_axcut, sac_axcut, dot_gap, sac_gap);
+[rtmat, choicemat, ~, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDM_Full_Dynmc_gap_GPU(Vinput, w, a, b,...
+    sgm, Tau, dur, dt, thresh, initialvals, G0, stoprule, sims, dot_ax, sac_ax, dot_gap, sac_gap);
 rtmat = squeeze(rtmat)';
 choicemat = squeeze(choicemat)';
 % toc;

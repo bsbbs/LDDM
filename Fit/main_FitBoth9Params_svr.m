@@ -7,7 +7,7 @@ mypool = parpool(myCluster, myCluster.NumWorkers);
 addpath(genpath('../../bads'));% updated bads, 2022
 addpath('../CoreFunctions/');
 addpath('./SvrCode/');
-out_dir = '../../LDDM_Output/FitRoitman/FitDynmc_OLS_SvrGPU';
+out_dir = '../../LDDM_Output/FitRoitman/FitBoth_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -22,21 +22,19 @@ t = datenum(clock)*10^10 - floor(datenum(clock)*100)*10^8 + sortNum*10^7;
 num2str(t);
 rng(t);
 % Define optimization starting point and bounds
-%     a,    b, noise, tauR, tauG, tauD, thresh
-LB = [0    0.6   .1   [.01,.01,.01], 65];
-UB = [60   2	100  [.5,.5,.5], 100];
-PLB = [15  .9	5    [.05 .1 .2], 75];
-PUB = [40   1.7	40   [.2 .3 .4], 80];
+%     a,    b, noise, tauR, tauG, tauD, thresh, B0, G0
+LB = [0    0.6   4   [.01,.01,.01],    70,     0,   0];
+UB = [60   2	50  [.5,.5,.5],        88,        1,    60];
+PLB = [15  .9	20    [.05 .1 .2],       71,        0,  15];
+PUB = [40   1.7	30   [.2 .3 .4],        73,         .1, 40];
 
 
 % Randomize initial starting point inside plausible box
 x0 = rand(1,numel(LB)) .* (PUB - PLB) + PLB;
 
 % likelihood function
-% parpool(6);
-% nLLfun = @(params) LDDMFitBhvr7ParamsX_QMLE_GPU(params, dataBhvr, 102400);
-OLS = @(params) LDDM_FitDynmc7Params_OLS_GPU(params, dataDynmc, dataBhvr, 10240);
-[fvalbest,~,~] = OLS(x0)
+nLLfun = @(params) LDDM_FitBoth9Params_GPU(params, dataDynmc, dataBhvr, 10240);
+[fval0,~,~] = nLLfun(x0)
 fprintf('test succeeded\n');
 % change starting points
 Collect = [];
@@ -66,7 +64,7 @@ parfor i = 1:myCluster.NumWorkers*1
     % with ** samples (10 by default). Note that this number counts towards the budget
     % of function evaluations.
     options.NoiseFinalSamples = 20;
-    [xest,fval,~,output] = bads(OLS,x0,LB,UB,PLB,PUB,[],options);
+    [xest,fval,~,output] = bads(nLLfun,x0,LB,UB,PLB,PUB,[],options);
     dlmwrite(fullfile(out_dir,'RsltList.txt'),[sortNum, i, t, xest fval],'delimiter','\t','precision','%.6f','-append');
 
     Collect(i).rndseed = t;
@@ -88,7 +86,7 @@ addpath(fullfile(Homedir,'Documents','LDDM','utils'));
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
 % cd('G:\My Drive\LDDM\Fit');
 cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
-out_dir = './Rslts/FitDynmc7Params_OLS_SvrGPU';
+out_dir = './Rslts/FitBoth_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -500,6 +498,8 @@ saveas(h,fullfile(plot_dir,sprintf('Proportion_Plot_%s.eps',name)),'epsc2');
 params = [9E-06	1.438371	25.389358	3243.067494	0.183473	0.229657	0.324556	16535.000107];
 params = [0.0000    0.6040   48.8001    0.0869    0.4686    0.4994   92.8301];
 params = [0.0036    1.6646   19.1890    0.1944    0.2150    0.1470   78.8105];
+params = [14.6702    1.2822    6.0202    0.0414    0.4747    0.0101   70.5402];
+params = [4E-05	1.477076	42.066964	0.138429	0.03566	0.300504	84.082798];
 name = sprintf('a%2.2f_b%1.2f_sgm%2.3_tau%1.2f_%1.2f_%1.2f_thresh%5.2f',params);
 if ~exist(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),'file')
     tic;

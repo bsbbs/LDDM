@@ -21,7 +21,7 @@ names = {'alpha','beta','sgm','S','tauR','tauG','tauD'};
 %% Check the space of alpha and beta
 ivec = linspace(0,100,41); % [0, 10.^[-1:.1:3]]; %10.^[-1:.01:3];
 jvec = linspace(0,4,41); %linspace(0,4,401);
-idx = [1, 2];
+idx = [1, 2];g
 [filename, nLLmat] = SpaceCheck(bestparams, names, ivec, jvec, idx, dataBhvr, out_dir);
 Visualization(out_dir,filename, names, idx, 5);
 %% Check the space of noise and scale
