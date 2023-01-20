@@ -1,0 +1,196 @@
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2021 The MathWorks, Inc.
+             R2021a Update 4 (9.10.0.1710957) 64-bit (glnxa64)
+                                July 1, 2021
+
+ 
+To get started, type doc.
+For product information, visit www.mathworks.com.
+ 
+sortNum1 
+Hostgn-0003_14560691 
+Starting parallel pool (parpool) using the 'local' profile ...
+Connected to the parallel pool (number of workers: 40).
+
+fval0 =
+
+   2.2975e+04
+
+test succeeded
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.112.235) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.112.235) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.112.235) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.112.235) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING d3ag4hukkh62yn.cloudfront.net (108.138.112.235) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+PING e15316.dsca.akamaiedge.net (23.52.166.35) 56(84) bytes of data.
+64 bytes from a23-52-166-35.deploy.static.akamaitechnologies.com (23.52.166.35): icmp_seq=1 ttl=45 time=5.38 ms
+
+--- e15316.dsca.akamaiedge.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 5.382/5.382/5.382/0.000 ms
+Warning: Error in executing the logged function '@(params)LDDM_FitBoth9Params_GPU(params,dataDynmc,dataBhvr,10240)' with input: [32.48046875 1.069140625 22.9443359375 0.13115234375 0.1806640625 0.306640625 71.4423828125 0.052783203125 32.56591796875]
+> In funlogger (line 113)
+In evalinitmesh (line 31)
+In bads (line 421)
+In parallel_function>make_general_channel/channel_general (line 832)
+In remoteParallelFunction (line 67)
+64 bytes from server-108-138-112-235.jfk50.r.cloudfront.net (108.138.112.235): icmp_seq=1 ttl=238 time=4.81 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.811/4.811/4.811/0.000 ms
+Warning: Error in executing the logged function '@(params)LDDM_FitBoth9Params_GPU(params,dataDynmc,dataBhvr,10240)' with input: [34.82421875 0.90078125 29.51171875 0.16162109375 0.2572265625 0.3716796875 71.8740234375 0.041259765625 37.2412109375]
+> In funlogger (line 113)
+In evalinitmesh (line 31)
+In bads (line 421)
+In parallel_function>make_general_channel/channel_general (line 832)
+In remoteParallelFunction (line 67)
+64 bytes from a23-52-166-35.deploy.static.akamaitechnologies.com (23.52.166.35): icmp_seq=1 ttl=45 time=5.45 ms
+
+--- e15316.dsca.akamaiedge.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 5.457/5.457/5.457/0.000 ms
+Warning: Error in executing the logged function '@(params)LDDM_FitBoth9Params_GPU(params,dataDynmc,dataBhvr,10240)' with input: [32.63916015625 1.691015625 23.6474609375 0.0579833984375 0.162109375 0.31162109375 71.09375 0.0125 38.62060546875]
+> In funlogger (line 113)
+In evalinitmesh (line 31)
+In bads (line 421)
+In parallel_function>make_general_channel/channel_general (line 832)
+In remoteParallelFunction (line 67)
+64 bytes from a23-52-166-35.deploy.static.akamaitechnologies.com (23.52.166.35): icmp_seq=1 ttl=45 time=5.39 ms
+
+--- e15316.dsca.akamaiedge.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 5.390/5.390/5.390/0.000 ms
+Warning: Error in executing the logged function '@(params)LDDM_FitBoth9Params_GPU(params,dataDynmc,dataBhvr,10240)' with input: [39.74365234375 1.5203125 24.12109375 0.095556640625 0.2634765625 0.3583984375 71.2021484375 0.01669921875 19.541015625]
+> In funlogger (line 113)
+In evalinitmesh (line 31)
+In bads (line 421)
+In parallel_function>make_general_channel/channel_general (line 832)
+In remoteParallelFunction (line 67)
+64 bytes from a23-52-166-35.deploy.static.akamaitechnologies.com (23.52.166.35): icmp_seq=1 ttl=45 time=5.47 ms
+
+--- e15316.dsca.akamaiedge.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 5.477/5.477/5.477/0.000 ms
+Warning: Error in executing the logged function '@(params)LDDM_FitBoth9Params_GPU(params,dataDynmc,dataBhvr,10240)' with input: [24.58251953125 1.27734375 24.7900390625 0.0808349609375 0.2591796875 0.25048828125 71.7578125 0.002978515625 19.6875]
+> In funlogger (line 113)
+In evalinitmesh (line 31)
+In bads (line 421)
+In parallel_function>make_general_channel/channel_general (line 832)
+In remoteParallelFunction (line 67)
+64 bytes from server-108-138-112-235.jfk50.r.cloudfront.net (108.138.112.235): icmp_seq=1 ttl=238 time=4.79 ms
+
+--- d3ag4hukkh62yn.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 4.794/4.794/4.794/0.000 ms
+Warning: Error in executing the logged function '@(params)LDDM_FitBoth9Params_GPU(params,dataDynmc,dataBhvr,10240)' with input: [33.95751953125 1.475390625 29.4140625 0.1426513671875 0.23779296875 0.3759765625 71.9326171875 0.0400390625 21.87255859375]
+> In funlogger (line 113)
+In evalinitmesh (line 31)
+In bads (line 421)
+In parallel_function>make_general_channel/channel_general (line 832)
+In remoteParallelFunction (line 67)
+64 bytes from a23-52-166-35.deploy.static.akamaitechnologies.com (23.52.166.35): icmp_seq=1 ttl=45 time=5.44 ms
+
+--- e15316.dsca.akamaiedge.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 5.443/5.443/5.443/0.000 ms
+Warning: Error in executing the logged function '@(params)LDDM_FitBoth9Params_GPU(params,dataDynmc,dataBhvr,10240)' with input: [31.6748046875 1.316796875 22.900390625 0.1328369140625 0.1234375 0.245703125 71.6865234375 0.07353515625 25.51025390625]
+> In funlogger (line 113)
+In evalinitmesh (line 31)
+In bads (line 421)
+In parallel_function>make_general_channel/channel_general (line 832)
+In remoteParallelFunction (line 67)
+64 bytes from a23-52-166-35.deploy.static.akamaitechnologies.com (23.52.166.35): icmp_seq=1 ttl=45 time=5.49 ms
+
+--- e15316.dsca.akamaiedge.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 5.490/5.490/5.490/0.000 ms
+Warning: Error in executing the logged function '@(params)LDDM_FitBoth9Params_GPU(params,dataDynmc,dataBhvr,10240)' with input: [32.44384765625 1.340625 25.830078125 0.17861328125 0.10146484375 0.33779296875 72.2802734375 0.0734375 35.25146484375]
+> In funlogger (line 113)
+In evalinitmesh (line 31)
+In bads (line 421)
+In parallel_function>make_general_channel/channel_general (line 832)
+In remoteParallelFunction (line 67)
+64 bytes from a23-52-166-35.deploy.static.akamaitechnologies.com (23.52.166.35): icmp_seq=1 ttl=45 time=5.47 ms
+
+--- e15316.dsca.akamaiedge.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 5.471/5.471/5.471/0.000 ms
+Warning: Error in executing the logged function '@(params)LDDM_FitBoth9Params_GPU(params,dataDynmc,dataBhvr,10240)' with input: [32.236328125 1.612890625 29.833984375 0.092333984375 0.14033203125 0.25 71.162109375 0.007470703125 17.18505859375]
+> In funlogger (line 113)
+In evalinitmesh (line 31)
+In bads (line 421)
+In parallel_function>make_general_channel/channel_general (line 832)
+In remoteParallelFunction (line 67)
+64 bytes from a23-52-166-35.deploy.static.akamaitechnologies.com (23.52.166.35): icmp_seq=1 ttl=45 time=5.54 ms
+
+--- e15316.dsca.akamaiedge.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 5.541/5.541/5.541/0.000 ms
+Warning: Error in executing the logged function '@(params)LDDM_FitBoth9Params_GPU(params,dataDynmc,dataBhvr,10240)' with input: [17.81982421875 1.208203125 26.0498046875 0.1482177734375 0.1337890625 0.26904296875 72.5693359375 0.001513671875 36.76513671875]
+> In funlogger (line 113)
+In evalinitmesh (line 31)
+In bads (line 421)
+In parallel_function>make_general_channel/channel_general (line 832)
+In remoteParallelFunction (line 67)
+{Error using LDDM_Full_Dynmc_gap_GPU (line 214)
+Out of memory on device. To view more detail about available memory on the GPU,
+use 'gpuDevice()'. If the problem persists, reset the GPU by calling
+'gpuDevice(2)'.
+
+Error in LDDM_FitBoth9Params_GPU (line 59)
+[rtmat, choicemat, ~, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] =
+LDDM_Full_Dynmc_gap_GPU(Vinput, w, a, b,...
+
+Error in
+main_FitBoth9Params_svr>@(params)LDDM_FitBoth9Params_GPU(params,dataDynmc,dataBhvr,10240)
+(line 36)
+nLLfun = @(params) LDDM_FitBoth9Params_GPU(params, dataDynmc, dataBhvr, 10240);
+
+Error in funlogger (line 98)
+                fval = fun(x);
+
+Error in evalinitmesh (line 31)
+    [yval,optimState] = funlogger(funwrapper,u0,optimState,'iter');
+
+Error in bads (line 421)
+    evalinitmesh(u0,funwrapper,optimState,options,prnt);
+
+Error in main_FitBoth9Params_svr (line 41)
+parfor i = 1:myCluster.NumWorkers*1
+} 
