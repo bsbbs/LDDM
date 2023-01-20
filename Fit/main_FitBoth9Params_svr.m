@@ -7,7 +7,7 @@ mypool = parpool(myCluster, myCluster.NumWorkers);
 addpath(genpath('../../bads'));% updated bads, 2022
 addpath('../CoreFunctions/');
 addpath('./SvrCode/');
-out_dir = '../../LDDM_Output/FitRoitman/FitBoth_SvrGPU';
+out_dir = '../../LDDM_Output/FitRoitman/FitBoth9Params_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -86,7 +86,7 @@ addpath(fullfile(Homedir,'Documents','LDDM','utils'));
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
 % cd('G:\My Drive\LDDM\Fit');
 cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
-out_dir = './Rslts/FitBoth_SvrGPU';
+out_dir = './Rslts/FitBoth9Parmas_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -98,11 +98,9 @@ dataDynmc = load('./RoitmanDataCode/DynmcsData.mat');
 dataBhvr = LoadRoitmanData('./RoitmanDataCode');
 randseed = 24356545;
 rng(randseed);
-% a, b, noiseinput, scale, tauRGI, nLL
-params = [14.6702    1.2822    6.0202    0.0414    0.4747    0.0101   70.5402];
-% params = [0.0036    1.6646   19.1890    0.1944    0.2150    0.1470   78.8105];
-%params = [0.0000    0.6040   48.8001    0.0869    0.4686    0.4994   92.8301];
-name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_tau%1.2f_%1.2f_%1.2f_thresh%5.2f',params);
+%     a,    b, noise, tauR, tauG, tauD, thresh, B0, G0
+params = [13.7428    1.3510   10.3880    0.0100    0.3452    0.1810   74.9281    0.1178    0.0037];
+name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_tau%1.2f_%1.2f_%1.2f_thresh%5.2f_B0%1.4f_G0%1.4f',params);
 if ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
     tic;
     [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsX_QMLE_GPU(params, dataBhvr,102400);
@@ -495,18 +493,15 @@ h.PaperPosition = [0 0 3 10];
 saveas(h,fullfile(plot_dir,sprintf('Proportion_Plot_%s.eps',name)),'epsc2');
 
 %% plot time course
-params = [9E-06	1.438371	25.389358	3243.067494	0.183473	0.229657	0.324556	16535.000107];
-params = [0.0000    0.6040   48.8001    0.0869    0.4686    0.4994   92.8301];
-params = [0.0036    1.6646   19.1890    0.1944    0.2150    0.1470   78.8105];
-params = [14.6702    1.2822    6.0202    0.0414    0.4747    0.0101   70.5402];
-params = [4E-05	1.477076	42.066964	0.138429	0.03566	0.300504	84.082798];
-name = sprintf('a%2.2f_b%1.2f_sgm%2.3_tau%1.2f_%1.2f_%1.2f_thresh%5.2f',params);
+%     a,    b, noise, tauR, tauG, tauD, thresh, B0, G0
+params = [13.7428    1.3510   10.3880    0.0100    0.3452    0.1810   74.9281    0.1178    0.0037];
+name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_tau%1.2f_%1.2f_%1.2f_thresh%5.2f_B0%1.4f_G0%1.4f',params);
 if ~exist(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),'file')
     tic;
-    [Chi2, N, nLL, BIC, AIC, rtmat, choicemat, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDM_FitDynmc7Params_OLS_GPU(params, dataDynmc, dataBhvr, 10240);
+    [nLL, BIC, AIC, rtmat, choicemat, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDM_FitBoth9Params_GPU(params, dataDynmc, dataBhvr, 10240);
     %sm_mr1c = gather(sm_mr1c);
     save(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),...
-        'rtmat','choicemat','sm_mr1c','sm_mr2c','sm_mr1cD','sm_mr2cD','params');
+        'rtmat','nLL','AIC','BIC','choicemat','sm_mr1c','sm_mr2c','sm_mr1cD','sm_mr2cD','params');
     toc
 else
     load(fullfile(plot_dir, sprintf('PlotDynamic_%s.mat',name)));

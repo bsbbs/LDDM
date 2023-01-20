@@ -57,7 +57,7 @@ Vinput = [V1, V2]*scale/(1+B0);
 % fprintf('GPU Simulations %i chains ...\t', sims);
 % tic;
 [rtmat, choicemat, ~, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDM_Full_Dynmc_gap_GPU(Vinput, w, a, b,...
-    sgm, Tau, dur, dt, thresh, initialvals, G0, stoprule, sims, dot_ax, sac_ax, dot_gap, sac_gap);
+    sgm, Tau, dur, dt, thresh, initialvals, G0, stoprule, sims, dot_axcut, sac_axcut, dot_gap, sac_gap);
 rtmat = squeeze(rtmat)';
 choicemat = squeeze(choicemat)';
 % toc;
