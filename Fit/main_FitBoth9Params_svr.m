@@ -1,6 +1,8 @@
 addpath('../utils');
 numNode = 1;
-[sortNum, myCluster] = RndCtrl(numNode);
+myCluster  = parcluster();
+sortNum = 1;
+%[sortNum, myCluster] = RndCtrl(numNode);
 mypool = parpool(myCluster, myCluster.NumWorkers);
 
 %% Model fitting with Bayesian Adaptive Direct Search (BADS) optimization algorithm
