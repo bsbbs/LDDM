@@ -4,7 +4,7 @@ cd('G:\My Drive\LDDM\Fit');
 addpath(genpath('./bads-master_2019'));
 % addpath(genpath('~/Documents/LDDM/utils'));
 addpath(genpath('C:\Users\Bo\Documents\LDDM\utils'));
-out_dir = './Rslts/FitLouie2011/TrinaryLDDM';
+out_dir = './Rslts/FitLouie2011/LDDM';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -26,14 +26,14 @@ Vilist = unique(Vi);
 V1list = unique(V1);
 %% Values in equilibirum
 S = 1;
-G0 = 3;
-a = 2;
+G0 = 0;
+a = 1.3;
 B = 71;
 x = [S,         G0-a,       B];
-LB = [0.0001,  -10,         0];
-UB = [.1,       10,         140];
-PLB = [.001,    -1,         50];
-PUB = [.02,     2,          90];
+LB = [0.5,  -10,         0];
+UB = [2,       10,         140];
+PLB = [.9,    -1,         60];
+PUB = [1.2,     2,          80];
 tic;
 [RSS, R1s] = OLS(x,V1,V2,V3,FR);
 toc
@@ -110,7 +110,7 @@ B = x(3);
 R1s = [];
 for i = 1:numel(V1)
     % fprintf('%i.',i)
-    V = S.*([V1(i) V2(i) V3(i)]+B);
+    V = [V1(i) V2(i) V3(i)]+B;
     tmp = SolveEqlb(V,G0_a);
     if numel(tmp) > 1
         warning('Real positive solution more than 1. Recorded only the first value.');
@@ -118,6 +118,7 @@ for i = 1:numel(V1)
     R1s(i,:) = tmp(1);
 end
 % fprintf('\n');
+R1s = S*R1s/max(R1s)*max(FR);
 RSS = sum((R1s - FR).^2);
 end
 %%
