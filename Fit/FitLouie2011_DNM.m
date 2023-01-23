@@ -12,7 +12,7 @@ plot_dir = fullfile(out_dir,'graphics');
 if ~exist(plot_dir,'dir')
     mkdir(plot_dir);
 end
-load('./Data/LIPMeanData_TrinaryConditions.mat');
+load('./LouieData/LIPMeanData_TrinaryConditions.mat');
 mksz = 18;
 lwd = 2.0;
 %%
