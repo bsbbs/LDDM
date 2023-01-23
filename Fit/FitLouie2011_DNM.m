@@ -75,7 +75,7 @@ for i = 1:20
         B = xBest(3);
         RSS_min = fval;
         count = count + 1;
-        sprintf(['Iteration %d: ' repmat('%8.3f\t', 1, length(XBest)) '\n'], i, XBest)
+        sprintf(['Iteration %d: ' repmat('%8.3f\t', 1, length(xBest)) '\n'], i, xBest)
     end
     save(fullfile(out_dir,'FitRslt.mat'),'summaries','xBest', 'S', 'G0','B','RSS_min','reports');
 end
