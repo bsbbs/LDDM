@@ -1,9 +1,10 @@
 % Fit the mean firing rates from Louie, et al., 2011
-% cd('G:\My Drive\LDDM\Fit');
-addpath(genpath('~/Documents/LDDM/utils'));
-cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
+cd('G:\My Drive\LDDM\Fit');
+% cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
 addpath(genpath('./bads-master_2019'));
-out_dir = './Rslts/FitLouie2011/TrinaryS_M-a_B0';
+% addpath(genpath('~/Documents/LDDM/utils'));
+addpath(genpath('C:\Users\Bo\Documents\LDDM\utils'));
+out_dir = './Rslts/FitLouie2011/DNM';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -26,19 +27,17 @@ V1list = unique(V1);
 %% Values in equilibirum
 S = 1;
 M = 1;
-a = 50;
-I0 = 0.1;
-x = [S,a-M,I0];
-LB = [0.0001,  -10,  0];
+B = 0.1;
+x = [S,M,B];
+LB = [0.0001,  0,  0];
 UB = [.1,  10, 1];
-PLB = [.001,   -5,  .1];
-PUB = [.02,   0, .5];
+PLB = [.001,  0,  .1];
+PUB = [.02,   5, .5];
 tic;
 [RSS, R1s] = OLS(x,V1,V2,V3,FR);
 toc
 f = @(x)OLS(x, V1, V2, V3, FR);
 
-% opt = optimset('Display', 'on', 'MaxFunEvals', 1000, 'MaxIter', 1000, 'TolFun', 1e-3, 'Algorithm', 'active-set');
 count = 0;
 summaries = [];
 reports = [];
@@ -46,10 +45,7 @@ visulize = 1;
 options = bads('defaults');     % Default options
 options.Display = 'iter';
 options.UncertaintyHandling = false;    % Function is deterministic
-% options.UncertaintyHandling = true;    % Function is deterministic
-opt = optimoptions('fmincon');
-opt.Display = 'iter';
-opt.StepTolerance = .001;
+opt = optimset('Display', 'on', 'MaxFunEvals', 1000, 'MaxIter', 1000, 'TolFun', 1e-3, 'Algorithm', 'active-set');
 %% 
 if exist(fullfile(out_dir,'FitRslt.mat'),'file')
     load(fullfile(out_dir,'FitRslt.mat'));
@@ -69,21 +65,25 @@ for i = 1:20
         Rsquared = summaries(i,end);
     end
     
+    %%
+    fprintf('\n');
+    pause(.3);
     if ~isnan(fval) && (count == 0 || (fval < RSS_min && sum(x ~= xBest)>0))
         xBest = x;
         S = xBest(1);
-        B = xBest(3)/xBest(1);
-        M_a = -xBest(2);
+        G0 = xBest(2);
+        B = xBest(3);
         RSS_min = fval;
         count = count + 1;
-        %              sprintf(['Subject %d\t: Round-%d ' repmat('%8.3f\t', 1, length(XBest)) '\n'], jj, i, XBest)
+        sprintf(['Iteration %d: ' repmat('%8.3f\t', 1, length(XBest)) '\n'], i, XBest)
     end
-    save(fullfile(out_dir,'FitRslt.mat'),'summaries','xBest', 'S', 'M_a','B','RSS_min','reports');
+    save(fullfile(out_dir,'FitRslt.mat'),'summaries','xBest', 'S', 'G0','B','RSS_min','reports');
 end
+
 %%
 if visulize
     h = figure;  hold on;
-    filename = sprintf('FitLouie_bads_%i_S%0.3e_M-a%1.3f_B%2.1f_fval%1.3e_Rsqd%1.6f',i,S,M_a,B,fval,Rsquared);
+    filename = sprintf('FitLouie_bads_%i_S%0.3e_G0%1.3f_B%2.1f_fval%1.3e_Rsqd%1.6f',i,S,G0,B,fval,Rsquared);
     [RSS, R1s] = OLS(xBest,V1,V2,V3,FR);
     for ii = 1:numel(V1list)
         mask = V1 == V1list(ii);
@@ -97,20 +97,20 @@ if visulize
     xlabel('V_{out}');
     legend(flip(ln),flip({'V_{in} = 0','V_{in} = 50','V_{in} = 100','V_{in} = 200'}),'Box','off','fontsize',7);
     legend([flip(pts) flip(ln)],flip({'V_{in} = 0','V_{in} = 50','V_{in} = 100','V_{in} = 200','','','',''}),'NumColumns', 2, 'Box','off','fontsize',7);
-    savefigs(h, filename, plot_dir, 12, [3, 3]);
+    mysavefig(h, filename, plot_dir, 12, [3, 3]);
     saveas(h,fullfile(plot_dir,[filename, '.fig']));
 end
+
 %%
 function [RSS, R1s] = OLS(x,V1,V2,V3,FR)
 S = x(1);
-a_M = x(2);
-I0 = x(3);
-idx = 1;
+G0 = x(2);
+B = x(3);
 R1s = [];
 for i = 1:numel(V1)
     % fprintf('%i.',i)
-    V = (S.*[V1(i) V2(i) V3(i)]+I0).^idx;
-    tmp = SolveEqlb(V,a_M);
+    V = S.*([V1(i) V2(i) V3(i)]+B);
+    tmp = SolveEqlb(V,G0);
     if numel(tmp) > 1
         warning('Real positive solution more than 1. Recorded only the first value.');
     end
@@ -120,33 +120,33 @@ end
 RSS = sum((R1s - FR).^2);
 end
 %%
-function R1 = SolveEqlb(V,a_M)
+function R1 = SolveEqlb(V,G0)
 w = 1;
 v = 1;
 b = 0;
 syms R1 R2 R3
 if V(1) > 0 && V(2) > 0 && V(3) > 0
-    eqns = [(V(1)/R1 - (w - b)*R1 + a_M - v*R3)/v == R2, ... % dR1/dt = 0: R2 = (V(1)./R1 - (w - b)*R1 - (1-a) - v*R3)/v
-        (V(2)/R2 - (w - b)*R2 + a_M - v*R1)/v == R3, ... % dR2/dt = 0: R3 = (V(2)./R2 - (w - b)*R2 - (1-a) - v*R1)/v
-        (V(3)/R3 - (w - b)*R3 + a_M - v*R2)/v == R1]; % dR3/dt = 0: R1 = (V(3)./R3 - (w - b)*R3 - (1-a) - v*R2)/v;
+    eqns = [(V(1)/R1 - (w - b)*R1 - (1+G0) - v*R3)/v == R2, ... % dR1/dt = 0: R2 = (V(1)./R1 - (w - b)*R1 - (1-a) - v*R3)/v
+        (V(2)/R2 - (w - b)*R2 - (1+G0) - v*R1)/v == R3, ... % dR2/dt = 0: R3 = (V(2)./R2 - (w - b)*R2 - (1-a) - v*R1)/v
+        (V(3)/R3 - (w - b)*R3 - (1+G0) - v*R2)/v == R1]; % dR3/dt = 0: R1 = (V(3)./R3 - (w - b)*R3 - (1-a) - v*R2)/v;
     vars = [R1 R2 R3];
     [AnswR1, ~, ~] = solve(eqns, vars);
 elseif V(1) > 0 && (V(2) <= 0 || V(3) <= 0)
     if V(2) <= 0 && V(3) > 0
         warning('V2 <= 0');
-        eqns = [(V(1)/R1 - (w - b)*R1 + a_M - v*R3)/v == 0, ... % dR1/dt = 0: R2 = (V(1)./R1 - (w - b)*R1 - (1-a) - v*R3)/v
-            (V(3)/R3 - (w - b)*R3 + a_M)/v == R1]; % dR3/dt = 0: R1 = (V(3)./R3 - (w - b)*R3 - (1-a) - v*R2)/v;
+        eqns = [(V(1)/R1 - (w - b)*R1 - (1+G0) - v*R3)/v == 0, ... % dR1/dt = 0: R2 = (V(1)./R1 - (w - b)*R1 - (1-a) - v*R3)/v
+            (V(3)/R3 - (w - b)*R3 - (1+G0))/v == R1]; % dR3/dt = 0: R1 = (V(3)./R3 - (w - b)*R3 - (1-a) - v*R2)/v;
         vars = [R1 R3];
         [AnswR1, ~] = solve(eqns, vars);
     elseif V(3) <= 0 && V(2) > 0
         warning('V3 <= 0');
-        eqns = [(V(1)/R1 - (w - b)*R1 + a_M)/v == 0, ... % dR1/dt = 0: R2 = (V(1)./R1 - (w - b)*R1 - (1-a) - v*R3)/v
-            (V(2)/R2 - (w - b)*R2 + a_M - v*R1)/v == 0]; % dR2/dt = 0: R3 = (V(2)./R2 - (w - b)*R2 - (1-a) - v*R1)/v
+        eqns = [(V(1)/R1 - (w - b)*R1 - (1+G0))/v == 0, ... % dR1/dt = 0: R2 = (V(1)./R1 - (w - b)*R1 - (1-a) - v*R3)/v
+            (V(2)/R2 - (w - b)*R2 - (1+G0) - v*R1)/v == 0]; % dR2/dt = 0: R3 = (V(2)./R2 - (w - b)*R2 - (1-a) - v*R1)/v
         vars = [R1 R2];
         [AnswR1, ~] = solve(eqns, vars);
     elseif V(2) <= 0 && V(3) <= 0
         warning('V2, V3 <= 0');
-        eqns = [(V(1)/R1 - (w - b)*R1 + a_M)/v == 0]; % dR1/dt = 0: R2 = (V(1)./R1 - (w - b)*R1 - (1-a) - v*R3)/v
+        eqns = [(V(1)/R1 - (w - b)*R1 - (1+G0))/v == 0]; % dR1/dt = 0: R2 = (V(1)./R1 - (w - b)*R1 - (1-a) - v*R3)/v
         vars = [R1];
         [AnswR1] = solve(eqns, vars);
     end
@@ -160,6 +160,7 @@ for i = [find(PositiveRealAnsw)]'
     R1(end+1) = double(AnswR1(i));
 end
 end
+
 %%
 function X0 = randomX(lowerBd,upperBd)
 X0 = lowerBd + (upperBd - lowerBd) .* rand(size(lowerBd));
