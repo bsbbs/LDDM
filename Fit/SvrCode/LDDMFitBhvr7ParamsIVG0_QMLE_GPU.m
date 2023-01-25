@@ -32,7 +32,7 @@ stimdur = dur;
 stoprule = 1;
 w = [1 1; 1 1];
 Rstar = 32; % ~ 32 Hz at the bottom of initial fip, according to Roitman and Shadlen's data
-initialvals = [Rstar,Rstar; sum(w(1,:))*Rstar,sum(w(2,:))*Rstar; 0,0];
+initialvals = [Rstar,Rstar; sum(w(1,:))*Rstar + G0,sum(w(2,:))*Rstar + G0; 0,0];
 eqlb = Rstar; % set equilibrium value before task as R^*
 
 Tau = [tauR tauG tauI];
