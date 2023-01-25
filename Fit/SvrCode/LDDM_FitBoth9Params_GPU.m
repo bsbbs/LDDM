@@ -49,9 +49,9 @@ scale = (1-trace(a)/2+G0)*Rstar + (mean(sum(w)) - trace(b)/2)*Rstar^2;
 initialvals = [Rstar,   Rstar;
     (sum(w(1,:)) - b(1,1))*Rstar + G0,(sum(w(2,:)) - b(2,2))*Rstar + G0;
     b(1,1)*Rstar, b(2,2)*Rstar];
-V1 = (1 + B0 + Cohr)';
-V2 = (1 + B0 - Cohr)';
-Vinput = [V1, V2]*scale/(1+B0);
+V1 = (1 + B0 + Cohr)'.^2;
+V2 = (1 + B0 - Cohr)'.^2;
+Vinput = [V1, V2]*scale/((1+B0).^2);
 
 % simulation
 % fprintf('GPU Simulations %i chains ...\t', sims);
