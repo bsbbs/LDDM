@@ -36,7 +36,9 @@ x0 = rand(1,numel(LB)) .* (PUB - PLB) + PLB;
 
 % likelihood function
 nLLfun = @(params) LDDM_FitBoth9Params_GPU(params, dataDynmc, dataBhvr, 10240);
+tic;
 [fval0,~,~] = nLLfun(x0)
+toc
 fprintf('test succeeded\n');
 % change starting points
 Collect = [];
