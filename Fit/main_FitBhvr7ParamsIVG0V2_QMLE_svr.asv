@@ -8,7 +8,7 @@ mypool = parpool(myCluster, myCluster.NumWorkers);
 addpath(genpath('../../bads'));% updated bads, 2022
 addpath('../CoreFunctions/');
 addpath('./SvrCode/');
-out_dir = '../../LDDM_Output/FitRoitman/FitBhvr7ParamsIVG0_QMLE_SvrGPU';
+out_dir = '../../LDDM_Output/FitRoitman/FitBhvr7ParamsIVG0V2_QMLE_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -34,10 +34,10 @@ x0 = rand(1,numel(LB)) .* (PUB - PLB) + PLB;
 
 % likelihood function
 % parpool(6);
-nLLfun = @(params) LDDMFitBhvr7ParamsIVG0_QMLE_GPU(params, dataBhvr, 10240);
+nLLfun = @(params) LDDMFitBhvr7ParamsIVG0V2_QMLE_GPU(params, dataBhvr, 10240);
 tic;
 [fvalbest,~,~] = nLLfun(x0)
-
+toc
 fprintf('test succeeded\n');
 % change starting points
 Collect = [];
@@ -55,7 +55,7 @@ parfor i = 1:myCluster.NumWorkers*8
     options.Display = 'iter';
     % options.UncertaintyHandling = false;    % Function is deterministic
     options.UncertaintyHandling = true;    % Function is deterministic
-    [xest,fval,~,output] = bads(nLLfun,x0,LB,UB,PLB,PUB,options);
+    [xest,fval,~,output] = bads(nLLfun,x0,LB,UB,PLB,PUB,[],options);
     %     xest
     %     fval
     %     output
@@ -86,7 +86,7 @@ addpath(fullfile(Homedir,'Documents','LDDM','utils'));
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
 % cd('G:\My Drive\LDDM\Fit');
 cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
-out_dir = './Rslts/FitBhvr7ParamsIV_QMLE_SvrGPU';
+out_dir = './Rslts/FitBhvr7ParamsIVG0V2_QMLE_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -94,17 +94,16 @@ plot_dir = fullfile(out_dir,'graphics');
 if ~exist(plot_dir,'dir')
     mkdir(plot_dir);
 end
-dataDynmc = load('./Data/Data.mat');
-dataBhvr = LoadRoitmanData('../RoitmanDataCode');
+dataDynmc = load('./RoitmanDataCode/DynmcsData.mat');
+dataBhvr = LoadRoitmanData('./RoitmanDataCode');
 randseed = 24356545;
 rng(randseed);
-% a, b, noise, scale, tauRGI, nLL
-% params = [0.000056	1.433901	24.837397	3254.833078	0.183152	0.248698	0.309921	16542.77267]; % 16542.77267 ± 2.7264
-params = [0	1.433631	25.35945	3251.289056	0.185325	0.224459	0.323132 16539.138186]; % the old results
-name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f_nLL%5.2f',params);
+% a, b, noise, scale, tauRGI, G0, nLL
+params = [28.6722 1.9021 27.0051 3.8874e+03 0.4171 0.2425 0.4200 35.8706, 1.6558e+04];
+name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f_G0_nLL%5.2f',params);
 if ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
     tic;
-    [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsIV_QMLE_GPU(params, dataBhvr);
+    [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsIVG0V2_QMLE_GPU(params, dataBhvr);
     toc
     save(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),...
         'rtmat','choicemat','params','nLL','Chi2','AIC','BIC');
@@ -118,7 +117,7 @@ mksz = 3;
 fontsize = 11;
 rng(randseed);
 % a, b, noise, scale, tauRGI, nLL
-simname = sprintf('LDDM_Dynmc_a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f_nLL%4.0f',params);
+simname = sprintf('a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f_G0_nLL%5.2f',params);
 
 a = params(1)*eye(2);
 b = params(2)*eye(2);
@@ -220,7 +219,7 @@ for ii = 1:6
     meanrtw(ii) = mean(rtmat(choicemat(:,ii)==2,ii));
 end
 % loading Roitman's data
-addpath('../RoitmanDataCode');
+addpath('./RoitmanDataCode');
 ColumnNames608
 load T1RT.mat;
 x(:,R_RT) = x(:,R_RT)/1000;

@@ -8,7 +8,7 @@ mypool = parpool(myCluster, myCluster.NumWorkers);
 addpath(genpath('../../bads'));% updated bads, 2022
 addpath('../CoreFunctions/');
 addpath('./SvrCode/');
-out_dir = '../../LDDM_Output/FitRoitman/FitBhvr7ParamsIVG0_QMLE_SvrGPU';
+out_dir = '../../LDDM_Output/FitRoitman/FitBhvr7ParamsIVG0V2_QMLE_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -34,7 +34,7 @@ x0 = rand(1,numel(LB)) .* (PUB - PLB) + PLB;
 
 % likelihood function
 % parpool(6);
-nLLfun = @(params) LDDMFitBhvr7ParamsIVG0_QMLE_GPU(params, dataBhvr, 10240);
+nLLfun = @(params) LDDMFitBhvr7ParamsIVG0V2_QMLE_GPU(params, dataBhvr, 10240);
 tic;
 [fvalbest,~,~] = nLLfun(x0)
 toc
@@ -86,7 +86,7 @@ addpath(fullfile(Homedir,'Documents','LDDM','utils'));
 addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
 % cd('G:\My Drive\LDDM\Fit');
 cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
-out_dir = './Rslts/FitBhvr7ParamsIVG0_QMLE_SvrGPU';
+out_dir = './Rslts/FitBhvr7ParamsIVG0V2_QMLE_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -99,11 +99,11 @@ dataBhvr = LoadRoitmanData('./RoitmanDataCode');
 randseed = 24356545;
 rng(randseed);
 % a, b, noise, scale, tauRGI, G0, nLL
-params = [34.139038      1.3284022      24.557772      2548.8569     0.10306163     0.23946271     0.30092417      20.738086, 16566.3886];
+params = [28.6722 1.9021 27.0051 3.8874e+03 0.4171 0.2425 0.4200 35.8706, 1.6558e+04];
 name = sprintf('a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f_G0_nLL%5.2f',params);
 if ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
     tic;
-    [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsIVG0_QMLE_GPU(params, dataBhvr);
+    [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsIVG0V2_QMLE_GPU(params, dataBhvr);
     toc
     save(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),...
         'rtmat','choicemat','params','nLL','Chi2','AIC','BIC');
@@ -117,7 +117,7 @@ mksz = 3;
 fontsize = 11;
 rng(randseed);
 % a, b, noise, scale, tauRGI, nLL
-simname = sprintf('LDDM_Dynmc_a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f_nLL%4.0f',params);
+simname = sprintf('a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f_G0_nLL%5.2f',params);
 
 a = params(1)*eye(2);
 b = params(2)*eye(2);
