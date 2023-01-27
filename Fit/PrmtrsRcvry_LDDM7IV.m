@@ -3,7 +3,7 @@ Homedir = 'C:\Users\Bo\Documents';
 % Homedir = '~/Documents';
 addpath(fullfile(Homedir, 'LDDM','CoreFunctions'));
 addpath(fullfile(Homedir, 'LDDM','utils'));
-addpath(fullfile(Homedir, 'LDDM', 'Fit','SvrCode'));
+addpath(genpath(fullfile(Homedir, 'LDDM', 'Fit')));
 
 Glgdir = 'G:\My Drive\LDDM';
 % Glgdir = '/Volumes/GoogleDrive/My Drive/LDDM';
