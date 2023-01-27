@@ -82,6 +82,7 @@ beta12 = gpuArray(b(1,2));
 beta21 = gpuArray(b(2,1));
 beta22 = gpuArray(b(2,2));
 threshArray = gpuArray(thresh);
+G0 = gpuArray(G0);
 if isstruct(Vinput)
     name = fieldnames(Vinput);
     V1mat = Vinput.(name{1});
@@ -96,13 +97,15 @@ NComput = prod(sizeComput);
 V1Array = gpuArray(repmat(V1mat,1,1,sims));
 V2Array = gpuArray(repmat(V2mat,1,1,sims));
 posttask_steps = gpuArray(round(dur/dt));
-% dot_ax = [-100:20:1000];
-% sac_ax = [-1000:20:300];
+dot_ax = gpuArray(dot_ax);
+sac_ax = gpuArray(sac_ax);
+sac_gap = gpuArray(sac_gap);
+dot_gap = gpuArray(dot_gap);
 sac_axp = sac_ax + sac_gap;
-time_spc = 100; % ms, to exclude activity within 100 msecs of eye movement initiation in calculating mrc
+time_spc = gpuArray(100); % ms, to exclude activity within 100 msecs of eye movement initiation in calculating mrc
 % since there is a delay (sac_gap) between the dynamic hit boundry and
 % saccade behavior, the gap is counted.
-time_spcD = 200; % ms, to exclude activity within 200 msecs of motion onset in calculating mrcD
+time_spcD = gpuArray(200); % ms, to exclude activity within 200 msecs of motion onset in calculating mrcD
 % since there is a delay (dot_gap) between the stimuli onset and the
 % starting of WTA dynamics, the gap is counted.
 %% stablizing noise for 200 ms

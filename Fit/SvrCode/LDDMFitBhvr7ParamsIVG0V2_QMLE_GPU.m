@@ -1,4 +1,4 @@
-function [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsIVG0_QMLE_GPU(params, dataBhvr, sims)
+function [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LDDMFitBhvr7ParamsIVG0V2_QMLE_GPU(params, dataBhvr, sims)
 % reload Roitman's data, processed
 q = dataBhvr.q;
 On = dataBhvr.On;
@@ -40,7 +40,7 @@ Tau = [tauR tauG tauI];
 % fprintf('GPU Simulations %i chains ...\t', sims);
 V1 = (1 + Cohr)';
 V2 = (1 - Cohr)';
-Vinput = [V1, V2]*scale;
+Vinput = [V1.^2, V2.^2]*scale;
 Vprior = ones(size(Vinput))*(2*mean(w,'all')*eqlb.^2 + (1-a(1)).*eqlb);
 % tic
 [rtmat, choicemat, ~] = LDDM_G0_GPU(Vprior, Vinput, w, a, b,...

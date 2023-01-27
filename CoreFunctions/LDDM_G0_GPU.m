@@ -82,6 +82,7 @@ beta12 = gpuArray(b(1,2));
 beta21 = gpuArray(b(2,1));
 beta22 = gpuArray(b(2,2));
 threshArray = gpuArray(thresh);
+G0 = gpuArray(G0);
 if isstruct(Vinput)
     name = fieldnames(Vinput);
     V1mat = Vinput.(name{1});
