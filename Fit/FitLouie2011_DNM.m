@@ -26,13 +26,12 @@ Vilist = unique(Vi);
 V1list = unique(V1);
 %% Values in equilibirum
 S = 1;
-G0 = 1;
 B = 70;
-x = [S,        G0,       B];
-LB = [0.5,      0,       0];
-UB = [2,       10,      140];
-PLB = [.9,      0,      60];
-PUB = [1.2,     2,      80];
+x = [S,         B];
+LB = [0.5,      0];
+UB = [2,       140];
+PLB = [.9,      60];
+PUB = [1.2,     80];
 tic;
 [RSS, R1s] = OLS(x,V1,V2,V3,FR);
 toc
@@ -71,19 +70,18 @@ for i = 1:20
     if ~isnan(fval) && (count == 0 || (fval < RSS_min && sum(x ~= xBest)>0))
         xBest = x;
         S = xBest(1);
-        G0 = xBest(2);
-        B = xBest(3);
+        B = xBest(2);
         RSS_min = fval;
         count = count + 1;
         sprintf(['Iteration %d: ' repmat('%8.3f\t', 1, length(xBest)) '\n'], i, xBest)
     end
-    save(fullfile(out_dir,'FitRslt.mat'),'summaries','xBest', 'S', 'G0','B','RSS_min','reports');
+    save(fullfile(out_dir,'FitRslt.mat'),'summaries','xBest', 'S', 'B','RSS_min','reports');
 end
 
 %%
 if visulize
     h = figure;  hold on;
-    filename = sprintf('FitLouie_bads_%i_S%0.3e_G0%1.3f_B%2.1f_fval%1.3e_Rsqd%1.6f',i,S,G0,B,fval,Rsquared);
+    filename = sprintf('FitLouie_bads_%i_S%0.3e_B%2.1f_fval%1.3e_Rsqd%1.6f',i,S,B,fval,Rsquared);
     [RSS, R1s] = OLS(xBest,V1,V2,V3,FR);
     for ii = 1:numel(V1list)
         mask = V1 == V1list(ii);
@@ -104,13 +102,12 @@ end
 %%
 function [RSS, R1s] = OLS(x,V1,V2,V3,FR)
 S = x(1);
-G0 = x(2);
-B = x(3);
+B = x(2);
 R1s = [];
 for i = 1:numel(V1)
     % fprintf('%i.',i)
     V = [V1(i) V2(i) V3(i)]+B;
-    tmp = SolveEqlb(V,G0);
+    tmp = SolveEqlb(V);
     if numel(tmp) > 1
         warning('Real positive solution more than 1. Recorded only the first value.');
     end
@@ -121,10 +118,11 @@ R1s = S*R1s/max(R1s)*max(FR);
 RSS = sum((R1s - FR).^2);
 end
 %%
-function R1 = SolveEqlb(V,G0)
+function R1 = SolveEqlb(V)
 w = 1;
 v = 1;
 b = 0;
+G0 = 0;
 syms R1 R2 R3
 if V(1) > 0 && V(2) > 0 && V(3) > 0
     eqns = [(V(1)/R1 - (w - b)*R1 - (1+G0) - v*R3)/v == R2, ... % dR1/dt = 0: R2 = (V(1)./R1 - (w - b)*R1 - (1-a) - v*R3)/v
