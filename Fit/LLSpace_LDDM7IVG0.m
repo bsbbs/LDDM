@@ -1,12 +1,12 @@
 %% set path
-% Homedir = '~/Documents';
-Homedir = 'C:\Users\Bo\Documents';
+Homedir = '~/Documents';
+% Homedir = 'C:\Users\Bo\Documents';
 addpath(fullfile(Homedir, 'LDDM','CoreFunctions'));
 addpath(fullfile(Homedir, 'LDDM','utils'));
 addpath(fullfile(Homedir, 'LDDM', 'Fit','SvrCode'));
 
-% Glgdir = '/Volumes/GoogleDrive/My Drive/LDDM';
-Glgdir = 'G:\My Drive\LDDM';
+Glgdir = '/Volumes/GoogleDrive/My Drive/LDDM';
+% Glgdir = 'G:\My Drive\LDDM';
 out_dir = fullfile(Glgdir,'Fit/Rslts/FitBhvr7ParamsIVG0_QMLE_SvrGPU/LLSpace');
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
@@ -20,42 +20,43 @@ dataBhvr = LoadRoitmanData(fullfile(Glgdir,'Fit','RoitmanDataCode'));
 % a, b, noise, scale, tauR, tauG, tauD, G0
 bestparams = [0	1.433631	25.35945	3251.289056	0.185325	0.224459	0.323132 0];
 names = {'alpha','beta','sgm','S','tauR','tauG','tauD', 'G0'};
+latexnames = {'\alpha','\beta','\sigma','S','\tau_R','\tau_G','\tau_D', 'G_0'};
 %% Check the space of alpha and beta
 ivec = linspace(0,100,41); % [0, 10.^[-1:.1:3]]; %10.^[-1:.01:3];
 jvec = linspace(0,4,41); %linspace(0,4,401);
 idx = [1, 2];
 [filename, nLLmat] = SpaceCheck(bestparams, names, ivec, jvec, idx, dataBhvr, out_dir);
-Visualization(out_dir,filename, names, idx, 5);
+Visualization(out_dir,filename, names, idx, 5, latexnames);
 %% Check the space of noise and scale
 ivec = linspace(0,80,41); % noise, best fit = 25.36 
 jvec = linspace(10, 8010, 41); % 10.^[-1:.1:3]*9; % scale, best fit = 3251
 idx = [3, 4];
 [filename, nLLmat] = SpaceCheck(bestparams, names, ivec, jvec, idx, dataBhvr, out_dir);
-Visualization(out_dir,filename, names, idx, 5);
+Visualization(out_dir,filename, names, idx, 5, latexnames);
 %% Check the space of tauR and tauG
 ivec = 10.^[-2:.1:1]; %linspace(.025,1.05,42); % tauR, best fit = .18
 jvec = 10.^[-2:.1:1]; %linspace(.025,1.025,41); % tauG, best fit = .22
 idx = [5, 6];
 [filename, nLLmat] = SpaceCheck(bestparams, names, ivec, jvec, idx, dataBhvr, out_dir);
-Visualization(out_dir,filename, names, idx, 4);
+Visualization(out_dir,filename, names, idx, 4, latexnames);
 %% Check the space of tauR and tauD
 ivec = 10.^[-2:.1:1]; %linspace(.025,1.05,42); % tauR, best fit = .18
 jvec = 10.^[-2:.1:1]; %linspace(.025,1.025,41);% tauD, best fit = .32
 idx = [5, 7];
 [filename, nLLmat] = SpaceCheck(bestparams, names, ivec, jvec, idx, dataBhvr, out_dir);
-Visualization(out_dir,filename, names, idx, 4);
+Visualization(out_dir,filename, names, idx, 4, latexnames);
 %% Check the space of tauG and tauD
 ivec = 10.^[-2:.1:1]; %linspace(.025,1.05,42); % tauG, best fit = .22
 jvec = 10.^[-2:.1:1]; %linspace(.025,1.025,41); % tauD, best fit = .32
 idx = [6, 7];
 [filename, nLLmat] = SpaceCheck(bestparams, names, ivec, jvec, idx, dataBhvr, out_dir);
-Visualization(out_dir,filename, names, idx, 4);
+Visualization(out_dir,filename, names, idx, 4, latexnames);
 %% Check the space of alpha and G0
 ivec = linspace(0,100,41); % [0, 10.^[-1:.1:3]]; %10.^[-1:.01:3];
 jvec = linspace(0,100,41); %
 idx = [1, 8];
 [filename, nLLmat] = SpaceCheck(bestparams, names, ivec, jvec, idx, dataBhvr, out_dir);
-Visualization(out_dir,filename, names, idx, 5);
+Visualization(out_dir,filename, names, idx, 5, latexnames);
 %% functions
 function [filename, nLLmat] = SpaceCheck(bestparams, names, ivec, jvec, idx, dataBhvr, out_dir)
 iN = length(ivec);
@@ -79,43 +80,45 @@ else
 end
 end
 
-function Visualization(out_dir,filename, names, idx, nticks)
+function Visualization(out_dir,filename, names, idx, nticks, latexnames)
 % Visuliazation parameters
 lwd = 2.0;
 mksz = 18;
 fontsize = 14;
 load(fullfile(out_dir,[filename, '.mat']));
 h = figure;
-subplot(1,2,1); hold on;
-s = surf(nLLmat,'EdgeColor','none');
+% subplot(1,2,1);
+hold on;
+% s = surf(nLLmat,'EdgeColor','none');
 minnLL = min(nLLmat(:));
 [r, c] = find(nLLmat == minnLL);
-plot3(c,r,minnLL*1.01, 'rx', 'MarkerSize', mksz/3, 'LineWidth', lwd);
-ylim([1,length(ivec)]);
-xlim([1,length(jvec)]);
-xticks(linspace(1,length(jvec),nticks));
-xticklabels(jvec(linspace(1,length(jvec),nticks)));
-yticks(linspace(1,length(ivec),nticks));
-yticklabels(ivec(linspace(1,length(ivec),nticks))); % {'10^{-1}','10^0','10^1','10^2','10^3'});
-xlabel(names{idx(2)});
-ylabel(names{idx(1)});
-clb = colorbar;
-ylabel(clb, 'Negative Log likelihood');
-view(0,90);
-grid on;
+% plot3(c,r,minnLL*1.01, 'rx', 'MarkerSize', mksz/3, 'LineWidth', lwd);
+% ylim([1,length(ivec)]);
+% xlim([1,length(jvec)]);
+% xticks(linspace(1,length(jvec),nticks));
+% xticklabels(jvec(linspace(1,length(jvec),nticks)));
+% yticks(linspace(1,length(ivec),nticks));
+% yticklabels(ivec(linspace(1,length(ivec),nticks))); % {'10^{-1}','10^0','10^1','10^2','10^3'});
+% xlabel(names{idx(2)});
+% ylabel(names{idx(1)});
+% clb = colorbar;
+% ylabel(clb, 'Negative Log likelihood');
+% view(0,90);
+% grid on;
 
-subplot(1,2,2); hold on;
-contour(nLLmat,100);
-plot3(c,r,minnLL*1.01, 'rx', 'MarkerSize', mksz/3, 'LineWidth', lwd);
+% subplot(1,2,2); hold on;
+contour(-nLLmat,60);
+plot3(c,r,-minnLL*1.01, 'rx', 'MarkerSize', mksz/3, 'LineWidth', lwd);
 xticks(linspace(1,length(jvec),nticks));
 xticklabels(jvec(linspace(1,length(jvec),nticks)));
 yticks(linspace(1,length(ivec),nticks));
 yticklabels(ivec(linspace(1,length(ivec),nticks)));
-xlabel(names{idx(2)});
-ylabel(names{idx(1)});
+xlabel(latexnames{idx(2)},'FontAngle', 'italic');
+ylabel(latexnames{idx(1)},'FontAngle', 'italic');
 clb = colorbar;
-ylabel(clb, 'Negative Log likelihood');
-savefig(h, fullfile(out_dir,filename));
-savefigs(h, filename, out_dir, fontsize - 2, [9 3]);
-close(h);
+colormap('turbo');
+ylabel(clb, 'Log likelihood');
+savefig(h, fullfile(out_dir,['Contour', filename]));
+savefigs(h, ['Contour', filename], out_dir, fontsize - 2, [4 3]); % [9 3]
+% close(h);
 end
