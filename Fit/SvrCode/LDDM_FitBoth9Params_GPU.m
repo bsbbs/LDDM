@@ -49,15 +49,15 @@ scale = (1-trace(a)/2+G0)*Rstar + (mean(sum(w)) - trace(b)/2)*Rstar^2;
 initialvals = [Rstar,   Rstar;
     (sum(w(1,:)) - b(1,1))*Rstar + G0,(sum(w(2,:)) - b(2,2))*Rstar + G0;
     b(1,1)*Rstar, b(2,2)*Rstar];
-V1 = (1 + B0 + Cohr)';
-V2 = (1 + B0 - Cohr)';
-Vinput = [V1, V2]*scale/(1+B0);
+V1 = (1 + B0 + Cohr)'.^2;
+V2 = (1 + B0 - Cohr)'.^2;
+Vinput = [V1, V2]*scale/((1+B0).^2);
 
 % simulation
 % fprintf('GPU Simulations %i chains ...\t', sims);
 % tic;
 [rtmat, choicemat, ~, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDM_Full_Dynmc_gap_GPU(Vinput, w, a, b,...
-    sgm, Tau, dur, dt, thresh, initialvals, G0, stoprule, sims, dot_axcut, sac_axcut, dot_gap, sac_gap);
+    sgm, Tau, dur, dt, thresh, initialvals, G0, stoprule, sims, dot_axcut, sac_axcut, dot_gap, sac_gap); % 
 rtmat = squeeze(rtmat)';
 choicemat = squeeze(choicemat)';
 % toc;
