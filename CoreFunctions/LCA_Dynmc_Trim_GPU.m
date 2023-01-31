@@ -60,11 +60,10 @@ for ti = 1:(dur/dt)
     end
 
     % when all of the channel hit the decision boundary or timed out, stop simulation
-    if stoprule == 1
-        if NComput == 0 && all(tpafterward(:) > sum(sac_ax>0))
-            break;
-        end
+    if NComput == 0 && all(tpafterward(:) > sum(sac_ax>0))
+        break;
     end
+
     
     % update xs
     x1 = x1 + (Rho1inputArray - k11*x1 - beta12*x2)*dt_tau + gpuArray.randn(sizeComput)*sgmArray*sqrt(dt_tau);
@@ -78,7 +77,7 @@ for ti = 1:(dur/dt)
     inside = (x1 >= threshArray) + (x2 >= threshArray);
     flip = (inside > 0) & (choice == 0);
     NComput = NComput - sum(flip(:));
-    rt(flip) = ti.*flip*dtArray;
+    rt(flip) = ti;
     
     choice = choice + ((x2 > x1) - (x1 > x2) + 3) .* flip; % 2 choose R1, 4 choose R2, 3 R1 = R2, 0 choice is not made
     Continue = choice == 0;
@@ -87,11 +86,7 @@ for ti = 1:(dur/dt)
     % exclude data in mrc 100 ms before decision (defined in time_spc)
     loc = find(flip);
     for excl = 1:numel(loc)
-        if numel(unique(onset_of_trigger)) == 1
-            excldt = rt(loc(excl)) + onset_of_trigger(1) - time_spc;
-        elseif all(size(onset_of_trigger) == sizeComput)
-            excldt = rt(loc(excl)) + onset_of_trigger(loc(excl)) - time_spc;
-        end
+        excldt = rt(loc(excl)) - time_spc;
         mr1c(dot_ax > excldt,loc(excl)) = NaN;
         mr2c(dot_ax > excldt,loc(excl)) = NaN;
     end
@@ -108,7 +103,7 @@ for ti = 1:(dur/dt)
         mr2cD(-min(sac_ax)+1,flip) = x2(flip);
         tpafterward(flip) = 1; % mark the time stamp at decision as 0, after decision, push the time stamp one step forward
         % for chains already stopped, sample according to sac_ax untill max(sac_ax)
-        smpl = (ti == onset_of_trigger + rt + sac_ax(sum(sac_ax<=0)+min(tpafterward,sum(sac_ax>0)))) & (tpafterward <= sum(sac_ax>0));
+        smpl = (ti == rt + sac_ax(sum(sac_ax<=0)+min(tpafterward,sum(sac_ax>0)))) & (tpafterward <= sum(sac_ax>0));
         tplist = unique(tpafterward(smpl));
         for si = 1:numel(tplist) % loop over different time stamps
             updatecells = smpl & (tpafterward == tplist(si));
@@ -140,7 +135,7 @@ for i = 1:size(rt,1)
         m_mr1cD(:,i,j) = mean(mr1cD([-min(sac_ax) + sac_ax(sac_ax < 0)' + 1, -min(sac_ax)+(1:sum(sac_ax>=0))],i,j,choose1),4,'omitnan');
         m_mr2cD(:,i,j) = mean(mr2cD([-min(sac_ax) + sac_ax(sac_ax < 0)' + 1, -min(sac_ax)+(1:sum(sac_ax>=0))],i,j,choose1),4,'omitnan');
         % only look at the data more than half numbers of trials
-        mRT = median(rt(i,j,choose1)) + round(mean(triggert - presentt,'all')/dt); % median rt for trials choosing R1,  noticing rt = Inf in non-choice trials
+        mRT = median(rt(i,j,choose1)); % median rt for trials choosing R1,  noticing rt = Inf in non-choice trials
         m_mr1c(dot_ax >= mRT + time_spc,i,j) = NaN;
         m_mr2c(dot_ax >= mRT + time_spc,i,j) = NaN;
         m_mr1cD(sac_ax <= -mRT + time_spcD,i,j) = NaN;

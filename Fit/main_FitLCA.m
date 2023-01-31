@@ -83,6 +83,8 @@ if 0
     % set directory
     Homedir = '~';
     Glgdr = '/Volumes/GoogleDrive/My Drive/LDDM';
+    Homedir = 'C:\Users\Bo';
+    Glgdr = 'G:\My Drive\LDDM';
     addpath(genpath(fullfile(Homedir,'Documents','LDDM','utils')));
     addpath(genpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions')));
     addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
@@ -98,8 +100,8 @@ if 0
         mkdir(plot_dir);
     end
     
-    dataDynmc = load(fullfile(Glgdr, 'Fit', 'Data', 'Data.mat'));
-    dataBhvr = LoadRoitmanData(fullfile(Glgdr, 'RoitmanDataCode'));
+    dataDynmc = load(fullfile(Glgdr, 'Fit', 'RoitmanDataCode', 'DynmcsData.mat'));
+    dataBhvr = LoadRoitmanData(fullfile(Glgdr, 'Fit', 'RoitmanDataCode'));
 
     params = [%0.3805    1.6402    0.4608    0.0803    3.2093 1.8959e+04
         0.268202	5.265115	0.377111	0	3.800356	16634.666784];
@@ -118,13 +120,72 @@ if 0
     destfile = fullfile(plot_dir,sprintf('PlotDynmcs_%s.mat',name));
     if ~exist(destfile,'file')
         tic;
-    [nLL, Chi2, BIC, AIC, rtmat, choicemat, m_mr1c, m_mr2c, m_mr1cD, m_mr2cD]...
-        = LCADynmcs_FitBhvr5Params_QMLE_GPU(params, dataDynmc, dataBhvr, sims);
-    save(destfile,...
-            'rtmat','choicemat','params','nLL','Chi2','AIC','BIC', 'm_mr1c', 'm_mr2c', 'm_mr1cD', 'm_mr2cD');
+        [nLL, Chi2, BIC, AIC, rtmat, choicemat, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD]...
+            = LCADynmcs_FitBhvr5Params_QMLE_GPU(params, dataDynmc, dataBhvr, sims);
+        save(destfile,...
+            'rtmat','choicemat','params','nLL','Chi2','AIC','BIC', 'sm_mr1c', 'sm_mr2c', 'sm_mr1cD', 'sm_mr2cD');
         toc
     else
-        load(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)));
+        load(destfile);
+    end
+    %% Plot fitted time course
+    load('./RoitmanDataCode/DynmcsData.mat');
+    for Nclass = {'r'}
+        h = figure;
+        aspect = [3, 2.5];
+        fontsize = 10;
+        lwd = 1;
+        filename = sprintf('FittedTimeCourse_%sNeurons_%s',Nclass{1},name);
+        subplot(1,2,1);hold on;
+        clear flip;
+        colvec = flip({[218,166,109]/256,[155 110 139]/256,'#32716d','#af554d','#708d57','#3b5d64'});
+        for ci = 1:6
+            lg(ci) = plot(dot_ax/1000, eval(['sm_m' Nclass{1}, '1c(:,ci)']),'Color',colvec{ci},'LineWidth',lwd);
+            plot(dot_ax/1000, eval(['sm_m' Nclass{1}, '2c(:,ci)']),'--','Color',colvec{ci},'LineWidth',lwd);
+        end
+        set(gca,'TickDir','out');
+        H = gca;
+        H.LineWidth = 1;
+        switch Nclass{1}
+            case 'r'
+                ylim([0,4]);
+            case 'g'
+                ylim([40,68]);
+            case 'd'
+                ylim([0,72.5]);
+        end
+        ylabel('Firing rate (sp/s)');
+        xlabel('Time (secs)');
+        xlim([-.05, .8]);
+        xticks([0:.2:.8]);
+        xticklabels({'0','.2','.4','.6','.8'});
+        % set(gca,'FontSize',16);
+        savefigs(h,filename,plot_dir,fontsize,aspect);
+        subplot(1,2,2);hold on;
+        plot([0,0],[0,4],'-k');
+        for ci = 1:6
+            lg(ci) = plot(sac_ax(sac_ax<=0)/1000, eval(['sm_m' Nclass{1}, '1cD((sac_ax<=0),ci)']),'Color',colvec{ci},'LineWidth',lwd);
+            plot(sac_ax(sac_ax<=0)/1000, eval(['sm_m' Nclass{1}, '2cD((sac_ax<=0),ci)']),'--','Color',colvec{ci},'LineWidth',lwd);
+        end
+        xlim([-.8, .05]);
+        xticks([-.8:.2:0]);
+        xticklabels({'-.8','-.6','-.4','-.2','0'});
+        set(gca,'TickDir','out');
+        H = gca;
+        H.LineWidth = 1;
+        yticks([]);
+        set(gca,'ycolor',[1 1 1]);
+        switch Nclass{1}
+            case 'r'
+                ylim([0,4]);
+            case 'g'
+                ylim([40,68]);
+            case 'd'
+                ylim([0,72.5]);
+        end
+        legend(flip(lg),flip({'0','3.2','6.4','12.8','25.6','51.2'}),'Location','best','FontSize',fontsize-2);
+        savefigs(h,filename,plot_dir,fontsize,aspect);
+        saveas(h,fullfile(plot_dir,[filename, '.fig']),'fig');
     end
     %% plot RT distribution - fitted
     rate = length(rtmat)/1024;
