@@ -490,75 +490,84 @@ h.PaperPosition = [0 0 3 10];
 saveas(h,fullfile(plot_dir,sprintf('Proportion_Plot_%s.eps',name)),'epsc2');
 
 %% plot time course
-if ~exist(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),'file')
-    tic;
-    [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDMDynamic_FitBhvr7ParamsIV_QMLE_GPU(params, dataDynmc, dataBhvr);
-    %sm_mr1c = gather(sm_mr1c);
-    save(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),...
-        'rtmat','choicemat','sm_mr1c','sm_mr2c','sm_mr1cD','sm_mr2cD','params');
-    toc
-else
-    load(fullfile(plot_dir, sprintf('PlotDynamic_%s.mat',name)));
-end
-if ~exist(fullfile(plot_dir,sprintf('PlotClassDynamic_%s.mat',name)),'file')
+% if ~exist(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),'file')
+%     tic;
+%     [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDMDynamic_FitBhvr7ParamsIV_QMLE_GPU(params, dataDynmc, dataBhvr);
+%     save(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),...
+%         'rtmat','choicemat','sm_mr1c','sm_mr2c','sm_mr1cD','sm_mr2cD','params');
+%     toc
+% else
+%     load(fullfile(plot_dir, sprintf('PlotDynamic_%s.mat',name)));
+% end
+destfile = fullfile(plot_dir,sprintf('PlotClassDynamic_%s.mat',name));
+if ~exist(destfile,'file')
     tic;
     [nLL, Chi2, BIC, AIC, rtmat, choicemat, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD, ...
         sm_mg1c, sm_mg2c, sm_mg1cD, sm_mg2cD, sm_md1c, sm_md2c, sm_md1cD, sm_md2cD]...
         = LDDMClassDynamic_FitBhvr7ParamsIV_QMLE_GPU(params, dataDynmc, dataBhvr);
-    %sm_mr1c = gather(sm_mr1c);
-    save(fullfile(plot_dir,sprintf('PlotDynamic_%s.mat',name)),...
-        'rtmat','choicemat','sm_mr1c','sm_mr2c','sm_mr1cD','sm_mr2cD','params');
+    save(destfile,...
+        'rtmat','choicemat','sm_mr1c','sm_mr2c','sm_mr1cD','sm_mr2cD',...
+        'sm_mg1c', 'sm_mg2c', 'sm_mg1cD', 'sm_mg2cD', 'sm_md1c', 'sm_md2c',...
+        'sm_md1cD', 'sm_md2cD', 'params');
     toc
 else
-    load(fullfile(plot_dir, sprintf('PlotDynamic_%s.mat',name)));
+    load(destfile);
 end
 load('./RoitmanDataCode/DynmcsData.mat');
-m_mr1c = m_mr1c';
-m_mr2c = m_mr2c';
-m_mr1cD = m_mr1cD';
-m_mr2cD = m_mr2cD';
-dot_ax = dot_ax';
-sac_ax = sac_ax';
-h = figure;
-aspect = [3, 2.5];
-fontsize = 10;
-lwd = 1;
-filename = sprintf('FittedTimeCourse_%s',name);
-subplot(1,2,1);hold on;
-clear flip;
-colvec = flip({[218,166,109]/256,[155 110 139]/256,'#32716d','#af554d','#708d57','#3b5d64'});
-for ci = 1:6
-    lg(ci) = plot(dot_ax/1000, sm_mr1c(:,ci),'Color',colvec{ci},'LineWidth',lwd);
-    plot(dot_ax/1000, sm_mr2c(:,ci),'--','Color',colvec{ci},'LineWidth',lwd);
+for Nclass = {'r','g','d'}
+    h = figure;
+    aspect = [3, 2.5];
+    fontsize = 10;
+    lwd = 1;
+    filename = sprintf('FittedTimeCourse_%sNeurons_%s',Nclass{1},name);
+    subplot(1,2,1);hold on;
+    clear flip;
+    colvec = flip({[218,166,109]/256,[155 110 139]/256,'#32716d','#af554d','#708d57','#3b5d64'});
+    for ci = 1:6
+        lg(ci) = plot(dot_ax/1000, eval(['sm_m' Nclass{1}, '1c(:,ci)']),'Color',colvec{ci},'LineWidth',lwd);
+        plot(dot_ax/1000, eval(['sm_m' Nclass{1}, '2c(:,ci)']),'--','Color',colvec{ci},'LineWidth',lwd);
+    end
+    set(gca,'TickDir','out');
+    H = gca;
+    H.LineWidth = 1;
+    switch Nclass{1}
+        case 'r'
+            ylim([20,71]);
+        case 'g'
+            ylim([40,68]);
+        case 'd'
+            ylim([0,72.5]);
+    end
+    ylabel('Firing rate (sp/s)');
+    xlabel('Time (secs)');
+    xlim([-.05, .8]);
+    xticks([0:.2:.8]);
+    % set(gca,'FontSize',16);
+    savefigs(h,filename,plot_dir,fontsize,aspect);
+    subplot(1,2,2);hold on;
+    plot([0,0],[20,71],'-k');
+    for ci = 1:6
+        lg(ci) = plot(sac_ax/1000, eval(['sm_m' Nclass{1}, '1cD(:,ci)']),'Color',colvec{ci},'LineWidth',lwd);
+        plot(sac_ax/1000, eval(['sm_m' Nclass{1}, '2cD(:,ci)']),'--','Color',colvec{ci},'LineWidth',lwd);
+    end
+    xlim([-.8, .05]);
+    set(gca,'TickDir','out');
+    H = gca;
+    H.LineWidth = 1;
+    yticks([]);
+    set(gca,'ycolor',[1 1 1]);
+    switch Nclass{1}
+        case 'r'
+            ylim([20,71]);
+        case 'g'
+            ylim([40,68]);
+        case 'd'
+            ylim([0,72.5]);
+    end
+    legend(flip(lg),flip({'0','3.2','6.4','12.8','25.6','51.2'}),'Location','best','FontSize',fontsize-2);
+    savefigs(h,filename,plot_dir,fontsize,aspect);
+    saveas(h,fullfile(plot_dir,[filename, '.fig']),'fig');
 end
-set(gca,'TickDir','out');
-H = gca;
-H.LineWidth = 1;
-% ylim([20,60]);
-ylim([20,70.5]);
-ylabel('Firing rate (sp/s)');
-xlabel('Time (secs)');
-xlim([-.05, .8]);
-xticks([0:.2:.8]);
-% set(gca,'FontSize',16);
-savefigs(h,filename,plot_dir,fontsize,aspect);
-subplot(1,2,2);hold on;
-plot([0,0],[20,71],'-k');
-for ci = 1:6
-    lg(ci) = plot(sac_ax/1000, sm_mr1cD(:,ci),'Color',colvec{ci},'LineWidth',lwd);
-    plot(sac_ax/1000, sm_mr2cD(:,ci),'--','Color',colvec{ci},'LineWidth',lwd);
-end
-xlim([-.8, .05]);
-set(gca,'TickDir','out');
-H = gca;
-H.LineWidth = 1;
-yticks([]);
-set(gca,'ycolor',[1 1 1]);
-ylim([20,70.5]);
-legend(flip(lg),flip({'0','3.2','6.4','12.8','25.6','51.2'}),'Location','best','FontSize',fontsize-2);
-savefigs(h,filename,plot_dir,fontsize,aspect);
-saveas(h,fullfile(plot_dir,[filename, '.fig']),'fig');
-
 %% raw data time course
 % h = figure;
 % subplot(1,2,1);hold on;

@@ -1,7 +1,7 @@
 function [nLL, Chi2, BIC, AIC, rtmat, choicemat, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD, sm_mg1c, sm_mg2c, sm_mg1cD, sm_mg2cD, sm_md1c, sm_md2c, sm_md1cD, sm_md2cD] = LDDMClassDynamic_FitBhvr7ParamsIV_QMLE_GPU(params,dataDynmc, dataBhvr)
 % reload Roitman's data, processed
-dot_ax = dataDynmc.dot_ax';
-sac_ax = dataDynmc.sac_ax';
+dot_ax = dataDynmc.dot_ax;
+sac_ax = dataDynmc.sac_ax;
 q = dataBhvr.q;
 On = dataBhvr.On;
 ON = dataBhvr.ON;
