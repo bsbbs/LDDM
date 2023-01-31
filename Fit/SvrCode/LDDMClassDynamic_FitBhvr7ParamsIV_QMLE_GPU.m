@@ -1,4 +1,4 @@
-function [nLL, Chi2, BIC, AIC, rtmat, choicemat,sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD, sm_mg1c, sm_mg2c, sm_mg1cD, sm_mg2cD, sm_md1c, sm_md2c, sm_md1cD, sm_md2cD] = LDDMClassDynamic_FitBhvr7ParamsIV_QMLE_GPU(params,dataDynmc, dataBhvr)
+function [nLL, Chi2, BIC, AIC, rtmat, choicemat, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD, sm_mg1c, sm_mg2c, sm_mg1cD, sm_mg2cD, sm_md1c, sm_md2c, sm_md1cD, sm_md2cD] = LDDMClassDynamic_FitBhvr7ParamsIV_QMLE_GPU(params,dataDynmc, dataBhvr)
 % reload Roitman's data, processed
 dot_ax = dataDynmc.dot_ax';
 sac_ax = dataDynmc.sac_ax';
@@ -46,7 +46,9 @@ V1 = (1 + Cohr)';
 V2 = (1 - Cohr)';
 Vinput = [V1, V2]*scale;
 % tic;
-[rtmat, choicemat, ~, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD] = LDDM_Dynmc_Trim_GPU(Vprior, Vinput, w, a, b,...
+[rtmat, choicemat, ~, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD,...
+    sm_mg1c, sm_mg2c, sm_mg1cD, sm_mg2cD, sm_md1c, sm_md2c, sm_md1cD, sm_md2cD]...
+    = LDDM_NClassDynmc_Trim_GPU(Vprior, Vinput, w, a, b,...
     sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims, dot_ax, sac_ax);
 rtmat = squeeze(rtmat)'+ndt;
 choicemat = squeeze(choicemat)';
