@@ -115,6 +115,17 @@ if 0
     else
         load(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)));
     end
+    destfile = fullfile(plot_dir,sprintf('PlotDynmcs_%s.mat',name));
+    if ~exist(destfile,'file')
+        tic;
+    [nLL, Chi2, BIC, AIC, rtmat, choicemat, m_mr1c, m_mr2c, m_mr1cD, m_mr2cD]...
+        = LCADynmcs_FitBhvr5Params_QMLE_GPU(params, dataDynmc, dataBhvr, sims);
+    save(destfile,...
+            'rtmat','choicemat','params','nLL','Chi2','AIC','BIC', 'm_mr1c', 'm_mr2c', 'm_mr1cD', 'm_mr2cD');
+        toc
+    else
+        load(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)));
+    end
     %% plot RT distribution - fitted
     rate = length(rtmat)/1024;
     maxrt = max(max(rtmat));
