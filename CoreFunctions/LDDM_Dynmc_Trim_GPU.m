@@ -109,8 +109,8 @@ stim_duration = gpuArray(round(stimdur/dt));
 offset_of_stimuli = onset_of_stimuli + stim_duration;
 % dot_ax = [-100:20:1000];
 % sac_ax = [-1000:20:300];
-time_spc = 100; % ms, to exclude activity within 100 msecs of eye movement initiation in calculating mrc
-time_spcD = 200; % ms, to exclude activity within 200 msecs of motion onset in calculating mrcD
+time_spc = 100 - 30; % ms, to exclude activity within 100 msecs of eye movement initiation in calculating mrc
+time_spcD = 200 - 90; % ms, to exclude activity within 200 msecs of motion onset in calculating mrcD
 %% stablizing noise for 200 ms
 InoiseR1 = gpuArray(zeros(sizeComput));
 InoiseG1 = gpuArray(zeros(sizeComput));

@@ -113,17 +113,16 @@ end
 lwd = 1;
 mksz = 3;
 fontsize = 11;
-rng(randseed);
 % a, b, noise, scale, tauRGI, nLL
 simname = sprintf('LDDM_Dynmc_a%2.2f_b%1.2f_sgm%2.1f_scale%4.1f_tau%1.2f_%1.2f_%1.2f_nLL%4.0f',params);
 
 a = params(1)*eye(2);
 b = params(2)*eye(2);
-sgm = params(3)/5;
+sgm = params(3)/50;
 tauR = params(5);
 tauG = params(6);
-tauI = params(7);
-Tau = [tauR tauG tauI];
+tauD = params(7);
+Tau = [tauR tauG tauD];
 ndt = .09 + .03; % sec, 90ms after stimuli onset, resort to the saccade side,
 % the activities reaches peak 30ms before initiation of saccade, according to Roitman & Shadlen
 presentt = 0; % changed for this version to move the fitting begin after the time point of recovery
@@ -149,49 +148,47 @@ cplist = [c1, c2];
 mygray = flip(gray(length(cplist)));
 
 h = figure; 
-% subplot(2,1,1);
-hold on;
+
 filename = sprintf('%s',simname);
 randseed = 75245522;
-rng(randseed);
+rng(randseed, 'twister');
 for vi = 2:6
     Vinput = cplist(vi,:)*scale;
-%     [R, G, I, rt, choice] = LcDsInhbt(Vinput, w, a, b, sgm, Tau, dur,...
-%         dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-    [~, ~, R, G, I] = LDDM(Vprior, Vinput, w, a, b, sgm, Tau, predur, dur,...
-    dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-    lgd2(vi-1) = plot(R(:,2), 'k-.', 'Color', mygray(vi,:), 'LineWidth',lwd);
+    [~, ~, R, G, D] = LDDM(Vprior, Vinput, w, a, b, sgm, Tau, predur, dur,...
+        dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+    subplot(3,1,1);
+    hold on;
+    lgd2(vi-1) = plot(R(:,2), 'k--', 'Color', mygray(vi,:), 'LineWidth',lwd);
     lgd1(vi-1) = plot(R(R(:,1)<=thresh,1), 'k-', 'Color', mygray(vi,:), 'LineWidth',lwd);
+    subplot(3,1,2);
+    hold on;
+    lgd2(vi-1) = plot(G(:,2), 'k--', 'Color', mygray(vi,:), 'LineWidth',lwd);
+    lgd1(vi-1) = plot(G(R(:,1)<=thresh,1), 'k-', 'Color', mygray(vi,:), 'LineWidth',lwd);
+    subplot(3,1,3);
+    hold on;
+    lgd2(vi-1) = plot(D(:,2), 'k--', 'Color', mygray(vi,:), 'LineWidth',lwd);
+    lgd1(vi-1) = plot(D(R(:,1)<=thresh,1), 'k-', 'Color', mygray(vi,:), 'LineWidth',lwd);
 end
-% legend()
+subplot(3,1,1);
 plot([.2, 1.2]/dt,[thresh,thresh], 'k-');
 text(600,thresh*1.1,'threshold');
 yticks([0,32,70]);
 yticklabels({'0','32','70'});
-ylabel('Activity (Hz)');
 ylim([0,74]);
-xticks([0, 500, 1000, 1500]);
-xticklabels({'0','.5','1.0','1.5'});
-xlim([-50, 1200]);
+for i = 1:3
+    subplot(3,1,i);
+    xticks([0, 500, 1000, 1500]);
+    xticklabels({'0','.5','1.0','1.5'});
+    xlim([-50, 1200]);
+    ylabel('Activity (Hz)');
+end
+subplot(3,1,3);
 xlabel('Time (s)');
-savefigs(h, filename, plot_dir, fontsize, [2 1.5]);
-% 
-% subplot(2,1,2); hold on;
-% for vi = 2:6
-%     Vinput = cplist(vi,:)*scale;
-%     [~, ~, R, G, I] = LDDM(Vinput, w, a, b, sgm, Tau, dur,...
-%     dt, presentt, triggert, thresh, initialvals, stismdur, stoprule);
-%     lgd2(vi-1) = plot(diff(R(:,2)), 'k--', 'Color', mygray(vi+1,:), 'LineWidth',lwd);
-%     lgd1(vi-1) = plot(diff(R(:,1)), 'k-', 'Color', mygray(vi+1,:), 'LineWidth',lwd);
-% end
-% ylabel('Time derivative');
-% xticks([0, 500, 1000, 1500]);
-% xticklabels({'0','.5','1.0','1.5'});
-% xlim([-50, 1800]);
-% yticks([-.1,0,.3]);
-% ylim([-.1, .35]);
-% xlabel('Time (s)');
-% savefigs(h, filename, plot_dir, fontsize, [1.8 2.5]);
+for i = 1:3
+    subplot(3,1,i);
+    savefigs(h, filename, plot_dir, fontsize, [3 6.75]);
+end
+
 
 %% plot RT distribution - fitted
 rate = length(rtmat)/1024;
@@ -301,6 +298,7 @@ h.PaperUnits = 'inches';
 h.PaperPosition = [0 0 3.0 10];
 %saveas(h,fullfile(plot_dir,sprintf('RTDistrb_%s.fig',name)),'fig');
 saveas(h,fullfile(plot_dir,sprintf('RTDistrb_%s.eps',name)),'epsc2');
+
 %% panel a, ditribution of RT and fitted line
 lwd = 1;
 fontsize = 11;
@@ -378,6 +376,7 @@ set(gca, 'XScale', 'log');
 % legend('boxoff');
 savefigs(h,filename,plot_dir,fontsize,[2,3.0]);
 %% Quantile probability plot for reaction time and choice
+colorpalette = {'#ef476f','#ffd166','#06d6a0','#118ab2','#073b4c'};
 lwd = 1.0;
 mksz = 3;
 fontsize = 11;
@@ -389,8 +388,8 @@ acc = [];
 for vi = 1:length(x)
     xc = x(vi)*ones(size(y(:,1,vi)));
     xw = 1 - x(vi)*ones(size(y(:,2,vi)));
-    lgc = plot(xc,y(:,1,vi),'gx','MarkerSize',mksz+1,'LineWidth',lwd);
-    lge = plot(xw,y(:,2,vi),'rx','MarkerSize',mksz+1,'LineWidth',lwd);
+    lgc = plot(xc,y(:,1,vi),'x','Color',colorpalette{4}, 'MarkerSize',mksz+1,'LineWidth',lwd);
+    lge = plot(xw,y(:,2,vi),'x','Color', colorpalette{1}, 'MarkerSize',mksz+1,'LineWidth',lwd);
     % fitted value
     En(vi) = numel(rtmat(:,vi));
     RT_corr = rtmat(choicemat(:,vi) == 1,vi);
@@ -540,17 +539,20 @@ for Nclass = {'r','g','d'}
     end
     ylabel('Firing rate (sp/s)');
     xlabel('Time (secs)');
-    xlim([-.05, .8]);
-    xticks([0:.2:.8]);
+    xlim([-.09, .8]);
+    xticks([0:.2:.8]-.09);
+    xticklabels({'0','.2','.4','.6','.8'});
     % set(gca,'FontSize',16);
     savefigs(h,filename,plot_dir,fontsize,aspect);
     subplot(1,2,2);hold on;
-    plot([0,0],[20,71],'-k');
+    plot([0.03,0.03],[20,71],'-k');
     for ci = 1:6
         lg(ci) = plot(sac_ax/1000, eval(['sm_m' Nclass{1}, '1cD(:,ci)']),'Color',colvec{ci},'LineWidth',lwd);
         plot(sac_ax/1000, eval(['sm_m' Nclass{1}, '2cD(:,ci)']),'--','Color',colvec{ci},'LineWidth',lwd);
     end
-    xlim([-.8, .05]);
+    xlim([-.6, .03]);
+    xticks([-.6:.2:0]+.03);
+    xticklabels({'-.6','-.4','-.2','0'});
     set(gca,'TickDir','out');
     H = gca;
     H.LineWidth = 1;
@@ -568,7 +570,7 @@ for Nclass = {'r','g','d'}
     savefigs(h,filename,plot_dir,fontsize,aspect);
     saveas(h,fullfile(plot_dir,[filename, '.fig']),'fig');
 end
-%% raw data time course
+%% Empirical data time course from Roitman & Shadlen 2002
 % h = figure;
 % subplot(1,2,1);hold on;
 % plot(dot_ax, m_mr1c,'LineWidth',1.5);
@@ -581,61 +583,49 @@ end
 % h.PaperUnits = 'inches';
 % h.PaperPosition = [0 0 5.3 4];
 % saveas(h,fullfile(plot_dir,sprintf('Data.eps')),'epsc2');
-%% plot firing rates at position a,b,c,d 
+%% plot firing rates at position a,b,c,d
+colorpalette = {'#ef476f','#ffd166','#06d6a0','#118ab2','#073b4c'};
 Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
-h = figure;
-filename = sprintf('abcd_%s',name);
-subplot(2,1,1);hold on;
 x = Cohr*100;
-y = sm_mr1c(19,:);
-plot(x, y,'k.','MarkerSize',16);
-p = polyfit(x,y,1);
-mdl = fitlm(x,y,'linear')
-plot(x,p(1)*x+p(2),'k-');
-y = sm_mr2c(19,:);
-plot(x, y,'k.','MarkerSize',16);
-p = polyfit(x,y,1);
-mdl = fitlm(x,y,'linear')
-plot(x,p(1)*x+p(2),'k-');
-% ylim([10,45]);
-xlim([-4,55.2]);
-yticks([30:10:60]);
-xticks([0:10:50]);
-xticklabels({});
-ylabel('Firing rates (sp/s)');
-% set(gca,'FontSize',12);
-% set(gca,'TickDir','out');
-% H = gca;
-% H.LineWidth = 1;
-savefigs(h, filename, plot_dir, fontsize, [2 3]);
-
-subplot(2,1,2);hold on;
-y = sm_mr1cD(end-15,:);
-plot(x, y,'k.','MarkerSize',16);
-p = polyfit(x,y,1);
-mdl = fitlm(x,y,'linear')
-plot(x,p(1)*x+p(2),'k-');
-y = sm_mr2cD(end-15,:);
-plot(x, y,'k.','MarkerSize',16);
-p = polyfit(x,y,1);
-mdl = fitlm(x,y,'linear')
-plot(x,p(1)*x+p(2),'k-');
-% ylim([0,60]);
-xlim([-4,55.2]);
-yticks([10:20:70]);
-xticks([0:10:50]);
-xlabel('Input strength (% coh)');
-ylabel('Firing rates (sp/s)');
-% set(gca,'FontSize',12);
-% set(gca,'TickDir','out');
-% H = gca;
-% H.LineWidth = 1;
-% h.PaperUnits = 'inches';
-% h.PaperPosition = [0 0 2.5 4];
-%saveas(h,fullfile(plot_dir,sprintf('abcd_%s.fig',name)),'fig');
-% saveas(h,fullfile(plot_dir,sprintf('abcd_%s.eps',name)),'epsc2');
-savefigs(h, filename, plot_dir, fontsize, [2 3]);
-
+for Nclass = {'r','g','d'}
+    h = figure;
+    filename = sprintf('abcd_%s_%s',Nclass{1},name);
+    subplot(2,1,1);hold on;
+    y = eval(['sm_m' Nclass{1} '1c(19,:);']);
+    plot(x, y,'.', 'Color', colorpalette{4}, 'MarkerSize',14);
+    p = polyfit(x,y,1);
+    mdl = fitlm(x,y,'linear')
+    plot(x,p(1)*x+p(2),'-','Color', colorpalette{4}, 'LineWidth', lwd);
+    y = eval(['sm_m' Nclass{1} '2c(19,:);']);
+    plot(x, y,'.','Color', colorpalette{1},'MarkerSize',14);
+    p = polyfit(x,y,1);
+    mdl = fitlm(x,y,'linear')
+    plot(x,p(1)*x+p(2),'--', 'Color', colorpalette{1}, 'LineWidth',lwd);
+    xlim([-4,55.2]);
+    %yticks([30:10:60]);
+    xticks([0:10:50]);
+    xticklabels({});
+    ylabel('Firing rates (sp/s)');
+    mysavefig(h, filename, plot_dir, fontsize, [2 3]);
+    
+    subplot(2,1,2);hold on;
+    y = eval(['sm_m' Nclass{1} '1cD(end-15,:);']);
+    plot(x, y,'.','Color', colorpalette{4},'MarkerSize',14);
+    p = polyfit(x,y,1);
+    mdl = fitlm(x,y,'linear')
+    plot(x,p(1)*x+p(2),'-','Color', colorpalette{4},'LineWidth',lwd);
+    y = eval(['sm_m' Nclass{1} '2cD(end-15,:);']);
+    plot(x, y,'.','Color', colorpalette{1},'MarkerSize',14);
+    p = polyfit(x,y,1);
+    mdl = fitlm(x,y,'linear')
+    plot(x,p(1)*x+p(2),'--','Color', colorpalette{1},'LineWidth',lwd);
+    xlim([-4,55.2]);
+    %yticks([10:20:70]);
+    xticks([0:10:50]);
+    xlabel('Input strength (% coh)');
+    ylabel('Firing rates (sp/s)');
+    mysavefig(h, filename, plot_dir, fontsize, [2 3]);
+end
 %% disribution of fitted parameters
 rslts = dlmread(fullfile(out_dir,'RsltList.txt'));
 name = {'a', 'b', 'noise', 'tauR', 'tauG', 'tauI', 'ndt', 'scale', 'sigma of ll'};
