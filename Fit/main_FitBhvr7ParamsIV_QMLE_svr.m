@@ -545,7 +545,8 @@ for Nclass = {'r','g','d'}
     % set(gca,'FontSize',16);
     savefigs(h,filename,plot_dir,fontsize,aspect);
     subplot(1,2,2);hold on;
-    plot([0.03,0.03],[20,71],'-k');
+    plot([0.03,0.03],[20,71],'--k');
+    plot([0.0,0.0],[20,71],'-b');
     for ci = 1:6
         lg(ci) = plot(sac_ax/1000, eval(['sm_m' Nclass{1}, '1cD(:,ci)']),'Color',colvec{ci},'LineWidth',lwd);
         plot(sac_ax/1000, eval(['sm_m' Nclass{1}, '2cD(:,ci)']),'--','Color',colvec{ci},'LineWidth',lwd);
