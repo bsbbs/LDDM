@@ -92,7 +92,7 @@ if 0
     RoitmanDataDir = fullfile(Glgdr, 'Fit', 'RoitmanDataCode');
     dataDynmc = load(fullfile(RoitmanDataDir,'DynmcsData.mat'));
     dataBhvr = LoadRoitmanData(RoitmanDataDir);
-
+    
     out_dir = fullfile(Glgdr,'Fit','Rslts','FitLCA');
     if ~exist(out_dir,'dir')
         mkdir(out_dir);
@@ -114,16 +114,16 @@ if 0
     else
         load(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)));
     end
-
+    
     %% ditribution of RT and fitted line
     h = RT_Dstrbtn(dataBhvr, rtmat, choicemat, plot_dir, name);
-
+    
     %% aggregated RT & ACC
     h = PlotmeanRTACC(RoitmanDataDir, rtmat, choicemat, plot_dir, name);
-
+    
     %% QP plot for reaction time and choice
     h = QPP_Roitman(dataBhvr, rtmat, choicemat, plot_dir, name);
-
+    
     %% the original space of QMLE
     acc = dataBhvr.proportionmat;
     ON = dataBhvr.ON;
@@ -184,7 +184,7 @@ if 0
     end
     %% plot fitted dynamics and abcd values
     [h, h2, dot_tick] = PlotFitDynmcs(RoitmanDataDir, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD, plot_dir, name);
-
+    
     %% The dynamic of single trials
     mygray = gray(8);
     h = figure; hold on;
