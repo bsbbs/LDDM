@@ -81,13 +81,13 @@ save(fullfile(out_dir,sprintf('CollectRslts%i.mat',t)),'Collect');
 %% visulization
 if 0
     % set directory
-    % Homedir = 'C:\Users\Bo';
-    Homedir = '~';
+    Homedir = 'C:\Users\Bo';
+%     Homedir = '~';
     addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
     addpath(fullfile(Homedir,'Documents','LDDM','utils'));
     addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
-    % Glgdr = 'G:\My Drive\LDDM';
-    Glgdr = '/Volumes/GoogleDrive/My Drive/LDDM';
+    Glgdr = 'G:\My Drive\LDDM';
+%     Glgdr = '/Volumes/GoogleDrive/My Drive/LDDM';
     cd(fullfile(Glgdr, 'Fit'));
     RoitmanDataDir = fullfile(Glgdr, 'Fit', 'RoitmanDataCode');
     dataDynmc = load(fullfile(RoitmanDataDir,'DynmcsData.mat'));
@@ -171,6 +171,7 @@ if 0
     %saveas(h,fullfile(plot_dir,sprintf('QMLE_Plot_%s.fig',name)),'fig');
     saveas(h,fullfile(plot_dir,sprintf('QMLE_Plot_%s.eps',name)),'epsc2');
     %% Simulate dynamics
+    sims = 10240;
     destfile = fullfile(plot_dir,sprintf('PlotDynmcs_%s.mat',name));
     if ~exist(destfile,'file')
         tic;

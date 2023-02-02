@@ -77,13 +77,13 @@ save(fullfile(out_dir,sprintf('CollectRslts%i.mat',t)),'Collect');
 
 if 0
     %% hand tuning
-    % Homedir = 'C:\Users\Bo';
-    Homedir = '~';
+    Homedir = 'C:\Users\Bo';
+%     Homedir = '~';
     addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
     addpath(fullfile(Homedir,'Documents','LDDM','utils'));
     addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
-    % Glgdr = 'G:\My Drive\LDDM';
-    Glgdr = '/Volumes/GoogleDrive/My Drive/LDDM';
+    Glgdr = 'G:\My Drive\LDDM';
+%     Glgdr = '/Volumes/GoogleDrive/My Drive/LDDM';
     cd(fullfile(Glgdr, 'Fit'));
     RoitmanDataDir = fullfile(Glgdr, 'Fit', 'RoitmanDataCode');
     dataDynmc = load(fullfile(RoitmanDataDir,'DynmcsData.mat'));
