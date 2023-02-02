@@ -126,8 +126,8 @@ for ti = 0:max(posttask_steps(:))
     % update nerual firing rates H
     H1 = H1new;
     H2 = H2new;
-    I1 = JAext*miu0*V1;
-    I2 = JAext*miu0*V2;
+    I1 = JAext*miu0*V1.*Continue;
+    I2 = JAext*miu0*V2.*Continue;
     x1 = JN11*S1 + JN12*S2 + I0Array + I1 + Inoise1;
     x2 = JN21*S1 + JN22*S2 + I0Array + I2 + Inoise2;
     H1new = (a*x1 - b)./(1 - exp(-d*(a*x1 - b)));
