@@ -65,8 +65,8 @@ if isequal(size(onset_of_trigger), size(cp1))
 end
 stim_duration = gpuArray(round(stimdur/dt));
 offset_of_stimuli = onset_of_stimuli + stim_duration;
-time_spc = 100; % ms, to exclude activity within 100 msecs of eye movement initiation in calculating mrc
-time_spcD = 200; % ms, to exclude activity within 200 msecs of motion onset in calculating mrcD
+time_spc = 100 - 30; % ms, to exclude activity within 100 msecs of eye movement initiation in calculating mrc
+time_spcD = 200 - 90; % ms, to exclude activity within 200 msecs of motion onset in calculating mrcD
 %% stablizing noise for 200 ms
 Inoise1 = gpuArray(zeros(sizeComput));
 Inoise2 = gpuArray(zeros(sizeComput));

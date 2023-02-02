@@ -19,7 +19,7 @@ tgap = 0.09; % initial dip for 90ms after stimuli onset
 
 % other fixed parameters
 % sims = 1024;
-deduction = 1;
+deduction = .1;
 sims = 1024/deduction;
 Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
 presentt = 0;
