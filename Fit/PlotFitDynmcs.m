@@ -36,9 +36,9 @@ for ci = 1:6
     lg(ci) = plot(sac_ax/1000, sm_mr1cD(:,ci),'Color',mygray(ci+2,:),'LineWidth',lwd);
     plot(sac_ax/1000, sm_mr2cD(:,ci),'--','Color',mygray(ci+2,:),'LineWidth',lwd);
 end
-xlim([-.6, .03]);
-xticks([-.6:.2:0]+.03);
-xticklabels({'-.6','-.4','-.2','0'});
+xlim([-.8, .03]);
+xticks([-.8:.2:0]+.03);
+xticklabels({'-.8','-.6','-.4','-.2','0'});
 ylim([ylowlim,yuplim]);
 yticks([]);
 set(gca,'ycolor',[1 1 1]);
@@ -46,22 +46,24 @@ legend(flip(lg),flip({'0','3.2','6.4','12.8','25.6','51.2'}),'Location','best','
 mysavefig(h,filename,plot_dir,fontsize,aspect);
 saveas(h,fullfile(plot_dir,[filename, '.fig']),'fig');
 %% plot firing rates at position a,b,c,d
-colorpalette = {'#ef476f','#ffd166','#06d6a0','#118ab2','#073b4c'};
+% colorpalette = {'#ef476f','#ffd166','#06d6a0','#118ab2','#073b4c'};
 Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
 x = Cohr*100;
 h2 = figure;
 filename = sprintf('abcd_%s',name);
 subplot(2,1,1);hold on;
 y = sm_mr1c(dot_tick,:);
-plot(x, y,'.', 'Color', colorpalette{4}, 'MarkerSize',14);
+% plot(x, y,'.', 'Color',  colorpalette{4}, 'MarkerSize',14);
+scatter(x, y, 14, mygray(3:8,:), 'filled');
 p = polyfit(x,y,1);
 mdl = fitlm(x,y,'linear')
-plot(x,p(1)*x+p(2),'-','Color', colorpalette{4}, 'LineWidth', lwd);
+plot(x,p(1)*x+p(2),'k-', 'LineWidth', lwd);
 y = sm_mr2c(dot_tick,:);
-plot(x, y,'.','Color', colorpalette{1},'MarkerSize',14);
+% plot(x, y,'o','Color', colorpalette{1},'MarkerSize',14);
+scatter(x, y, 14, mygray(3:8,:));
 p = polyfit(x,y,1);
 mdl = fitlm(x,y,'linear')
-plot(x,p(1)*x+p(2),'--', 'Color', colorpalette{1}, 'LineWidth',lwd);
+plot(x,p(1)*x+p(2),'k--', 'LineWidth',lwd);
 xlim([-4,55.2]);
 xticks([0:10:50]);
 xticklabels({});
@@ -71,15 +73,17 @@ mysavefig(h2, filename, plot_dir, fontsize, [2 3]);
 subplot(2,1,2);hold on;
 sac_tick = find(sac_ax == 0);
 y = sm_mr1cD(sac_tick,:);
-plot(x, y,'.','Color', colorpalette{4},'MarkerSize',14);
+% plot(x, y,'.','Color', colorpalette{4},'MarkerSize',14);
+scatter(x, y, 14, mygray(3:8,:), 'filled');
 p = polyfit(x,y,1);
 mdl = fitlm(x,y,'linear')
-plot(x,p(1)*x+p(2),'-','Color', colorpalette{4},'LineWidth',lwd);
+plot(x,p(1)*x+p(2),'k-','LineWidth',lwd);
 y = sm_mr2cD(sac_tick,:);
-plot(x, y,'.','Color', colorpalette{1},'MarkerSize',14);
+% plot(x, y,'.','Color', colorpalette{1},'MarkerSize',14);
+scatter(x, y, 14, mygray(3:8,:));
 p = polyfit(x,y,1);
 mdl = fitlm(x,y,'linear')
-plot(x,p(1)*x+p(2),'--','Color', colorpalette{1},'LineWidth',lwd);
+plot(x,p(1)*x+p(2),'k--','LineWidth',lwd);
 xlim([-4,55.2]);
 xticks([0:10:50]);
 xlabel('Input strength (% coh)');
