@@ -22,19 +22,10 @@ c = [3.2 12.8, 25.6, 38.4 51.2]'/100; % percentage of coherence
 scale0 = 250;
 B0 = 70;
 a0 = 15;
+G0 = 0;
 b0 = 1.1;
 dt = .001;
 Tau = ones(1,3)*.1;
-% 
-% VmatDiag = 30*[1+c, 1-c];
-% Vmat = [linspace(0,60,5)', ones(5,1)*30];
-% V1Iter = linspace(0,60,50);
-% V2Iter = 60 - linspace(0,60,50);
-% 
-% V1IterN = linspace(0,60,100);
-% V2IterN = 60 - V1IterN;
-
-
 %% define parameters for visualization
 lwd = 2.0;
 mksz = 18;
@@ -65,17 +56,23 @@ aspect13 = [3, 2.0]; % for dynamic Fig7
 aspect14 = [2.41 3]; % for choice and RT panel
 aspect15 = [3, 11]; % for combined Fig7
 
-%% Fig 2 - model comparison
+%% Fig 2 - Example dynamics
 Fig2;
+
+%% Fig2-S1 - a full series of models
+Fig2_S1;
 
 %% Fig 3 - divisive normalization
 Fig3;
 
-%% Fig 4 - winner-take-all competition
+%% Fig 4 & Fig4-S1 - Color map of R1 & fit models to Louie et al., 2011
 Fig4;
 
-%% Fig 5 - fitting to classical RT dataset
+%% Fig 5 - winner-take-all competition
 Fig5;
+
+%% Fig 5 - fitting to classical RT dataset
+Fig6;
 
 %% Fig 6 - persistent activity
 Fig6;
@@ -86,8 +83,7 @@ Fig7;
 %% Fig 8 - Speed-accuracy tradeoff
 Fig8;
 
-%% Fig S1 - a full series of models
-FigS1;
+
 
 %% Fig S2 - five territories of parameter regimes for local disinhibition model
 FigS2;

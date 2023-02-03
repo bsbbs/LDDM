@@ -26,42 +26,44 @@ predur = .8;
 presentt = dt;
 dur = 1.1;
 stimdur = dur-presentt;
-triggert = presentt;
+triggert =  presentt;
 sgm = 0;
 thresh = 70;
 stoprule = 1;
 Vprior = [1, 1]*scale0 + B0;
 Tau = [.1,.1,.1];
 initialvals = zeros(3,2);
-h = figure; hold on;
-filename = 'Fig5a_latebeta';
-for vi = 1:5
-    Vinput = [1+c(vi), 1-c(vi)]*scale0 + B0;
-    [choice, rt, R, G, I] = LDDM(Vprior, Vinput, w, a, b,...
-    sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-    lgd2(vi) = plot(R(:,2), 'k--', 'Color', mygray(vi+1,:), 'LineWidth',lwd);
-    lgd1(vi) = plot(R(:,1), 'k-', 'Color', mygray(vi+1,:), 'LineWidth',lwd);
+for Nclass = ['R','G','D']
+    h = figure; hold on;
+    filename = sprintf('Fig5a_%s_latebeta',Nclass);
+    for vi = 1:5
+        Vinput = [1+c(vi), 1-c(vi)]*scale0 + B0;
+        [choice, rt, R, G, D] = LDDM(Vprior, Vinput, w, a, b,...
+            sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+        lgd2(vi) = plot(eval([Nclass,'(:,2)']), 'k--', 'Color', mygray(vi+1,:), 'LineWidth',lwd);
+        lgd1(vi) = plot(eval([Nclass, '(:,1)']), 'k-', 'Color', mygray(vi+1,:), 'LineWidth',lwd);
+    end
+    plot([1.2, dur+predur]/dt,[thresh,thresh], 'k-');
+    text(1200,thresh*1.05,'threshold');
+    
+    plot([1, 1, (predur)/dt],...
+        [0, 2, 2]-7,'k--','LineWidth',lwd/2); % input, target, pre-motion
+    plot([(predur)/dt, (predur+presentt+dur)/dt],...
+        [2,2]-7,'k-','LineWidth',lwd/2); % inputs, stimuli, motion
+    plot([1, (predur+triggert)/dt, (predur+triggert)/dt, (predur+presentt+dur)/dt],[0,0,2,2]-11.5,'k-','LineWidth',lwd/2); % disinhibition
+    ylim([-16.5,71]);
+    yticks([0, 70]);
+    yticklabels({'0', '70'});
+    ylabel('          Activity (a.u.)');
+    xticks([1, predur/dt]);
+    xticklabels({'',''});
+    drawaxis(gca, 'x', 0, 'movelabel', 1);
+    xlim([-50, (predur+presentt+dur)/dt]);
+    legend([lgd1(5), lgd2(5)],{[Nclass,'_1'], [Nclass,'_2']},...
+        'Location','NorthWest','FontSize',fontsize-5, 'FontName','Times New Roman', ...
+        'FontAngle','italic','NumColumns',1,'Box','off');
+    savefigs(h, filename, plotdir, fontsize - 2, [2.8 2.54]);
 end
-plot([1.2, dur+predur]/dt,[thresh,thresh], 'k-');
-text(1200,thresh*1.05,'threshold');
-
-plot([1, 1, (predur)/dt],...
-    [0, 2, 2]-7,'k--','LineWidth',lwd/2); % input, target, pre-motion
-plot([(predur)/dt, (predur+presentt+dur)/dt],...
-    [2,2]-7,'k-','LineWidth',lwd/2); % inputs, stimuli, motion
-plot([1, (predur+triggert)/dt, (predur+triggert)/dt, (predur+presentt+dur)/dt],[0,0,2,2]-11.5,'k-','LineWidth',lwd/2); % disinhibition
-ylim([-16.5,71]);
-yticks([0, 70]);
-yticklabels({'0', '70'});
-ylabel('          Activity (a.u.)');
-xticks([1, predur/dt]);
-xticklabels({'',''});
-drawaxis(gca, 'x', 0, 'movelabel', 1);
-xlim([-50, (predur+presentt+dur)/dt]);
-legend([lgd1(5), lgd2(5)],{'R_1', 'R_2'},...
-    'Location','NorthWest','FontSize',fontsize-5, 'FontName','Times New Roman', ...
-    'FontAngle','italic','NumColumns',1,'Box','off');
-% savefigs(h, filename, plotdir, fontsize - 2, [2.8 2.54]);
 %% panel b, choice accuracy and reaction time
 a = a0*eye(2);
 b = b0*eye(2);
