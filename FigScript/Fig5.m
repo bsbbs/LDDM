@@ -62,7 +62,7 @@ for Nclass = ['R','G','D']
     legend([lgd1(5), lgd2(5)],{[Nclass,'_1'], [Nclass,'_2']},...
         'Location','NorthWest','FontSize',fontsize-5, 'FontName','Times New Roman', ...
         'FontAngle','italic','NumColumns',1,'Box','off');
-    savefigs(h, filename, plotdir, fontsize - 2, [2.8 2.54]);
+    mysavefig(h, filename, plotdir, fontsize - 2, [2.8 2.54]);
 end
 %% panel b, choice accuracy and reaction time
 a = a0*eye(2);
@@ -120,7 +120,7 @@ ylim([-2,100]);
 yticks([0:25:100]);
 ylabel('Choice (%)');
 %legend(lgdtext,'Location','NorthWest','FontSize',fontsize-5,'Box','off');
-savefigs(h, filename, plotdir, fontsize - 2, [2.41 3]);
+mysavefig(h, filename, plotdir, fontsize - 2, [2.41 3]);
 subplot(2,1,2); hold on;
 for sgmi = length(sgmvec)
     plot(RTALL(sgmi,:),'LineWidth',lwd/2,'Color',colorpalette{5});
@@ -134,26 +134,26 @@ ylim([min(RTALL(sgmi,:))*.8,max(RTALL(sgmi,:))*1.1]);
 yticks([.2:.4:max(RTALL(sgmi,:))]);
 % ylim([.6,1.4]);
 % yticks([.6:.2:1.4]);
-savefigs(h, filename, plotdir, fontsize - 2, [2.41 3]);
+mysavefig(h, filename, plotdir, fontsize - 2, [2.41 3]);
 %% panel c_left, nullclines for R1 and R2 under equal inputs
 a = a0;
-B0 = 70;
+B = 70;
 w = 1;
-v = 0;
+v = 1;
 sgm = .02; dur = 12;
 predur = 0;
 presentt = dt; triggert = presentt; thresh = Inf;
 initialvals = [4,4;8,8;0,0]/15; stimdur = dur; stoprule = 0;
-filenamelist = {'Fig5cUL','Fig5cUM','Fig5cUR';'Fig5cLL','Fig5cLM','Fig5cLR'};
-blist = [.9, b0];
+filenamelist = {'Fig5cL','Fig5cM','Fig5cR'};
+blist = [.9];
 cplist = [0, .512, 1];
-Vprior = [1, 1]*scale0 + B0;
-for bi = 1%:2
+Vprior = [1, 1]*scale0 + B;
+for bi = 1
     b = blist(bi);
     for ci = 1:3
         cp = cplist(ci);
         rng('default'); rng(8);
-        V = [1+cp 1-cp]*scale0 + B0;
+        V = [1+cp 1-cp]*scale0 + B;
         h = figure; hold on;
         filename = filenamelist{bi,ci};
         % - Nullclines R1*-R2* space
@@ -165,14 +165,14 @@ for bi = 1%:2
         R1 = 10.^(linspace(-1,3,300)); %linspace(.1,1000,300);
         R2 = (V(1)./R1 - (w - b)*R1 - (1-a))/v; % dR1/dt = 0
         lgd1 = plot(R2,R1,'k-','LineWidth',lwd/2); % dR1/dt = 0
-        plot([V(2)/(1-a), V(2)/(1-a)],[min(R1), V(1)/(1-a0)],'--k','LineWidth',1);
+        plot([V(2)/(1-a), V(2)/(1-a)],[min(R1), V(1)/(1-a)],'--k','LineWidth',1);
         Line2 = [R1' R2'];
         % - time couse R1 & R2
         if 1
-            [choice, rt, R, G, I] = LDDM(Vprior, V, [w v; v w], a*eye(2), b*eye(2),...
+            [choice, rt, R, G, D] = LDDM(Vprior, V, [w v; v w], a*eye(2), b*eye(2),...
                 sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
             ldgtrc(1) = plot(R(round(presentt/dt):5:end,2), R(round(presentt/dt):5:end,1),'-','Color','#ef476f','LineWidth',lwd/3);
-            [choice, rt, R, G, I] = LDDM(Vprior, V, [w v; v w], a*eye(2), b*eye(2),...
+            [choice, rt, R, G, D] = LDDM(Vprior, V, [w v; v w], a*eye(2), b*eye(2),...
                 sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
             ldgtrc(2) = plot(R(round(presentt/dt):5:end,2), R(round(presentt/dt):5:end,1),'-','Color','#118ab2','LineWidth',lwd/3);
         end
@@ -220,7 +220,7 @@ for bi = 1%:2
         xticks([1,10,100,1000]);yticks([1,10,100,1000]);
         xlabel('R_2 activity (a.u.)');
         ylabel('R_1 activity (a.u.)');
-        % savefigs(h, filename, plotdir, fontsize - 2, [2.8 2.54]*.8);
+        mysavefig(h, filename, plotdir, fontsize - 2, [2.8 2.54]*.8);
     end
 end
 %% panel d, equilibrium point for a noiseless system
@@ -274,7 +274,7 @@ lgd1 = plot((1+cplist)/2, CodeRatio, '.-','Color',colorpalette{3},'MarkerSize',m
 xlabel('Input ratio V_1/(V_1 + V_2)');ylabel('Coded ratio R_1/(R_1 + R_2)');
 xticks([0,.25,.5,.75,1]); yticks([0,.25,.5,.75,1]);
 legend([lgd1, lgd2],{'\color[rgb]{0.0235,0.8392,0.6275}Choice','\color[rgb]{0.0275,0.2314,0.2980}Representation'},'Box','off','Location','NorthWest','FontSize',fontsize-5);
-savefigs(h, filename, plotdir, fontsize - 2, [2.8 2.54]*.95);
+mysavefig(h, filename, plotdir, fontsize - 2, [2.8 2.54]*.95);
 %% panel e, parameter space for choice/representation under equal inputs
 V = [1, 1]*scale0 + B0;
 w = 1;
@@ -350,5 +350,5 @@ yticklabels({'10^{-1}','10^0','10^1','10^2','10^3'});
 xlabel('\beta');
 ylabel('\alpha');
 view(0,90);
-savefigs(h, filename, plotdir, fontsize - 2, [2.8 2.54]*.95);
+mysavefig(h, filename, plotdir, fontsize - 2, [2.8 2.54]*.95);
 

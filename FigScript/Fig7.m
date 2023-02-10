@@ -1,212 +1,422 @@
-% Fig 7. Persistent activity
-%% Inputs
-Vin = [linspace(0,2,5)*scale0;
-    ones(1,5)*scale0]';
-Vout = [ones(1,5)*scale0;
-    linspace(0,2,5)*scale0]';
-%% panel a, dynamic of neural firing rates
-a = a0*eye(2);
-b = zeros(2);
-w = ones(2);
-initialvals = [2,2;4,4;0,0]*0;
-predur = .1;
-presentt = 0;
-dur = 1.7;
-stimdur = .8;
-sgm = 0;
-triggert = Inf;
-thresh = Inf;
-stoprule = 0;
-h = figure;
-filename = 'Fig7a';
-mygray5 = flip(gray(5 + 2));
-subplot(2,1,1); hold on;
-R1vecVin = [];
-for vi = 1:length(Vin)
-    Vprior = [0, 0];
-    Vinput = Vin(vi,:) + B0;
-    [choice, rt, R, G, I] = LDDM(Vprior, Vinput, w, a, b,...
-        sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-    lgd1 = plot(R(:,1), 'k-', 'Color', mygray5(vi+1,:), 'LineWidth',1.5);
-    R1vecVin(vi) = mean(R((predur+presentt)/dt:((predur+presentt)/dt+1000),1));
-end
-ylim([-1,70]);
-yticks([0, 30, 60]);
-xticks([(predur+presentt)/dt, (predur + presentt + stimdur)/dt]);
-xlim([1, (predur + dur)/dt]);
-xticklabels({});
-savefigs(h, filename, plotdir, fontsize, [3, 4]);
+%% multi-alternative choice - dynamic no noise
+clevel = 18;
+mygray = gray(clevel);
+myblue = (repmat([255,255,255],clevel,1)-[linspace(70,255,clevel)',linspace(70,255,clevel)',linspace(40,127,clevel)'])/255;
+myred = (repmat([255,255,255],clevel,1)-[linspace(0,25,clevel)',linspace(40,255,clevel)',linspace(40,255,clevel)'])/255;
+mygreen = (repmat([255,255,255],clevel,1)-[linspace(70,255,clevel)',linspace(40,127,clevel)',linspace(70,255,clevel)'])/255;
 
-subplot(2,1,2); hold on;
-R1vecVout = [];
-for vo = 1:length(Vout)
-    Vprior = [0, 0];
-    Vinput = Vout(vo,:) + B0;
-    [choice, rt, R, G, I] = LDDM(Vprior, Vinput, w, a, b,...
-        sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-    lgd1 = plot(R(:,1), 'k-', 'Color', mygray5(vo+1,:), 'LineWidth',1.5);
-    R1vecVout(vo) = mean(R((predur+presentt)/dt:((predur+presentt)/dt+1000),1));
-end
-ylim([-1,70]);
-yticks([0, 30, 60]);
-xticks([(predur+presentt)/dt, (predur + presentt + stimdur)/dt]);
-xlim([1, (predur + dur)/dt]);
-xticklabels({'on','off'});
-ylabel('R_1 Activity (a.u.)');
-xlabel('Time (a.u.)');
-savefigs(h, filename, plotdir, fontsize - 2, [3,4]);
-%% panel b, nullclines for R1 and R2 under any inputs
-i = 2;
-Taup = [1,1,1];
-alpha = eye(2)*a0;
-if i == 1
-    w = [1,.5;.5,1];
-elseif i == 2
-    w = [1,1;1,1];
-elseif i == 3
-    w = [1,2;2,1];
-end
-beta = 0; % 0, .4, 1.2
-Dt = 1;
-if w(1,1) == w(1,2)
-    if beta > 0 && beta < 1
-        axismax = 25;
-    elseif beta == 0
-        axismax = 18;
-    elseif beta >= 1
-        axismax = 50;
-    end
-else
-    if w(1,1) > w(1,2)
-        axismax = (alpha(1,1) - 1)/w(1,2)*1.1;
-    elseif w(1,1) < w(1,2)
-        axismax = (alpha(1,1) - 1)/w(1,1)*1.1;
-    end
-end
-[R1,R2] = meshgrid(linspace(0,axismax,15),linspace(0,axismax,15));
-R1(1,1) = R1(1,2)/3;
-R2(1,1) = R2(2,1)/3;
-G1 = R1*w(1,1) + R2*w(1,2) - beta*R1;
-G2 = R1*w(2,1) + R2*w(2,2) - beta*R2;
-G1(G1<0) = 0;
-G2(G2<0) = 0;
-dR1 = (-R1 + (R1.*alpha(1,1))./(1+G1)) * Dt/Tau(1);
-dR2 = (-R2 + (R2.*alpha(2,2))./(1+G2)) * Dt/Tau(2);
-norm = sqrt(dR1.^2 + dR2.^2);
-rate = (norm.^.6)./(norm);
-dR1 = dR1.*rate;
-dR2 = dR2.*rate;
+fontsize = 10;
+% alpha beta2, sgm, beta4
+samebeta = 1.5;
+params = [45, samebeta, 7, samebeta];
+% a, b, noise, scale, b2
+Tau = [.1, .1, .1];
+% Tau = [.1853, .2244, .3231];
+% Tau = [.1, .1, .3231];
+predur = .6;
+dur = 3;
+delay = .19;
+Cohr = [3.2, 9, 25.6]/100;
+% Cohr = [0 32 64 128 256 512 768]/1000;
+dt = .001;
+sigma = 0;
+sgm = 0;%params(3);
+Rstar = 32;
+Scl = ((1-a(1,1))*Rstar + 2*Rstar^2);
+
+presentt = delay;
+stimdur = dur - presentt;
+triggert = presentt;
+stoprule = 1;
+
+Buildup = NaN(320,6,2);
+Suppress = NaN(320,6,2);
+x = [1:130]';
 h = figure;
-filename = 'Fig7b';
 hold on;
-if w(2,2) - beta > 0 && w(1,2) == w(1,1)
-    R2Line = [0,(alpha(2,2) - 1)/(w(2,2) - beta)];
-elseif w(2,2) - beta <= 0 && w(1,2) == w(1,1)
-    R2Line = [0,axismax];
-elseif beta == 0 && w(1,2) ~= w(1,1)
-    R2Line = [0,(alpha(1,1)-1)/w(1,2)];
-end
-R1Line = -w(1,2)/(w(1,1)-beta).*R2Line+(alpha(1,1) - 1)/(w(1,1)-beta);
-lg1 = plot(R2Line,R1Line,'-','Color',colorpalette{4},'LineWidth',lwd);% dR1/dt = 0
-if w(2,2) - beta > 0 && w(1,2) == w(1,1)
-    R1Line = [0,(alpha(1,1) - 1)/(w(1,1) - beta)];
-elseif w(2,2) - beta <= 0 && w(1,2) == w(1,1)
-    R1Line = [0,axismax];
-elseif beta == 0 && w(1,2) ~= w(1,1)
-    R1Line = [0,(alpha(2,2)-1)/w(2,1)];
-end
-R2Line = -w(2,1)/(w(2,2)-beta).*R2Line+(alpha(2,2) - 1)/(w(2,2)-beta);
-lg2 = plot(R2Line,R1Line,'--','Color',colorpalette{1},'LineWidth',lwd);% dR2/dt = 0
-if w(1,1) == w(1,2)
-    if beta > 0 && beta < 1
-        plot([(alpha(1,1)-1)/(w(1,1) - beta),(alpha(1,1)-1)/(w(1,1) - beta)],[0, (alpha(2,2)-1)/(w(2,2) - beta)],'k--','LineWidth',1); % constraints
-        plot([0, (alpha(1,1)-1)/(w(1,1) - beta)],[(alpha(2,2)-1)/(w(2,2) - beta),(alpha(2,2)-1)/(w(2,2) - beta)],'k--','LineWidth',1); % constraints
-        xlim([-1,axismax]);ylim([-1,axismax]);
-        xticks([0, (alpha(1,1)-1)/(w(1,1)+w(1,2)-beta), (alpha(1,1)-1)/(w(1,1) - beta)]);
-        yticks([0, (alpha(2,2)-1)/(w(2,2)+w(2,1)-beta), (alpha(2,2)-1)/(w(2,2) - beta)]);
-        xticklabels({'0','$\frac{\alpha-1}{2\omega-\beta}$','$\frac{\alpha-1}{\omega-\beta}$'});
-        yticklabels({'0','$\frac{\alpha-1}{2\omega-\beta}$','$\frac{\alpha-1}{\omega-\beta}$'});
-    elseif beta == 0
-        xlim([-1,axismax]);ylim([-1,axismax]);
-        xticks([0, (alpha(1,1)-1)/(w(1,1) - beta)]);
-        yticks([0, (alpha(2,2)-1)/(w(2,2) - beta)]);
-        xticklabels({'0','$\frac{\alpha-1}{\omega}$'});
-        yticklabels({'0','$\frac{\alpha-1}{\omega}$'});
-    elseif beta >= 1
-        xlim([-1,axismax]);ylim([-1,axismax]);
-        xticks([0, (alpha(1,1)-1)/(w(1,1) + w(1,2) - beta)]);
-        yticks([0, (alpha(2,2)-1)/(w(2,2) + w(2,1) - beta)]);
-        xticklabels({'0','$\frac{\alpha-1}{2\omega-\beta}$'});
-        yticklabels({'0','$\frac{\alpha-1}{2\omega-\beta}$'});
+for i = 1:2
+    items = i*2;
+    a = params(1) * eye(items);
+    b = params(2) * eye(items);
+    if items == 4
+        b = params(4) * eye(items);
     end
-elseif w(1,1) ~= w(1,2) && beta == 0
-    if w(1,1) > w(1,2) % convergent
-        xlim([-1,axismax]);ylim([-1,axismax]);
-        xticks([0, (alpha(1,1)-1)/(w(1,1) + w(1,2)),(alpha(1,1)-1)/w(1,2)]);
-        yticks([0, (alpha(2,2)-1)/(w(2,2) + w(2,1)),(alpha(2,2)-1)/w(2,1)]);
-        xticklabels({'0','$\frac{\alpha-1}{w+v}$','$\frac{\alpha-1}{v}$'});
-        yticklabels({'0','$\frac{\alpha-1}{w+v}$','$\frac{\alpha-1}{v}$'});
-    elseif w(1,1) < w(1,2) % divergent
-        xlim([-1,axismax]);ylim([-1,axismax]);
-        xticks([0, (alpha(1,1)-1)/(w(1,1) + w(1,2)),(alpha(1,1)-1)/w(1,1)]);
-        yticks([0, (alpha(2,2)-1)/(w(2,2) + w(2,1)),(alpha(2,2)-1)/w(2,2)]);
-        xticklabels({'0','$\frac{\alpha-1}{w+v}$','$\frac{\alpha-1}{w}$'});
-        yticklabels({'0','$\frac{\alpha-1}{w+v}$','$\frac{\alpha-1}{w}$'});
+    w = 1*ones(items);
+    initialvals = 5*[ones(1,items); items*ones(1,items); zeros(1, items)];
+    Vprior = Scl*ones(1,items);
+    
+    cohi = 0;
+    for cohr = Cohr
+        cohi = cohi + 1;
+        s = cohi + 1;
+        if length(Cohr) <= 3
+            if i == 1
+                mycol = mygray(18-s*4-1,:);
+            else
+                mycol = myred(s*4+2,:);
+            end
+        end
+        %         Vinput = Scl/1.5 * [1, ones(1,items-1)];
+        Vinput = Scl * [(1+cohr), (1-cohr)*ones(1,items-1)];
+        
+        [~, ~, Rout, G, D] = LDDM(Vprior, Vinput, w, a, b,...
+            sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+        %         [Rd, Gd, Id, ~, ~] = LcDsInhbt(Vinput, w, a, b, sigma, Tau, delay, dt, presentt, presentt+delay, thresh, initialvals, delay, 0);
+        %         initialvals = [Rd(end,:);Gd(end,:);Id(end,:)];
+        %         Vinput = Scl * [(1+cohr), (1-cohr)*ones(1,items-1)];
+        %         [R, G, I, rt, choice] = LcDsInhbt(Vinput, w, a, b, sigma, Tau, dur-delay, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+        %         Rout = [R0;Rd;R];
+        
+        if numel(Cohr) <= 3
+            if items == 2
+                lp(items) = plot(Rout(:,1),'-','Color',mycol,'LineWidth',1.5);
+            else
+                lp(items) = plot(Rout(:,1),'-','Color',mycol,'LineWidth',1.5);
+            end
+            plot(Rout(:,2),'--','Color',lp(items).Color,'LineWidth',1.5);
+            if 0 %items == 4
+                plot(Rout(:,3),'--','Color',lp(items).Color,'LineWidth',2.5);
+                plot(Rout(:,4),'--','Color',lp(items).Color,'LineWidth',2.5);
+            end
+        end
+        endt = min(floor(rt/dt), 480);
+        Buildup(1:endt,cohi,i) = R(1:endt,1);
+        Suppress(1:endt,cohi,i) = R(1:endt,2);
     end
 end
-set(gca,'TickLabelInterpreter', 'latex');
-xlabel('R_2 activity (a.u.)');
-ylabel('R_1 activity (a.u.)');
-quiver(R2,R1,dR2,dR1,1.3,'r','LineWidth',1);
-legend({'\color[rgb]{.0667,.5412,.6980}dR_1/dt = 0','\color[rgb]{.9373,.2784,.4353}dR_2/dt = 0','\color{red}Change rate'}, 'FontName','Times New Roman', ...
-    'FontAngle','Italic','FontSize',fontsize-5, 'Location','northeastoutside','Box','off');
-savefigs(h, filename, plotdir, fontsize, [4.1, 2.54]);
-%% panel c, coded ratio, comparing with the Wang type model
+plot([0, 0], [0,70],'k-');
+plot(ones(1,2)+(predur)/dt, [0,70],'k-');
+ylabel('Activity (H.z.)');
+xlabel('Time (ms)');
+xlim([-200,2000]);
+xticks([0,predur/dt+1,predur/dt+190,predur/dt+320]);
+xticklabels({'','','',''});
+set(gca,'FontSize',fontsize);
+% legend(lp,{'two items','four items'},'Location','North');
+set(gca,'TickDir','out');
+H = gca;
+H.LineWidth = 1;
+h.PaperUnits = 'inches';
+h.PaperPosition = [0 0 4.8 3.0];
+saveas(h,fullfile(plotdir,sprintf('Churchland_4items_%icoh.eps',length(Cohr))),'epsc2');
+%% build up rate
+clear up down;
+for i = 1:2
+    items = i*2;
+    switch i
+        case 1
+            mycol = 'b';
+        case 2
+            mycol = 'r';
+    end
+    for cohi = 1:length(Cohr)
+        % min(Buildup(:,cohi,i))
+        y_in = Buildup(x,cohi,i);
+        p = polyfit(x(~isnan(y_in)),y_in(~isnan(y_in)),1);
+        up(cohi,i) = p(1);
+        
+        y_out = Suppress(x,cohi,i);
+        p = polyfit(x(~isnan(y_out)),y_out(~isnan(y_out)),1);
+        down(cohi,i) = p(1);
+    end
+end
+%
 h = figure; hold on;
-filename = 'Fig7c';
-% Wang type model
-paramspecify_WongWang;
-dt = .001; sgm = 0; dur = 4; presentt = dt;stimdur = 2;stoprule = 0;
-name = sprintf('CodedRatioWong06_Sim%i_dur%1.1f_sgm%1.2f',length(V1Iter), dur, sigma);
-output = fullfile(datadir,[name '.mat']);
-R1rp = [];R2rp = [];R1wm = [];R2wm = [];
-if ~exist(output,'file')
-    for ii = 1:length(V1Iter)
-        fprintf('V1 %3.1f',V1Iter(ii));
-        fprintf('.');
-        Vinput = [V1Iter(ii), V2Iter(ii)];
-        rescale = 256/mean(Vinput);
-        [nu_wind, s_wind, rt, choice, H, S] = wong06(Vinput*rescale,miu0,sgm,I0,JN,...
-            gamma, tauS, tauAMPA, dur, dt, presentt, stimdur, thresh, initialvals, stoprule);
-        R1rp(ii) = nu_wind(round((presentt+stimdur)/dt) - 1,1);
-        R2rp(ii) = nu_wind(round((presentt+stimdur)/dt) - 1,2);
-        R1wm(ii) = nu_wind(round((dur)/dt) - 1,1);
-        R2wm(ii) = nu_wind(round((dur)/dt) - 1,2);
+plot(Cohr'*100, up(:,1)*1000,'k.-','LineWidth',1,'MarkerSize',14);
+plot(Cohr'*100, down(:,1)*1000,'ko--','LineWidth',1,'MarkerSize',5);
+plot(Cohr'*100, up(:,2)*1000,'r.-','LineWidth',1,'MarkerSize',14);
+plot(Cohr'*100, down(:,2)*1000,'ro--','LineWidth',1,'MarkerSize',5);
+xlabel('Motion strength (% coh)');
+ylabel('Build up rate (Hz/s)');
+set(gca,'FontSize',fontsize);
+set(gca,'TickDir','out');
+H = gca;
+H.LineWidth = 1;
+hold off;
+h.PaperUnits = 'inches';
+h.PaperPosition = [0 0 2.5 3.2];
+saveas(h,fullfile(plotdir,sprintf('MultiChoice_BuildupRate_%icoh.eps',length(Cohr))),'epsc2');
+%% multi-alternative choice, with noise
+%samebeta = 2.5;
+%params = [0, samebeta, 15, samebeta];
+sims = 10000;
+gap = 0;
+Cohr = [0 32 64 128 256 512 768]/1000; % percent of coherence
+name = sprintf('sims%ik_a%1.2f_b%1.2f_noise%2.2f_b%1.2f',sims/1000,params);
+file = fullfile(datadir,sprintf('MultiChoice_%s.mat',name));
+if exist(file,'file')
+    load(file);
+else
+    % rndseed = rng(2);
+    rtmat = [];
+    choicemat = [];
+    Buildup = NaN(320,sims,7,2); % 131
+    Suppress = NaN(320,sims,7,2); % 131
+    for i = 1:2
+        items = i*2;
+        fprintf('items: %i',items);
+        a = params(1) * eye(items);
+        b = params(2) * eye(items);
+        if items == 4
+            b = params(4) * eye(items);
+        end
+        sgm = params(3);
+        w = 1*ones(items);
+        initialvals = 8*[ones(1,items); items*ones(1,items); zeros(1, items)];
+        Scl = ((1-a(1,1))*Rstar + 2*Rstar^2);
+        Vprior = Scl*ones(1,items);
+        presentt = dt;
+        stimdur = dur - presentt;
+        triggert = Inf;
+        stoprule = 0;
+        sigma = 0;
+        [R0, G0, D0, rt, choice] = LcDsInhbt(Vprior, w, a, b, sigma, Tau, predur, dt, presentt, triggert, Inf, initialvals, stimdur, stoprule);
+        for cohi = 1:length(Cohr)
+            fprintf('.');
+            cohr = Cohr(cohi);
+            dur = 5;
+            presentt = 0;
+            stimdur = dur - presentt;
+            triggert = presentt;
+            stoprule = 1;
+            for rep = 1:sims
+                initialvals = [R0(end,:);G0(end,:);D0(end,:)];
+                Vinput = Scl/1.5 * [1, ones(1,items-1)];
+                [Rd, Gd, Id, ~, ~] = LcDsInhbt(Vinput, w, a, b, sgm, Tau, delay, dt, presentt, presentt+delay, thresh, initialvals, delay, 0);
+                initialvals = [Rd(end,:);Gd(end,:);Id(end,:)];
+                Vinput = Scl*[(1+cohr), (1-cohr)*ones(1,items-1)];
+                [R, G, I, rt, choice] = LcDsInhbt(Vinput, w, a, b, sgm, Tau, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+                if isnan(rt)
+                    warning('rt is NaN, decision not made');
+                else
+                    rt = rt + delay;
+                end
+                rtmat(rep,cohi,i) = rt;
+                choicemat(rep,cohi,i) = choice;
+                if rt >= .06+delay
+                    endt = min(320-delay/dt, round((rt-delay)/dt));
+                    Buildup(1:endt,rep,cohi,i) = R(1:endt,1);
+                    Suppress(1:endt,rep,cohi,i) = R(1:endt,2);
+                end
+            end
+        end
         fprintf('\n');
     end
-    save(output,'R1rp','R2rp','R1wm','R2wm','V1Iter','V2Iter');
-else
-    load(output);
+    save(fullfile(datadir,sprintf('MultiChoice_%s.mat',name)),...
+        'rtmat','choicemat','Buildup','Suppress','params');
 end
-lgd1 = plot(V1Iter(:)./(V1Iter(:)+V2Iter(:)), R1wm(:)./(R1wm(:)+R2wm(:)),'.','Color',colorpalette{1},'MarkerSize',mksz/2);
-plot(V1Iter(:)./(V1Iter(:)+V2Iter(:)), R1wm(:)./(R1wm(:)+R2wm(:)),'-','Color',colorpalette{1});
-% Disinhibitory model
-sigma = 0;
-alpha = eye(2)*15;
-w = [1,1; 1,1];
-dur = 4;
-stimdur = 2;
-name = sprintf('CodedRatioSim%i_dur%1.1f_W%1.2f%1.2f_alpha%1.1f_sgm%1.2f',length(V1Iter), dur, w(1,1), w(1,2), alpha(1), sigma);
-output = fullfile(datadir,[name '.mat']);
-if exist(output,'file')
-    load(output);
-else
-    error('Please check simulation in Fig3 - panel d');
+choicemat = choicemat == 1;
+% ACC & RT, build-up rate
+fontsize = 14;
+head = .012;
+h = figure;
+subplot(2,1,1); hold on;
+meanchoice = mean(choicemat, 1, 'omitnan');
+plot([head, Cohr(2:end)], meanchoice(:,:,1),'k.-','LineWidth',1,'MarkerSize',14);
+plot([head, Cohr(2:end)], meanchoice(:,:,2),'r.-','LineWidth',1,'MarkerSize',14);
+ylim([0,1]);
+xlim([head,1]);
+yticks([0:.25:1]);
+xticks([head, .1, 1]);
+xticklabels({'0','10','100'});
+ylabel('Probability correct');
+set(gca,'XScale','log');
+set(gca,'FontSize',fontsize);
+set(gca,'TickDir','out');
+H = gca;
+H.LineWidth = 1;
+hold off;
+
+subplot(2,1,2); hold on;
+meanrt = mean(rtmat,1,'omitnan')/dt;
+plot([head, Cohr(2:end)], meanrt(:,:,1),'k.-','LineWidth',1,'MarkerSize',14);
+plot([head, Cohr(2:end)], meanrt(:,:,2),'r.-','LineWidth',1,'MarkerSize',14);
+xlim([head,1]);
+yticks([200:200:1800]);
+xticks([head, .1, 1]);
+xticklabels({'0','10','100'});
+xlabel('Motion strength (% coh)');
+ylabel('Reaction time (ms)');
+set(gca,'XScale','log');
+set(gca,'FontSize',fontsize);
+set(gca,'TickDir','out');
+H = gca;
+H.LineWidth = 1;
+hold off;
+h.PaperUnits = 'inches';
+h.PaperPosition = [0 0 2.5 3.2];
+saveas(h,fullfile(plotdir,sprintf('MultiChoice_RT&ACC_%s.eps',name)),'epsc2');
+
+% build up rate
+x = [1:130]';
+h = figure; hold on;
+for i = 1:2
+    items = i*2;
+    switch i
+        case 1
+            mycol = 'b';
+        case 2
+            mycol = 'r';
+    end
+    for cohi = 1:length(Cohr)
+        in = choicemat(:,cohi,i) == 1;
+        longt = 1;%rtmat(:,cohi,i) > .45;
+        block_in = Buildup(1:130,in&longt,cohi,i);
+        y_in = mean(block_in,2,'omitnan');
+        p = polyfit(x,y_in,1);
+        up(cohi,i) = p(1);
+        mdl = fitlm(x,y_in,'linear')
+        plot(x,y_in,'.');
+        %plot(x,p(1)*x+p(2),'-','Color',mycol);
+        
+        out = choicemat(:,cohi,i) == 1;
+        block_out = Suppress(1:130,out&longt,cohi,i);
+        y_out = mean(block_out,2,'omitnan');
+        p = polyfit(x,y_out,1);
+        down(cohi,i) = p(1);
+        mdl = fitlm(x,y_out,'linear')
+        plot(x,y_out,'.');
+        %plot(x,p(1)*x+p(2),'--','Color',mycol);
+    end
 end
-lgd2 = plot(V1Iter(:)./(V1Iter(:)+V2Iter(:)), R1wm(:)./(R1wm(:)+R2wm(:)),'.','Color',colorpalette{5},'MarkerSize',mksz/2);
-plot(V1Iter(:)./(V1Iter(:)+V2Iter(:)), R1wm(:)./(R1wm(:)+R2wm(:)),'-','Color',colorpalette{5});
-xlabel('Input ratio (V_1 vs. V_2)');ylabel('Coded ratio (R_1 vs. R_2)');
-xticks([0,.25,.5,.75,1]); yticks([0,.25,.5,.75,1]);
-legend([lgd2, lgd1],{'\color[rgb]{.0275,.2314,.298}The hybird model',...
-    '\color[rgb]{.9373,.2784,.4353}Wong&Wang, 2006'},'Location','SouthEast','FontSize',fontsize-5,'Box','off');
-savefigs(h, filename, outdir, fontsize, aspect3);
+%
+h = figure; hold on;
+plot(Cohr'*100, up(:,1)*1000,'k.-','LineWidth',1,'MarkerSize',14);
+plot(Cohr'*100, down(:,1)*1000,'ko--','LineWidth',1,'MarkerSize',5);
+plot(Cohr'*100, up(:,2)*1000,'r.-','LineWidth',1,'MarkerSize',14);
+plot(Cohr'*100, down(:,2)*1000,'ro--','LineWidth',1,'MarkerSize',5);
+xlabel('Motion strength (% coh)');
+ylabel('Build up rate (Hz/s)');
+set(gca,'FontSize',fontsize-2);
+set(gca,'TickDir','out');
+H = gca;
+H.LineWidth = 1;
+hold off;
+h.PaperUnits = 'inches';
+h.PaperPosition = [0 0 2.5 3.2];
+saveas(h,fullfile(plotdir,sprintf('MultiChoice_BuildupRate_%s.eps',name)),'epsc2');
+%% averaged trace, Tin and Tout
+Cohr = [0, 9, 25.6, 51.2]/100;
+absCohr = [1,2,3,4];
+rtmat = [];
+choicemat = [];
+R1mat = []; %NaN(round((predur+dur)/dt),1000,5,2);
+R2mat = []; %NaN(round((predur+dur)/dt),1000,5,2);
+name = sprintf('sims%ik_a%1.2f_b%1.2f_noise%2.2f_b%1.2f',sims/1000,params);
+file = fullfile(datadir,sprintf('MultiChoiceTrace_%s.mat',name));
+if exist(file,'file')
+    load(file);
+else
+    % rndseed = rng(2);
+    for i = 1:2
+        items = i*2;
+        fprintf('items: %i\n',items);
+        a = params(1) * eye(items);
+        b = params(2) * eye(items);
+        if items == 4
+            b = params(4) * eye(items);
+        end
+        sgm = params(3);
+        w = 1*ones(items);
+        initialvals = 8*[ones(1,items); items*ones(1,items); zeros(1, items)];
+        Scl = ((1-a(1,1))*Rstar + 2*Rstar^2);
+        Vprior = Scl*ones(1,items);
+        %Vprior = params(4)*512*ones(1,items);
+        predur = .6;
+        presentt = dt;
+        stimdur = predur - presentt;
+        triggert = Inf;
+        stoprule = 0;
+        sigma = 0;
+        [R0, G0, D0, rt, choice] = LcDsInhbt(Vprior, w, a, b, sigma, Tau, predur+delay, dt, presentt, triggert, Inf, initialvals, stimdur+delay, stoprule);
+        for cohi = 1:length(Cohr)
+            cohr = Cohr(cohi);
+            fprintf('coherence %2.1f\n', cohr*100);
+            % Vinput = params(4)*[256*(1+cohr), 256*(1-cohr)*ones(1,items-1)];
+            Vinput = Scl*[(1+cohr), (1-cohr)*ones(1,items-1)];
+            initialvals = [R0(end,:);G0(end,:);D0(end,:)];
+            dur = 5;
+            presentt = 0;
+            stimdur = dur - presentt;
+            triggert = presentt;
+            stoprule = 0;
+            for rep = 1:sims
+                [R, G, I, rt, choice] = LcDsInhbt(Vinput, w, a, b, sgm, Tau, dur-delay, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+                if isnan(rt)
+                    warning('rt is NaN, decision not made');
+                end
+                rtmat(rep,cohi,i) = rt+delay;
+                choicemat(rep,cohi,i) = choice;
+                % Rvec(rep,)) = [R0(:,1); R(:,1)]';
+                R1mat(1:round((predur+dur)/dt),rep,cohi,i) = [R0(:,1); R(:,1)];
+                R2mat(1:round((predur+dur)/dt),rep,cohi,i) = [R0(:,2); R(:,2)];
+            end
+        end
+    end
+    save(fullfile(datadir,sprintf('MultiChoiceTrace_%s.mat',name)),...
+        'rtmat','choicemat','R1mat','R2mat','params');
+end
+%
+clevel = 18;
+mygray = gray(clevel);
+myblue = (repmat([255,255,255],clevel,1)-[linspace(70,255,clevel)',linspace(70,255,clevel)',linspace(40,127,clevel)'])/255;
+myred = (repmat([255,255,255],clevel,1)-[linspace(0,25,clevel)',linspace(40,255,clevel)',linspace(40,255,clevel)'])/255;
+mygreen = (repmat([255,255,255],clevel,1)-[linspace(70,255,clevel)',linspace(40,127,clevel)',linspace(70,255,clevel)'])/255;
+
+fontsize = 14;
+h = figure; hold on;
+R1sac = [];
+R2sac = [];
+R1stim = R1mat;
+R1tmp = R1mat;
+R2stim = R2mat;
+R2tmp = R2mat;
+for i = 1:2
+    for cohi = 1:length(Cohr)
+        cohr = Cohr(cohi);
+        s = absCohr(cohi);
+        if i == 1
+            mycol = mygray(18-s*4-1,:);
+        else
+            mycol = myred(s*4+2,:);
+        end
+        for rep = 1:sims
+            rtloc = round(rtmat(rep,cohi,i)/dt);
+            R1tmp(1:(predur/dt+200),rep,cohi,i) = NaN;
+            R2tmp(1:(predur/dt+200),rep,cohi,i) = NaN;
+            R1sac(:,rep,cohi,i) = R1tmp(round(predur/dt)+[(rtloc-250):(rtloc+50)],rep,cohi,i);
+            R2sac(:,rep,cohi,i) = R2tmp(round(predur/dt)+[(rtloc-250):(rtloc+50)],rep,cohi,i);
+            R1stim((round((predur+rtmat(rep,cohi,i))/dt)-60):end,rep,cohi,i) = NaN;
+            R2stim((round((predur+rtmat(rep,cohi,i))/dt)-60):end,rep,cohi,i) = NaN;
+        end
+        if cohr >= 0
+            in = choicemat(:,cohi,i) == 1;
+            longt = 1;
+            Rin = R1stim([1:round((predur+.33)/dt)], in&longt, cohi, i);
+            Rin_sac = R1sac(:, in&longt, cohi, i);
+            lp(cohi+(i-1)*length(Cohr)) = plot([mean(Rin,2,'omitnan'); NaN(100,1); mean(Rin_sac,2,'omitnan')],'-','Color',mycol,'LineWidth',1.5);
+            Rout = R2stim([1:round((predur+.33)/dt)], in&longt, cohi, i);
+            Rout_sac = R2sac(:, in&longt, cohi, i);
+            plot([mean(Rout,2,'omitnan'); NaN(100,1); mean(Rout_sac,2,'omitnan')],'--','Color',mycol,'LineWidth',1.5);
+        end
+    end
+end
+plot(ones(1,2)*0+predur/dt, [0,80],'k--');
+plot(ones(1,2)*190+predur/dt, [0,80],'k--');
+plot(ones(1,2)*320+predur/dt, [0,80],'k--');
+patch([190+predur/dt ones(1,2)*320+predur/dt 190+predur/dt], [0, 0, 80, 80], [0.8 0.8 0.8], 'FaceAlpha',.3);
+xlim([-50, 1400]);
+xticks([0,.2,.4,.6,.8,1.08,1.28]*1000);
+xticklabels({'cues','-.4','-.2','motion','.2','-.2','action'});
+ylim([0,71]);
+xlabel('Time (secs)');
+ylabel('Firing rates (Hz)');
+legend(lp([4,8]),{'Two choice','Four Choice'},'Location','NorthWest');
+legend('boxoff');
+set(gca,'TickDir','out');
+H = gca;
+H.LineWidth = 1;
+set(gca,'FontSize',fontsize);
+h.PaperUnits = 'inches';
+h.PaperPosition = [0 0 4.8 4];
+saveas(h,fullfile(plotdir,sprintf('MultiChoice_Trace_%s.eps',name)),'epsc2');

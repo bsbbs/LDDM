@@ -47,7 +47,7 @@ c = colorbar;
 ylabel(c, 'Rescaled R_1 activity');
 xh = get(gca, 'xlabel'); p = get(xh, 'position'); p(2) = p(2)+abs(p(2))*.9; set(xh, 'position',p);
 yh = get(gca, 'ylabel'); p = get(yh, 'position'); p(1) = p(1)+abs(p(1))*.8; set(yh, 'position',p);
-savefigs(h, filename, plotdir, fontsize - 2, [3.2, 2.3]);
+mysavefig(h, filename, plotdir, fontsize - 2, [3.2, 2.3]);
 
 % the LDDM model
 a = a0*eye(2);
@@ -61,7 +61,7 @@ if ~exist(output,'file')
         for kk = 1:length(V2Iterp)
             fprintf('.');
             Vinput = [V1Iterp(ii), V2Iterp(kk)] + B0;
-            [choice, rt, R, G, I] = LDDM(Vprior, Vinput, w, a, b,...
+            [choice, rt, R, G, D] = LDDM(Vprior, Vinput, w, a, b,...
                 sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
             R1rp(kk,ii) = R(round((predur+presentt+stimdur)/dt) - 1,1);
             R2rp(kk,ii) = R(round((predur+presentt+stimdur)/dt) - 1,2);
@@ -86,7 +86,7 @@ c = colorbar;
 ylabel(c, 'Rescaled R_1 activity');
 xh = get(gca, 'xlabel'); p = get(xh, 'position'); p(2) = p(2)+abs(p(2))*.9; set(xh, 'position',p);
 yh = get(gca, 'ylabel'); p = get(yh, 'position'); p(1) = p(1)+abs(p(1))*.8; set(yh, 'position',p);
-savefigs(h, filename, plotdir, fontsize - 2, [3.2, 2.3]);
+mysavefig(h, filename, plotdir, fontsize - 2, [3.2, 2.3]);
 
 % RNM (Wong and wang 2006)
 presentt = 0;
@@ -137,7 +137,7 @@ c = colorbar;
 ylabel(c, 'Rescaled R_1 activity');
 xh = get(gca, 'xlabel'); p = get(xh, 'position'); p(2) = p(2)+abs(p(2))*.9; set(xh, 'position',p);
 yh = get(gca, 'ylabel'); p = get(yh, 'position'); p(1) = p(1)+abs(p(1))*.8; set(yh, 'position',p);
-savefigs(h, filename, plotdir, fontsize - 2, [3.2, 2.3]);
+mysavefig(h, filename, plotdir, fontsize - 2, [3.2, 2.3]);
 
 %% Fit Louie et al., 2011
 % You need to do the following adaptation based on your own environment in order to run the

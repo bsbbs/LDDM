@@ -51,7 +51,7 @@ R1vecVin = [];
 for vi = 1:length(Vin)
     Vprior = [0, 0];
     Vinput = Vin(vi,:) + B0;
-    [choice, rt, R, G, I] = LDDM(Vprior, Vinput, w, a, b,...
+    [choice, rt, R, G, D] = LDDM(Vprior, Vinput, w, a, b,...
         sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
     lgd1 = plot(R(:,1), 'k-', 'Color', mygray5(vi+1,:), 'LineWidth',lwd);
     R1vecVin(vi) = mean(R((predur+presentt)/dt:((predur+presentt)/dt+1000),1));
@@ -60,14 +60,14 @@ ylim([-1,max(ylim)*1.3]);
 yticks([0, 30, 60]);
 xticks([(predur+presentt)/dt,predur/dt + 1000]);
 xticklabels({});
-savefigs(h, filename, plotdir, fontsize, [2, 4]);
+mysavefig(h, filename, plotdir, fontsize, [2, 4]);
 
 subplot(2,1,2); hold on;
 R1vecVout = [];
 for vo = 1:length(Vout)
     Vprior = [0, 0];
     Vinput = Vout(vo,:) + B0;
-    [choice, rt, R, G, I] = LDDM(Vprior, Vinput, w, a, b,...
+    [choice, rt, R, G, D] = LDDM(Vprior, Vinput, w, a, b,...
         sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
     lgd1 = plot(R(:,1), 'k-', 'Color', mygray5(vo+1,:), 'LineWidth',lwd);
     R1vecVout(vo) = mean(R((predur+presentt)/dt:((predur+presentt)/dt+1000),1));
@@ -78,7 +78,7 @@ xticks([(predur+presentt)/dt,predur/dt + 1000]);
 xticklabels({'0','1.0'});
 ylabel('R_1 Activity (a.u.)');
 xlabel('Time (a.u.)');
-savefigs(h, filename, plotdir, fontsize, [2,4]);
+mysavefig(h, filename, plotdir, fontsize, [2,4]);
 %% panel b_left, nullclines for R1 and R2 under equal inputs
 rng('default'); rng(5);
 cp = 0;
@@ -145,7 +145,7 @@ xlim([.1,5*10^3]);ylim([.1,5*10^3]);
 xticks([1,10,100,1000]);yticks([1,10,100,1000]);
 xlabel('R_2 activity (a.u.)');
 ylabel('R_1 activity (a.u.)');
-savefigs(h, filename, plotdir, fontsize, [2.8 2.54]);
+mysavefig(h, filename, plotdir, fontsize, [2.8 2.54]);
 
 %% panel b_middle, nullcines for R1 and R2 under moderately unequal inputs
 rng('default'); rng(5);
@@ -216,7 +216,7 @@ ylabel('R_1 activity (a.u.)');
 % legend([lgd1, lgd2],{'dR_1/dt = 0','dR_2/dt = 0'},...
 %     'Location','NorthEast','FontSize',fontsize-5, 'FontName','Times New Roman', ...
 %     'FontAngle','italic','NumColumns',1,'Box','off');
-savefigs(h, filename, plotdir, fontsize, [2.8 2.54]);
+mysavefig(h, filename, plotdir, fontsize, [2.8 2.54]);
 
 %% panel b_right, nullcines for R1 and R2 under extremely unequal inputs
 rng('default'); rng(5);
@@ -287,4 +287,4 @@ ylabel('R_1 activity (a.u.)');
 legend([lgd1, lgd2],{'dR_1/dt = 0','dR_2/dt = 0'},...
     'Location','NorthEast','FontSize',fontsize-5, 'FontName','Times New Roman', ...
     'FontAngle','italic','NumColumns',1,'Box','off');
-savefigs(h, filename, plotdir, fontsize, [2.8 2.54]);
+mysavefig(h, filename, plotdir, fontsize, [2.8 2.54]);

@@ -26,6 +26,7 @@ G0 = 0;
 b0 = 1.1;
 dt = .001;
 Tau = ones(1,3)*.1;
+
 %% define parameters for visualization
 lwd = 2.0;
 mksz = 18;
@@ -71,22 +72,23 @@ Fig4;
 %% Fig 5 - winner-take-all competition
 Fig5;
 
-%% Fig 5 - fitting to classical RT dataset
+%% Fig 5-S1, Five terroteries of parameter regimes for local disinhibition model
+Fig5_S1;
+
+%% Fig 6 - fitting to Roitman & Shadlen 2002
 Fig6;
 
-%% Fig 6 - persistent activity
-Fig6;
+%% Fig 7 - expansion to multiple alternative
+Fig7;
+
+%% Fig 8 - Persistent activity
+Fig8;
 
 %% Fig 7 - adapt to different tasks timelines
 Fig7;
 
 %% Fig 8 - Speed-accuracy tradeoff
 Fig8;
-
-
-
-%% Fig S2 - five territories of parameter regimes for local disinhibition model
-FigS2;
 
 %% Fig S3 - Persistent activity under asymmetric gain control weights
 FigS3;
