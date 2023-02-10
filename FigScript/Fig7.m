@@ -6,6 +6,7 @@ myred = (repmat([255,255,255],clevel,1)-[linspace(0,25,clevel)',linspace(40,255,
 mygreen = (repmat([255,255,255],clevel,1)-[linspace(70,255,clevel)',linspace(40,127,clevel)',linspace(70,255,clevel)'])/255;
 
 fontsize = 10;
+paramspecify_LcDsInhbt;
 % alpha beta2, sgm, beta4
 samebeta = 1.5;
 params = [45, samebeta, 7, samebeta];
@@ -20,15 +21,6 @@ Cohr = [3.2, 9, 25.6]/100;
 % Cohr = [0 32 64 128 256 512 768]/1000;
 dt = .001;
 sigma = 0;
-sgm = 0;%params(3);
-Rstar = 32;
-Scl = ((1-a(1,1))*Rstar + 2*Rstar^2);
-
-presentt = delay;
-stimdur = dur - presentt;
-triggert = presentt;
-stoprule = 1;
-
 Buildup = NaN(320,6,2);
 Suppress = NaN(320,6,2);
 x = [1:130]';
@@ -36,15 +28,26 @@ h = figure;
 hold on;
 for i = 1:2
     items = i*2;
-    a = params(1) * eye(items);
-    b = params(2) * eye(items);
+    alpha = params(1) * eye(items);
+    beta = params(2) * eye(items);
     if items == 4
-        b = params(4) * eye(items);
+        beta = params(4) * eye(items);
     end
+    sgm = params(3);
     w = 1*ones(items);
     initialvals = 5*[ones(1,items); items*ones(1,items); zeros(1, items)];
+    Rstar = 32;
+    Scl = ((1-alpha(1,1))*Rstar + 2*Rstar^2);
     Vprior = Scl*ones(1,items);
-    
+    presentt = dt;
+    stimdur = dur - presentt;
+    stoprule = 1;
+    [R0, G0, I0, ~, ~] = LcDsInhbt(Vprior, w, alpha, beta, sigma, Tau, predur, dt, presentt, Inf, Inf, initialvals, stimdur, stoprule);
+
+    presentt = 0;
+    stimdur = dur - presentt;
+    triggert = presentt;
+    stoprule = 1;
     cohi = 0;
     for cohr = Cohr
         cohi = cohi + 1;
@@ -56,17 +59,13 @@ for i = 1:2
                 mycol = myred(s*4+2,:);
             end
         end
-        %         Vinput = Scl/1.5 * [1, ones(1,items-1)];
+        initialvals = [R0(end,:);G0(end,:);I0(end,:)];
+        Vinput = Scl/1.5 * [1, ones(1,items-1)];
+        [Rd, Gd, Id, ~, ~] = LcDsInhbt(Vinput, w, alpha, beta, sigma, Tau, delay, dt, presentt, presentt+delay, thresh, initialvals, delay, 0);
+        initialvals = [Rd(end,:);Gd(end,:);Id(end,:)];
         Vinput = Scl * [(1+cohr), (1-cohr)*ones(1,items-1)];
-        
-        [~, ~, Rout, G, D] = LDDM(Vprior, Vinput, w, a, b,...
-            sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-        %         [Rd, Gd, Id, ~, ~] = LcDsInhbt(Vinput, w, a, b, sigma, Tau, delay, dt, presentt, presentt+delay, thresh, initialvals, delay, 0);
-        %         initialvals = [Rd(end,:);Gd(end,:);Id(end,:)];
-        %         Vinput = Scl * [(1+cohr), (1-cohr)*ones(1,items-1)];
-        %         [R, G, I, rt, choice] = LcDsInhbt(Vinput, w, a, b, sigma, Tau, dur-delay, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-        %         Rout = [R0;Rd;R];
-        
+        [R, G, I, rt, choice] = LcDsInhbt(Vinput, w, alpha, beta, sigma, Tau, dur-delay, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+        Rout = [R0;Rd;R];
         if numel(Cohr) <= 3
             if items == 2
                 lp(items) = plot(Rout(:,1),'-','Color',mycol,'LineWidth',1.5);
@@ -99,7 +98,7 @@ H.LineWidth = 1;
 h.PaperUnits = 'inches';
 h.PaperPosition = [0 0 4.8 3.0];
 saveas(h,fullfile(plotdir,sprintf('Churchland_4items_%icoh.eps',length(Cohr))),'epsc2');
-%% build up rate
+% build up rate
 clear up down;
 for i = 1:2
     items = i*2;
@@ -143,7 +142,7 @@ sims = 10000;
 gap = 0;
 Cohr = [0 32 64 128 256 512 768]/1000; % percent of coherence
 name = sprintf('sims%ik_a%1.2f_b%1.2f_noise%2.2f_b%1.2f',sims/1000,params);
-file = fullfile(datadir,sprintf('MultiChoice_%s.mat',name));
+file = fullfile(plotdir,sprintf('MultiChoice_%s.mat',name));
 if exist(file,'file')
     load(file);
 else
@@ -155,22 +154,22 @@ else
     for i = 1:2
         items = i*2;
         fprintf('items: %i',items);
-        a = params(1) * eye(items);
-        b = params(2) * eye(items);
+        alpha = params(1) * eye(items);
+        beta = params(2) * eye(items);
         if items == 4
-            b = params(4) * eye(items);
+            beta = params(4) * eye(items);
         end
         sgm = params(3);
         w = 1*ones(items);
         initialvals = 8*[ones(1,items); items*ones(1,items); zeros(1, items)];
-        Scl = ((1-a(1,1))*Rstar + 2*Rstar^2);
+        Scl = ((1-alpha(1,1))*Rstar + 2*Rstar^2);
         Vprior = Scl*ones(1,items);
         presentt = dt;
         stimdur = dur - presentt;
         triggert = Inf;
         stoprule = 0;
         sigma = 0;
-        [R0, G0, D0, rt, choice] = LcDsInhbt(Vprior, w, a, b, sigma, Tau, predur, dt, presentt, triggert, Inf, initialvals, stimdur, stoprule);
+        [R0, G0, I0, rt, choice] = LcDsInhbt(Vprior, w, alpha, beta, sigma, Tau, predur, dt, presentt, triggert, Inf, initialvals, stimdur, stoprule);
         for cohi = 1:length(Cohr)
             fprintf('.');
             cohr = Cohr(cohi);
@@ -180,15 +179,15 @@ else
             triggert = presentt;
             stoprule = 1;
             for rep = 1:sims
-                initialvals = [R0(end,:);G0(end,:);D0(end,:)];
+                initialvals = [R0(end,:);G0(end,:);I0(end,:)];
                 Vinput = Scl/1.5 * [1, ones(1,items-1)];
-                [Rd, Gd, Id, ~, ~] = LcDsInhbt(Vinput, w, a, b, sgm, Tau, delay, dt, presentt, presentt+delay, thresh, initialvals, delay, 0);
+                [Rd, Gd, Id, ~, ~] = LcDsInhbt(Vinput, w, alpha, beta, sgm, Tau, delay, dt, presentt, presentt+delay, thresh, initialvals, delay, 0);
                 initialvals = [Rd(end,:);Gd(end,:);Id(end,:)];
                 Vinput = Scl*[(1+cohr), (1-cohr)*ones(1,items-1)];
-                [R, G, I, rt, choice] = LcDsInhbt(Vinput, w, a, b, sgm, Tau, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+                [R, G, I, rt, choice] = LcDsInhbt(Vinput, w, alpha, beta, sgm, Tau, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
                 if isnan(rt)
                     warning('rt is NaN, decision not made');
-                else
+                else 
                     rt = rt + delay;
                 end
                 rtmat(rep,cohi,i) = rt;
@@ -202,7 +201,7 @@ else
         end
         fprintf('\n');
     end
-    save(fullfile(datadir,sprintf('MultiChoice_%s.mat',name)),...
+    save(fullfile(plotdir,sprintf('MultiChoice_%s.mat',name)),...
         'rtmat','choicemat','Buildup','Suppress','params');
 end
 choicemat = choicemat == 1;
@@ -303,7 +302,7 @@ choicemat = [];
 R1mat = []; %NaN(round((predur+dur)/dt),1000,5,2);
 R2mat = []; %NaN(round((predur+dur)/dt),1000,5,2);
 name = sprintf('sims%ik_a%1.2f_b%1.2f_noise%2.2f_b%1.2f',sims/1000,params);
-file = fullfile(datadir,sprintf('MultiChoiceTrace_%s.mat',name));
+file = fullfile(plotdir,sprintf('MultiChoiceTrace_%s.mat',name));
 if exist(file,'file')
     load(file);
 else
@@ -311,15 +310,15 @@ else
     for i = 1:2
         items = i*2;
         fprintf('items: %i\n',items);
-        a = params(1) * eye(items);
-        b = params(2) * eye(items);
+        alpha = params(1) * eye(items);
+        beta = params(2) * eye(items);
         if items == 4
-            b = params(4) * eye(items);
+            beta = params(4) * eye(items);
         end
         sgm = params(3);
         w = 1*ones(items);
         initialvals = 8*[ones(1,items); items*ones(1,items); zeros(1, items)];
-        Scl = ((1-a(1,1))*Rstar + 2*Rstar^2);
+        Scl = ((1-alpha(1,1))*Rstar + 2*Rstar^2);
         Vprior = Scl*ones(1,items);
         %Vprior = params(4)*512*ones(1,items);
         predur = .6;
@@ -328,20 +327,20 @@ else
         triggert = Inf;
         stoprule = 0;
         sigma = 0;
-        [R0, G0, D0, rt, choice] = LcDsInhbt(Vprior, w, a, b, sigma, Tau, predur+delay, dt, presentt, triggert, Inf, initialvals, stimdur+delay, stoprule);
+        [R0, G0, I0, rt, choice] = LcDsInhbt(Vprior, w, alpha, beta, sigma, Tau, predur+delay, dt, presentt, triggert, Inf, initialvals, stimdur+delay, stoprule);
         for cohi = 1:length(Cohr)
             cohr = Cohr(cohi);
             fprintf('coherence %2.1f\n', cohr*100);
             % Vinput = params(4)*[256*(1+cohr), 256*(1-cohr)*ones(1,items-1)];
             Vinput = Scl*[(1+cohr), (1-cohr)*ones(1,items-1)];
-            initialvals = [R0(end,:);G0(end,:);D0(end,:)];
+            initialvals = [R0(end,:);G0(end,:);I0(end,:)];
             dur = 5;
             presentt = 0;
             stimdur = dur - presentt;
             triggert = presentt;
             stoprule = 0;
             for rep = 1:sims
-                [R, G, I, rt, choice] = LcDsInhbt(Vinput, w, a, b, sgm, Tau, dur-delay, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+                [R, G, I, rt, choice] = LcDsInhbt(Vinput, w, alpha, beta, sgm, Tau, dur-delay, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
                 if isnan(rt)
                     warning('rt is NaN, decision not made');
                 end
@@ -353,7 +352,7 @@ else
             end
         end
     end
-    save(fullfile(datadir,sprintf('MultiChoiceTrace_%s.mat',name)),...
+    save(fullfile(plotdir,sprintf('MultiChoiceTrace_%s.mat',name)),...
         'rtmat','choicemat','R1mat','R2mat','params');
 end
 %
@@ -389,12 +388,20 @@ for i = 1:2
             R1stim((round((predur+rtmat(rep,cohi,i))/dt)-60):end,rep,cohi,i) = NaN;
             R2stim((round((predur+rtmat(rep,cohi,i))/dt)-60):end,rep,cohi,i) = NaN;
         end
+        %         if cohr <= 0
+        %             out = choicemat(:,cohi,i) ~= 1;
+        %             % longt = rtmat(:,cohi,i) > .45;
+        %             Rout = Rstim([1:round((predur+.33)/dt)], out, cohi, i);
+        %             Rout_sac = Rsac(:, out, cohi, i);
+        %             plot([mean(Rout,2,'omitnan'); NaN(200,1); mean(Rout_sac,2,'omitnan')],'--','Color',mycol,'LineWidth',1.5);
+        %         end
         if cohr >= 0
             in = choicemat(:,cohi,i) == 1;
-            longt = 1;
+            longt = 1;%rtmat(:,cohi,i) >= (.45-delay);
             Rin = R1stim([1:round((predur+.33)/dt)], in&longt, cohi, i);
             Rin_sac = R1sac(:, in&longt, cohi, i);
             lp(cohi+(i-1)*length(Cohr)) = plot([mean(Rin,2,'omitnan'); NaN(100,1); mean(Rin_sac,2,'omitnan')],'-','Color',mycol,'LineWidth',1.5);
+            
             Rout = R2stim([1:round((predur+.33)/dt)], in&longt, cohi, i);
             Rout_sac = R2sac(:, in&longt, cohi, i);
             plot([mean(Rout,2,'omitnan'); NaN(100,1); mean(Rout_sac,2,'omitnan')],'--','Color',mycol,'LineWidth',1.5);

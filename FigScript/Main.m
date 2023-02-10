@@ -2,9 +2,9 @@
 % Glimcher, A disinhibition-based circuit model of decision-making
 Codedir = '/Users/bs3667/Documents/LDDM';
 % Codedir = 'C:\Users\Bo\Documents\LDDM';
-addpath(fullfile(Codedir,'CoreFunctions')); % inlcude the core functions
-addpath(fullfile(Codedir,'utils')); % inlcude utilities and functions
-outdir = '/Volumes/GoogleDrive/My Drive/LDDM/Figs4Paper';
+addpath(genpath(fullfile(Codedir,'CoreFunctions'))); % inlcude the core functions
+addpath(genpath(fullfile(Codedir,'utils'))); % inlcude utilities and functions
+outdir = '/Users/bs3667/Library/CloudStorage/GoogleDrive-bs3667@nyu.edu/My Drive/LDDM/Figs4Paper';
 % outdir = 'G:\My Drive\LDDM\Figs4Paper';
 if ~exist(outdir,'dir')
     mkdir(outdir);
@@ -26,7 +26,7 @@ G0 = 0;
 b0 = 1.1;
 dt = .001;
 Tau = ones(1,3)*.1;
-
+thresh = 70;
 %% define parameters for visualization
 lwd = 2.0;
 mksz = 18;
@@ -84,17 +84,14 @@ Fig7;
 %% Fig 8 - Persistent activity
 Fig8;
 
-%% Fig 7 - adapt to different tasks timelines
-Fig7;
+%% Fig 8-S1 - Persistent activity when w matrix is asymmetric
+Fig8_S1;
 
-%% Fig 8 - Speed-accuracy tradeoff
-Fig8;
+%% Fig 8-S2 - Persistent activity under disinhibition
+Fig8_S2;
 
-%% Fig S3 - Persistent activity under asymmetric gain control weights
-FigS3;
+%% Fig 9 - Gated disinhibition adapts to the dynamics of various tasks
+Fig9;
 
-%% Fig S4 - Persistent activity under local disinhibition
-FigS4;
-
-%% Fig S5 - modified model with asymmetric gain control
-FigS5;
+%% Fig 10 - Pertubation on inhibitory connections, simulating GABAergic potentiation
+Fig10;
