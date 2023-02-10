@@ -66,8 +66,8 @@ for ti = 1:(dur/dt)
 
     
     % update xs
-    x1 = x1 + (Rho1inputArray - k11*x1 - beta12*x2)*dt_tau + gpuArray.randn(sizeComput)*sgmArray*sqrt(dt_tau);
-    x2 = x2 + (Rho2inputArray - k22*x2 - beta21*x1)*dt_tau + gpuArray.randn(sizeComput)*sgmArray*sqrt(dt_tau);
+    x1 = x1 + (Rho1inputArray.*Continue - k11*x1 - beta12*x2)*dt_tau + gpuArray.randn(sizeComput)*sgmArray*sqrt(dt_tau);
+    x2 = x2 + (Rho2inputArray.*Continue - k22*x2 - beta21*x1)*dt_tau + gpuArray.randn(sizeComput)*sgmArray*sqrt(dt_tau);
     % setting lower boundary, forcing neural firing rates to be non-negative
     inside = x1 >= 0;
     x1 = x1 .* inside;
