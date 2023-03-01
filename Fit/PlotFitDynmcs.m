@@ -1,4 +1,4 @@
-function [h, h2, dot_tick] = PlotFitDynmcs(RoitmanDataDir, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD, plot_dir, name)
+function [h, h2, dot_tick] = PlotFitDynmcs(RoitmanDataDir, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD, plot_dir, name, realdata)
 load(fullfile(RoitmanDataDir,'DynmcsData.mat'));
 aspect = [3, 2.5];
 fontsize = 11;
@@ -47,19 +47,32 @@ mysavefig(h,filename,plot_dir,fontsize,aspect);
 saveas(h,fullfile(plot_dir,[filename, '.fig']),'fig');
 %% plot firing rates at position a,b,c,d
 % colorpalette = {'#ef476f','#ffd166','#06d6a0','#118ab2','#073b4c'};
+% rescale to the threshold
+sac_tick = find(sac_ax == 0);
+y = sm_mr1cD(sac_tick,:);
+rate = mean(c)/mean(y);
+%
 Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
 x = Cohr*100;
 h2 = figure;
 filename = sprintf('abcd_%s',name);
 subplot(2,1,1);hold on;
-y = sm_mr1c(dot_tick,:);
-% plot(x, y,'.', 'Color',  colorpalette{4}, 'MarkerSize',14);
+y = sm_mr1c(dot_tick,:)*rate;
+if realdata
+    plot(x, a,'bx', 'MarkerSize',8);
+    sa = y;
+end
 scatter(x, y, 14, mygray(3:8,:), 'filled');
 p = polyfit(x,y,1);
 mdl = fitlm(x,y,'linear')
 plot(x,p(1)*x+p(2),'k-', 'LineWidth', lwd);
-y = sm_mr2c(dot_tick,:);
-% plot(x, y,'o','Color', colorpalette{1},'MarkerSize',14);
+y = sm_mr2c(dot_tick,:)*rate;
+if realdata
+    plot(x, b, 'rx', 'MarkerSize',8);
+    sb = y;
+    RMSE = sqrt(sum(([a,b] - [sa, sb]).^2)/numel([a,b]));
+    text(x(end-1), mean([sa,sb]), sprintf('RMSE = %1.2f', RMSE));
+end
 scatter(x, y, 14, mygray(3:8,:));
 p = polyfit(x,y,1);
 mdl = fitlm(x,y,'linear')
@@ -67,19 +80,32 @@ plot(x,p(1)*x+p(2),'k--', 'LineWidth',lwd);
 xlim([-4,55.2]);
 xticks([0:10:50]);
 xticklabels({});
-ylabel('Firing rates (sp/s)');
+if realdata
+    ylabel('Rescaled firing rates (sp/s)');
+else
+    ylabel('Firing rates (sp/s)');
+end
 mysavefig(h2, filename, plot_dir, fontsize, [2 3]);
+
 
 subplot(2,1,2);hold on;
 sac_tick = find(sac_ax == 0);
-y = sm_mr1cD(sac_tick,:);
-% plot(x, y,'.','Color', colorpalette{4},'MarkerSize',14);
+y = sm_mr1cD(sac_tick,:)*rate;
+if realdata
+    plot(x, c,'bx','MarkerSize',8);
+    sc = y;
+end
 scatter(x, y, 14, mygray(3:8,:), 'filled');
 p = polyfit(x,y,1);
 mdl = fitlm(x,y,'linear')
 plot(x,p(1)*x+p(2),'k-','LineWidth',lwd);
 y = sm_mr2cD(sac_tick,:);
-% plot(x, y,'.','Color', colorpalette{1},'MarkerSize',14);
+if realdata
+    plot(x, d,'rx','MarkerSize',8);
+    sd = y;
+    RMSE = sqrt(sum(([c,d] - [sc, sd]).^2)/numel([c,d]));
+    text(x(end-1), mean([sc,sd]), sprintf('RMSE = %1.2f', RMSE));
+end
 scatter(x, y, 14, mygray(3:8,:));
 p = polyfit(x,y,1);
 mdl = fitlm(x,y,'linear')
@@ -87,6 +113,10 @@ plot(x,p(1)*x+p(2),'k--','LineWidth',lwd);
 xlim([-4,55.2]);
 xticks([0:10:50]);
 xlabel('Input strength (% coh)');
-ylabel('Firing rates (sp/s)');
+if realdata
+    ylabel('Rescaled firing rates (sp/s)');
+else
+    ylabel('Firing rates (sp/s)');
+end
 mysavefig(h2, filename, plot_dir, fontsize, [2 3]);
 end

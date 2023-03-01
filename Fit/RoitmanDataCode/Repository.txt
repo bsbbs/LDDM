@@ -1,0 +1,2 @@
+Please see the authors' kind sharing through: https://shadlenlab.columbia.edu/resources/RoitmanDataCode.html
+Reference: Roitman, J. D., & Shadlen, M. N. (2002). Response of neurons in the lateral intraparietal area during a combined visual discrimination reaction time task. Journal of neuroscience, 22(21), 9475-9489.

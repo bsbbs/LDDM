@@ -75,16 +75,16 @@ save(fullfile(out_dir,sprintf('CollectRslts%i.mat',t)),'Collect');
 
 
 if 0
-    %% hand tuning
+    %% Visualization
     % Homedir = 'C:\Users\Bo';
     Homedir = '~';
     addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
     addpath(fullfile(Homedir,'Documents','LDDM','utils'));
     addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
     % Glgdr = 'G:\My Drive\LDDM';
-    Glgdr = '/Volumes/GoogleDrive/My Drive/LDDM';
+    Glgdr = '/Users/bs3667/Library/CloudStorage/GoogleDrive-bs3667@nyu.edu/My Drive/LDDM';
     cd(fullfile(Glgdr, 'Fit'));
-    RoitmanDataDir = fullfile(Glgdr, 'Fit', 'RoitmanDataCode');
+    RoitmanDataDir = fullfile(Homedir,'Documents','LDDM', 'Fit', 'RoitmanDataCode');
     dataDynmc = load(fullfile(RoitmanDataDir,'DynmcsData.mat'));
     dataBhvr = LoadRoitmanData(RoitmanDataDir);
     
@@ -233,9 +233,9 @@ if 0
         load(destfile);
     end
     %% plot fitted dynamics and abcd values
-    [h, h2, dot_tick] = PlotFitDynmcs(RoitmanDataDir, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD, plot_dir, ['r_',name]);
-    [h, h2, dot_tick] = PlotFitDynmcs(RoitmanDataDir, sm_mg1c, sm_mg2c, sm_mg1cD, sm_mg2cD, plot_dir, ['g_',name]);
-    [h, h2, dot_tick] = PlotFitDynmcs(RoitmanDataDir, sm_md1c, sm_md2c, sm_md1cD, sm_md2cD, plot_dir, ['d_',name]);
+    [h, h2, dot_tick] = PlotFitDynmcs(RoitmanDataDir, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD, plot_dir, ['r_',name],1);
+    [h, h2, dot_tick] = PlotFitDynmcs(RoitmanDataDir, sm_mg1c, sm_mg2c, sm_mg1cD, sm_mg2cD, plot_dir, ['g_',name],0);
+    [h, h2, dot_tick] = PlotFitDynmcs(RoitmanDataDir, sm_md1c, sm_md2c, sm_md1cD, sm_md2cD, plot_dir, ['d_',name],0);
     
     %% Single trials dynamics
     lwd = 1;
