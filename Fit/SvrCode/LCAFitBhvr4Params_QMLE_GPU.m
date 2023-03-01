@@ -1,4 +1,4 @@
-function [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LCAFitBhvr5Params_QMLE_GPU(params, dataBhvr, sims)
+function [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LCAFitBhvr4Params_QMLE_GPU(params, dataBhvr, sims)
 % reload Roitman's data, processed
 q = dataBhvr.q;
 On = dataBhvr.On;
