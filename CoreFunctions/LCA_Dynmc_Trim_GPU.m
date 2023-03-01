@@ -27,7 +27,7 @@ sizeVinput = size(Rho1mat);
 sizeComput = [sizeVinput, sims];
 NComput = prod(sizeComput);
 
-time_spc = 100 -30; % ms, to exclude activity within 100 msecs of eye movement initiation in calculating mrc
+time_spc = 100 - 30; % ms, to exclude activity within 100 msecs of eye movement initiation in calculating mrc
 time_spcD = 200 - 90; % ms, to exclude activity within 200 msecs of motion onset in calculating mrcD
 
 %% initialize variables
@@ -146,6 +146,6 @@ m_mr1c = gather(squeeze(m_mr1c));
 m_mr2c = gather(squeeze(m_mr2c));
 m_mr1cD = gather(squeeze(m_mr1cD));
 m_mr2cD = gather(squeeze(m_mr2cD));
-rt = gather(rt)*dt;
+rt = (gather(rt) + T0)*dt;
 rt(rt == Inf) = nan;
 choice = gather(choice);

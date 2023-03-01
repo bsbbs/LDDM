@@ -234,6 +234,7 @@ if 0
     end
     %% plot fitted dynamics and abcd values
     [h, h2, dot_tick] = PlotFitDynmcs(RoitmanDataDir, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD, plot_dir, ['r_',name],1);
+    %%
     [h, h2, dot_tick] = PlotFitDynmcs(RoitmanDataDir, sm_mg1c, sm_mg2c, sm_mg1cD, sm_mg2cD, plot_dir, ['g_',name],0);
     [h, h2, dot_tick] = PlotFitDynmcs(RoitmanDataDir, sm_md1c, sm_md2c, sm_md1cD, sm_md2cD, plot_dir, ['d_',name],0);
     

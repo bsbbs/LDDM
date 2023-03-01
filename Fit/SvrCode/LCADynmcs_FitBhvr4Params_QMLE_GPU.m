@@ -9,9 +9,8 @@ ON = dataBhvr.ON;
 k = params(1)*eye(2);
 beta = params(2)*eye(2);
 sgm = params(3);
-T0 = params(4);
-thresh = params(5);
-
+thresh = params(4);
+T0 = 30 + 90; 
 % other fixed parameters
 Cohr = [0 32 64 128 256 512]/1000; % percent of coherence
 dur = 5;
@@ -22,7 +21,7 @@ V2 = (1 - Cohr)';
 RhoMat = [V1, V2];
 
 % tic
-[rtmat, choicemat, ~, m_mr1c, m_mr2c, m_mr1cD, m_mr2cD] = LCA_Dynmc_Trim_GPU(RhoMat, k, beta, sgm, T0, thresh, dur, dt, sims, dot_ax, sac_ax);
+[rtmat, choicemat, ~, m_mr1c, m_mr2c, m_mr1cD, m_mr2cD] = LCA_Dynmc_Trim_GPU(RhoMat, k, beta, sgm, thresh, dur, dt, sims, T0, dot_ax, sac_ax);
 rtmat = squeeze(rtmat)';
 choicemat = squeeze(choicemat)';
 % toc;

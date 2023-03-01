@@ -9,7 +9,7 @@ mypool = parpool(myCluster, myCluster.NumWorkers);
 addpath(genpath('../../RecurrentModel/bads/bads-master'));
 addpath('../CoreFunctions/');
 addpath('./SvrCode/');
-out_dir = '../../RecurrentModel/Fit/Rslts/LCAFitBhvr5Params_QMLE_SvrGPU';
+out_dir = '../../RecurrentModel/Fit/Rslts/LCAFitBhvr4Params_QMLE_SvrGPU';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
 end
@@ -25,18 +25,18 @@ num2str(t);
 rng(t);
 
 % Define optimization starting point and bounds
-%     k,    beta, noise, T0, thresh
-LB = [-3    0   0      0    .01];
-UB = [3   30	5      2      10];
-PLB = [-1  1	.1      0      .1];
-PUB = [1   10	.5      .2      6];
+%     k,    beta, noise, thresh
+LB = [-3    0   0      .01];
+UB = [3   30	5      10];
+PLB = [-1  1	.1      .1];
+PUB = [1   10	.5      6];
 
 % Randomize initial starting point inside plausible box
 x0 = rand(1,numel(LB)) .* (PUB - PLB) + PLB;
 
 % likelihood function
 % parpool(6);
-nLLfun = @(params) LCAFitBhvr5Params_QMLE_GPU(params, dataBhvr, 10240)
+nLLfun = @(params) LCAFitBhvr4Params_QMLE_GPU(params, dataBhvr, 10240)
 [fvalbest,~,~] = nLLfun(x0)
 fprintf('test succeeded\n');
 
@@ -107,7 +107,7 @@ if 0
     sims = 10240;
     if ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
         tic;
-        [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LCAFitBhvr5Params_QMLE_GPU(params, dataBhvr, sims);
+        [nLL, Chi2, BIC, AIC, rtmat, choicemat] = LCAFitBhvr4Params_QMLE_GPU(params, dataBhvr, sims);
         save(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),...
             'rtmat','choicemat','params','nLL','Chi2','AIC','BIC');
         toc
@@ -176,7 +176,7 @@ if 0
     if ~exist(destfile,'file')
         tic;
         [nLL, Chi2, BIC, AIC, rtmat, choicemat, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD]...
-            = LCADynmcs_FitBhvr5Params_QMLE_GPU(params, dataDynmc, dataBhvr, sims);
+            = LCADynmcs_FitBhvr4Params_QMLE_GPU(params, dataDynmc, dataBhvr, sims);
         save(destfile,...
             'rtmat','choicemat','params','nLL','Chi2','AIC','BIC', 'sm_mr1c', 'sm_mr2c', 'sm_mr1cD', 'sm_mr2cD');
         toc

@@ -71,7 +71,7 @@ if realdata
     plot(x, b, 'rx', 'MarkerSize',8);
     sb = y;
     RMSE = sqrt(sum(([a,b] - [sa, sb]).^2)/numel([a,b]));
-    text(x(end-1), mean([sa,sb]), sprintf('RMSE = %1.2f', RMSE));
+    text(x(end-1), mean([a,b]), sprintf('RMSE = %1.2f', RMSE));
 end
 scatter(x, y, 14, mygray(3:8,:));
 p = polyfit(x,y,1);
@@ -99,12 +99,12 @@ scatter(x, y, 14, mygray(3:8,:), 'filled');
 p = polyfit(x,y,1);
 mdl = fitlm(x,y,'linear')
 plot(x,p(1)*x+p(2),'k-','LineWidth',lwd);
-y = sm_mr2cD(sac_tick,:);
+y = sm_mr2cD(sac_tick,:)*rate;
 if realdata
     plot(x, d,'rx','MarkerSize',8);
     sd = y;
     RMSE = sqrt(sum(([c,d] - [sc, sd]).^2)/numel([c,d]));
-    text(x(end-1), mean([sc,sd]), sprintf('RMSE = %1.2f', RMSE));
+    text(x(end-1), mean([c,d]), sprintf('RMSE = %1.2f', RMSE));
 end
 scatter(x, y, 14, mygray(3:8,:));
 p = polyfit(x,y,1);

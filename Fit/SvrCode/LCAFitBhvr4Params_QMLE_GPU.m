@@ -8,8 +8,8 @@ OP = dataBhvr.OP;
 k = params(1)*eye(2);
 beta = params(2)*eye(2);
 sgm = params(3);
-T0 = params(4);
-thresh = params(5);
+thresh = params(4);
+T0 = 30 + 90;
 
 % other fixed parameters
 Cohr = [0 32 64 128 256 512]/1000; % percent of coherence

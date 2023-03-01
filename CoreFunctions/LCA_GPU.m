@@ -68,7 +68,7 @@ x2Out(choice == 0) = x2(choice == 0);
 choice = choice/2; %1 choose x1, 2 choose x2, 1.5 x1 = x2, 0 choice is not made
 choice(choice == 0) = NaN; %1 choose x1, 2 choose x2, 1.5 x1 = x2, NaN choice is not made
 rt(rt==0) = NaN;
-rt = rt + T0;
+rt = rt + T0*dt;
 inside = x1Out < x2Out;
 inside = inside + (x1Out == x2Out)/2;% x1 < x2 recorded as 1, x1 > x2 recorded as 0, x1 == x2 recorded as .5;
 argmaxR = inside + 1; % keep consistant as other models, 1 for choose x1, 2 for choose x2, and 1.5 for equal
