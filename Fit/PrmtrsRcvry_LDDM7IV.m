@@ -1,12 +1,12 @@
 %% set path
-% Homedir = 'C:\Users\Bo\Documents';
-Homedir = '~/Documents';
+Homedir = 'C:\Users\Bo\Documents';
+% Homedir = '~/Documents';
 addpath(fullfile(Homedir, 'LDDM','CoreFunctions'));
 addpath(fullfile(Homedir, 'LDDM','utils'));
 addpath(genpath(fullfile(Homedir, 'LDDM', 'Fit')));
 
-% Glgdir = 'G:\My Drive\LDDM';
-Glgdir = '/Users/bs3667/Library/CloudStorage/GoogleDrive-bs3667@nyu.edu/My Drive/LDDM';
+Glgdir = 'G:\My Drive\LDDM';
+% Glgdir = '/Users/bs3667/Library/CloudStorage/GoogleDrive-bs3667@nyu.edu/My Drive/LDDM';
 % addpath(genpath(fullfile(Glgdir, 'Fit','bads-master')));
 addpath(genpath(fullfile(Glgdir, 'Fit','bads')));
 out_dir = fullfile(Glgdir,'Fit/Rslts/FitBhvr7ParamsIV_QMLE_SvrGPU/PrmtrsRcvry');
@@ -33,31 +33,31 @@ ivec = linspace(0,100,41); % [0, 10.^[-1:.1:3]]; %10.^[-1:.01:3];
 jvec = linspace(0,4,41); %linspace(0,4,401);
 idx = [1, 2];
 [filename, nLLmat] = SpaceCheck(bestparams, names, ivec, jvec, idx, SimDataQp, out_dir);
-Visualization(out_dir,filename, names, idx, 5, latexnames);
+Visualization(out_dir,filename, names, idx, 5, latexnames, bestparams);
 %% Check the space of noise and scale
 ivec = linspace(0,80,41); % noise, best fit = 25.36 
 jvec = linspace(10, 8010, 41); % 10.^[-1:.1:3]*9; % scale, best fit = 3251
 idx = [3, 4];
 [filename, nLLmat] = SpaceCheck(bestparams, names, ivec, jvec, idx, SimDataQp, out_dir);
-Visualization(out_dir,filename, names, idx, 5, latexnames);
+Visualization(out_dir,filename, names, idx, 5, latexnames, bestparams);
 %% Check the space of tauR and tauG
 ivec = 10.^[-2:.1:1]; %linspace(.025,1.05,42); % tauR, best fit = .18
 jvec = 10.^[-2:.1:1]; %linspace(.025,1.025,41); % tauG, best fit = .22
 idx = [5, 6];
 [filename, nLLmat] = SpaceCheck(bestparams, names, ivec, jvec, idx, SimDataQp, out_dir);
-Visualization(out_dir,filename, names, idx, 4, latexnames);
+Visualization(out_dir,filename, names, idx, 4, latexnames, bestparams);
 %% Check the space of tauR and tauD
 ivec = 10.^[-2:.1:1]; %linspace(.025,1.05,42); % tauR, best fit = .18
 jvec = 10.^[-2:.1:1]; %linspace(.025,1.025,41);% tauD, best fit = .32
 idx = [5, 7];
 [filename, nLLmat] = SpaceCheck(bestparams, names, ivec, jvec, idx, SimDataQp, out_dir);
-Visualization(out_dir,filename, names, idx, 4, latexnames);
+Visualization(out_dir,filename, names, idx, 4, latexnames, bestparams);
 %% Check the space of tauG and tauD
 ivec = 10.^[-2:.1:1]; %linspace(.025,1.05,42); % tauG, best fit = .22
 jvec = 10.^[-2:.1:1]; %linspace(.025,1.025,41); % tauD, best fit = .32
 idx = [6, 7];
 [filename, nLLmat] = SpaceCheck(bestparams, names, ivec, jvec, idx, SimDataQp, out_dir);
-Visualization(out_dir,filename, names, idx, 4, latexnames);
+Visualization(out_dir,filename, names, idx, 4, latexnames, bestparams);
 
 %% functions
 function [filename, nLLmat] = SpaceCheck(bestparams, names, ivec, jvec, idx, dataBhvr, out_dir)
@@ -83,7 +83,7 @@ end
 end
 
 %%
-function Visualization(out_dir,filename, names, idx, nticks, latexnames)
+function Visualization(out_dir,filename, names, idx, nticks, latexnames, bestparams)
 % Visuliazation parameters
 lwd = 2.0;
 mksz = 18;
@@ -93,14 +93,19 @@ h = figure;
 hold on;
 minnLL = min(nLLmat(:));
 [r, c] = find(nLLmat == minnLL);
-contour(-nLLmat,60);
-plot3(c,r,-minnLL*1.01, 'rx', 'MarkerSize', mksz/3, 'LineWidth', lwd);
-xticks(linspace(1,length(jvec),nticks));
-xticklabels(jvec(linspace(1,length(jvec),nticks)));
-yticks(linspace(1,length(ivec),nticks));
-yticklabels(ivec(linspace(1,length(ivec),nticks)));
+contour(jvec, ivec, -nLLmat, 60);
+plot3(bestparams(idx(2)),bestparams(idx(1)),-minnLL*1.02, 'bx', 'MarkerSize', mksz/3, 'LineWidth', lwd);
+plot3(jvec(c),ivec(r),-minnLL*1.01, 'rx', 'MarkerSize', mksz/3, 'LineWidth', lwd);
+% xticks(linspace(1,length(jvec),nticks));
+% xticklabels(jvec(linspace(1,length(jvec),nticks)));
+% yticks(linspace(1,length(ivec),nticks));
+% yticklabels(ivec(linspace(1,length(ivec),nticks)));
 xlabel(latexnames{idx(2)},'FontAngle', 'italic');
 ylabel(latexnames{idx(1)},'FontAngle', 'italic');
+if any(idx >= 5) % for tau space
+    set(gca,'XScale','log');
+    set(gca,'YScale','log');
+end
 clb = colorbar;
 colormap('turbo');
 ylabel(clb, 'Log likelihood');
