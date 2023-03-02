@@ -31,8 +31,8 @@ BG = 0;
 a = 1.3;
 BR = 71;
 x = [S,         BG-a,       BR];
-LB = [0.5,  -70,         0];
-UB = [2,       70,         200];
+LB = [0.5,  -50,         0];
+UB = [2,       50,         140];
 PLB = [.9,    -1,         60];
 PUB = [1.2,     2,          80];
 tic;
@@ -113,13 +113,12 @@ filename = 'PrmtrRcvry_Louie2011';
 subplot(1,2,1);
 hold on;
 plot([-40,40],[-40,40],'--','LineWidth',.5);
-plot(summaries(:,2), summaries(:,5),'.','MarkerSize',10);
+plot(summaries(:,2), summaries(:,5),'.');
 xlabel('Generated B_G-\alpha','FontAngle','italic','FontName','Times');
 ylabel('Recovered B_G-\alpha','FontAngle','italic','FontName','Times');
 xticks(-40:20:40);
 yticks(-40:20:40);
-xlim([-41,41]);
-ylim([-41,41]);
+xlim([-41
 mysavefig(h, filename, plot_dir, 12, [6, 3]);
 
 % over B
@@ -147,13 +146,9 @@ end
 subplot(1,2,2);
 hold on;
 plot([0,140],[0,140],'--','LineWidth',.5);
-plot(summaries(:,3), summaries(:,6),'.','MarkerSize',10);
+plot(summaries(:,3), summaries(:,6),'.');
 xlabel('Generated B_R','FontAngle','italic','FontName','Times');
 ylabel('Recovered B_R','FontAngle','italic','FontName','Times');
-xticks(0:40:140);
-yticks(0:40:140);
-xlim([-1,141]);
-ylim([-1,141]);
 mysavefig(h, filename, plot_dir, 12, [6, 3]);
 %%
 if visulize

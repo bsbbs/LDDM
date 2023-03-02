@@ -1,4 +1,4 @@
-function savefigs(h, filename, outdir, fontsize, aspect)
+function mysavefig(h, filename, outdir, fontsize, aspect)
 set(gca,'FontSize',fontsize);
 set(gca,'TickDir','out');
 set(gca,'LineWidth',1); 
