@@ -1,9 +1,9 @@
 % Fit the mean firing rates from Louie, et al., 2011
-cd('G:\My Drive\LDDM\Fit');
-% cd('/Volumes/GoogleDrive/My Drive/LDDM/Fit');
+% cd('G:\My Drive\LDDM\Fit');
+cd('/Users/bs3667/Library/CloudStorage/GoogleDrive-bs3667@nyu.edu/My Drive/LDDM/Fit');
 addpath(genpath('./bads-master_2019'));
-% addpath(genpath('~/Documents/LDDM/utils'));
-addpath(genpath('C:\Users\Bo\Documents\LDDM\utils'));
+addpath(genpath('~/Documents/LDDM/utils'));
+% addpath(genpath('C:\Users\Bo\Documents\LDDM\utils'));
 out_dir = './Rslts/FitLouie2011/LDDM';
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
@@ -83,7 +83,52 @@ for i = 1:20
     save(fullfile(out_dir,'FitRslt.mat'),'summaries','xBest', 'S', 'G0_a','B','RSS_min','reports');
 end
 %% parameters recovery
+% over G0_a
+G0_a_vec = -40:5:40;
+N = numel(G0_a_vec);
+output = fullfile(out_dir,'RcvryG0_aRslt.mat');
+if exist(output,'file')
+    load(output);
+else
+    summaries = nan(N, 8);
+    reports = cell(N,1);
+    parfor i = 1:N
+        fprintf('Fit G0_a generated = %2.1f: ',G0_a_vec(i));
+        x_gnrt = [xBest(1), G0_a, xBest(3)];
+        [~, gnrt_activity] = OLS(x_gnrt,V1,V2,V3,FR);
+        f = @(x)OLS(x, V1, V2, V3, gnrt_activity);
+        x0 = xBest;
+        [x,fval,~,report] = bads(f,x0,LB,UB,PLB,PUB,options);
+        Rsquared = 1 - fval/var(gnrt_activity)/(numel(gnrt_activity)-1);
+        summaries(i,:)  = [x_gnrt, x, fval, Rsquared];
+        reports{i} = report;
+    end
+    save(output,'summaries','reports');
+end
 
+
+% over B
+B_vec = 0:5:140;
+N = numel(B_vec);
+output = fullfile(out_dir,'RcvryBRslt.mat');
+if exist(output,'file')
+    load(output);
+else
+    summaries = nan(N, 8);
+    reports = cell(N,1);
+    parfor i = 1:N
+        fprintf('Fit B generated = %2.1f: ',B_vec(i));
+        x_gnrt = [xBest(1), xBest(2), B];
+        [~, gnrt_activity] = OLS(x_gnrt,V1,V2,V3,FR);
+        f = @(x)OLS(x, V1, V2, V3, gnrt_activity);
+        x0 = xBest;
+        [x,fval,~,report] = bads(f,x0,LB,UB,PLB,PUB,options);
+        Rsquared = 1 - fval/var(gnrt_activity)/(numel(gnrt_activity)-1);
+        summaries(i,:)  = [x_gnrt, x, fval, Rsquared];
+        reports{i} = report;
+    end
+    save(output,'summaries','reports');
+end
 %%
 if visulize
     h = figure;  hold on;
