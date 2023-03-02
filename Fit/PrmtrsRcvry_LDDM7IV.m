@@ -94,8 +94,8 @@ hold on;
 minnLL = min(nLLmat(:));
 [r, c] = find(nLLmat == minnLL);
 contour(jvec, ivec, -nLLmat, 60);
-plot3(bestparams(idx(2)),bestparams(idx(1)),-minnLL*1.02, 'bx', 'MarkerSize', mksz/3, 'LineWidth', lwd);
-plot3(jvec(c),ivec(r),-minnLL*1.01, 'rx', 'MarkerSize', mksz/3, 'LineWidth', lwd);
+lgd1 = plot3(bestparams(idx(2)),bestparams(idx(1)),-minnLL*1.02, 'bx', 'MarkerSize', mksz/3, 'LineWidth', lwd);
+lgd2 = plot3(jvec(c),ivec(r),-minnLL*1.01, 'rx', 'MarkerSize', mksz/3, 'LineWidth', lwd);
 % xticks(linspace(1,length(jvec),nticks));
 % xticklabels(jvec(linspace(1,length(jvec),nticks)));
 % yticks(linspace(1,length(ivec),nticks));
@@ -109,6 +109,9 @@ end
 clb = colorbar;
 colormap('turbo');
 ylabel(clb, 'Log likelihood');
+if all(idx <= 2)
+    legend([lgd1, lgd2], {'Best fit','Recovered'}, 'FontSize',10);
+end
 savefig(h, fullfile(out_dir,['Contour',filename]));
 savefigs(h, ['Contour',filename], out_dir, fontsize - 2, [4 3]);
 % close(h);
