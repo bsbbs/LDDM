@@ -1,7 +1,7 @@
 % Fit the mean firing rates from Louie, et al., 2011
-% cd('G:\My Drive\LDDM\Fit');
-% cd('/Users/bs3667/Library/CloudStorage/GoogleDrive-bs3667@nyu.edu/My Drive/LDDM/Fit');
-Glgdir = '/Volumes/GoogleDrive/My Drive/LDDM/Fit/';
+Glgdir = 'G:\My Drive\LDDM\Fit';
+% Glgdir = '/Users/bs3667/Library/CloudStorage/GoogleDrive-bs3667@nyu.edu/My Drive/LDDM/Fit';
+% Glgdir = '/Volumes/GoogleDrive/My Drive/LDDM/Fit/';
 addpath(genpath(fullfile(Glgdir, 'bads-master_2019')));
 addpath(genpath('~/Documents/LDDM/utils'));
 % addpath(genpath('C:\Users\Bo\Documents\LDDM\utils'));
@@ -84,10 +84,9 @@ for i = 1:20
     save(fullfile(out_dir,'FitRslt.mat'),'summaries','xBest', 'S', 'BG_a','BR','RSS_min','reports');
 end
 %% parameters recovery
-plot_dir = '~/Desktop';
 % over G0_a
-BG_a_vec = -40:3:41;
-N = numel(BG_a_vec);
+BG_a_rng = [-40, 40];
+N = 1000;
 output = fullfile(out_dir,'RcvryBG_aRslt.mat');
 if exist(output,'file')
     load(output);
@@ -95,8 +94,9 @@ else
     summaries = nan(N, 8);
     reports = cell(N,1);
     parfor i = 1:N
-        fprintf('Fit BG_a generated = %2.1f: ',BG_a_vec(i));
-        x_gnrt = [xBest(1), BG_a_vec(i), xBest(3)];
+        BG_a = rand(1,1)*range(BG_a_rng) +BG_a_rng(1);
+        fprintf('Fit BG_a generated = %2.1f: ',BG_a);
+        x_gnrt = [xBest(1), BG_a, xBest(3)];
         [~, gnrt_activity] = OLS(x_gnrt,V1,V2,V3,FR);
         f = @(x)OLS(x, V1, V2, V3, gnrt_activity);
         x0 = xBest;
@@ -112,7 +112,7 @@ h = figure;
 filename = 'PrmtrRcvry_Louie2011';
 subplot(1,2,1);
 hold on;
-plot([-40,40],[-40,40],'--','LineWidth',.5);
+plot(BG_a_rng,BG_a_rng,'--','LineWidth',.5);
 plot(summaries(:,2), summaries(:,5),'.','MarkerSize',10);
 xlabel('Generated B_G-\alpha','FontAngle','italic','FontName','Times');
 ylabel('Recovered B_G-\alpha','FontAngle','italic','FontName','Times');
@@ -123,8 +123,8 @@ ylim([-41,41]);
 mysavefig(h, filename, plot_dir, 12, [7, 3]);
 
 % over B
-BR_vec = 0:5:140;
-N = numel(BR_vec);
+BR_rng = [0, 140];
+N = 1000;
 output = fullfile(out_dir,'RcvryBR_Rslt.mat');
 if exist(output,'file')
     load(output);
@@ -132,8 +132,9 @@ else
     summaries = nan(N, 8);
     reports = cell(N,1);
     parfor i = 1:N
-        fprintf('Fit B generated = %2.1f: ',BR_vec(i));
-        x_gnrt = [xBest(1), xBest(2), BR_vec(i)];
+        BR = rand(1,1)*range(BR_rng) + min(BR_rng);
+        fprintf('Fit B generated = %2.1f: ',BR);
+        x_gnrt = [xBest(1), xBest(2), BR];
         [~, gnrt_activity] = OLS(x_gnrt,V1,V2,V3,FR);
         f = @(x)OLS(x, V1, V2, V3, gnrt_activity);
         x0 = xBest;
