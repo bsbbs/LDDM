@@ -101,8 +101,9 @@ if 0
     if ~exist(plot_dir,'dir')
         mkdir(plot_dir);
     end
-    params = [0.268202	5.265115	0.377111	0	3.800356	16634.666784];
-    name = sprintf('k%.3f_b%1.2f_sgm%.3f_T0%.3f_thresh%1.2f_nLL%5.2f',params);
+    
+    params = [0.477431	16.579511	0.353479	2.475246	16947.87064];
+    name = sprintf('k%.3f_b%1.2f_sgm%.3f_thresh%1.2f_nLL%5.2f',params);
     %% Simulation given parameters
     sims = 10240;
     if ~exist(fullfile(plot_dir,sprintf('PlotData_%s.mat',name)),'file')
