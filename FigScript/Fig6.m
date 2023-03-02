@@ -11,6 +11,8 @@
 cd ../Fit;
 %% Fit LDDM
 main_FitBhvr7ParamsIV_QMLE_svr;
+LLSpace_LDDM7IVG0;
+PrmtrsRcvry_LDDM7IV;
 
 %% Fit RNM
 main_WW06FitBhvr8ParamsVI_QMLE_svr;

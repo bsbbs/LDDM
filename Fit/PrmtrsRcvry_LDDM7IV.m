@@ -1,12 +1,12 @@
 %% set path
-Homedir = 'C:\Users\Bo\Documents';
-% Homedir = '~/Documents';
+% Homedir = 'C:\Users\Bo\Documents';
+Homedir = '~/Documents';
 addpath(fullfile(Homedir, 'LDDM','CoreFunctions'));
 addpath(fullfile(Homedir, 'LDDM','utils'));
 addpath(genpath(fullfile(Homedir, 'LDDM', 'Fit')));
 
-Glgdir = 'G:\My Drive\LDDM';
-% Glgdir = '/Volumes/GoogleDrive/My Drive/LDDM';
+% Glgdir = 'G:\My Drive\LDDM';
+Glgdir = '/Users/bs3667/Library/CloudStorage/GoogleDrive-bs3667@nyu.edu/My Drive/LDDM';
 % addpath(genpath(fullfile(Glgdir, 'Fit','bads-master')));
 addpath(genpath(fullfile(Glgdir, 'Fit','bads')));
 out_dir = fullfile(Glgdir,'Fit/Rslts/FitBhvr7ParamsIV_QMLE_SvrGPU/PrmtrsRcvry');
