@@ -120,7 +120,7 @@ xticks(-40:20:40);
 yticks(-40:20:40);
 xlim([-41,41]);
 ylim([-41,41]);
-mysavefig(h, filename, plot_dir, 12, [6, 3]);
+mysavefig(h, filename, plot_dir, 12, [7, 3]);
 
 % over B
 BR_vec = 0:5:140;
@@ -154,7 +154,7 @@ xticks(0:40:140);
 yticks(0:40:140);
 xlim([-1,141]);
 ylim([-1,141]);
-mysavefig(h, filename, plot_dir, 12, [6, 3]);
+mysavefig(h, filename, plot_dir, 12, [7, 3]);
 %%
 if visulize
     h = figure;  hold on;
