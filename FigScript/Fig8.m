@@ -105,41 +105,41 @@ for bi = 1:2
             xlim([-.6,axismax]);ylim([-.6,axismax]);
             yticks([0, (alpha(1,1)-1)/(w(1,1)+w(1,2)-b), (alpha(1,1)-1)/(w(1,1) - b)]);
             xticks([0, (alpha(2,2)-1)/(w(2,2)+w(2,1)-b), (alpha(2,2)-1)/(w(2,2) - b)]);
-            yticklabels({'0','$\frac{\alpha-1-G_0}{2\omega-\beta}$','$\frac{\alpha-1-G_0}{\omega-\beta}$'});
-            xticklabels({'0','$\frac{\alpha-1-G_0}{2\omega-\beta}$','$\frac{\alpha-1-G_0}{\omega-\beta}$'});
+            yticklabels({'0','$\frac{\alpha-1-B_G}{2\omega-\beta}$','$\frac{\alpha-1-B_G}{\omega-\beta}$'});
+            xticklabels({'0','$\frac{\alpha-1-B_G}{2\omega-\beta}$','$\frac{\alpha-1-B_G}{\omega-\beta}$'});
         elseif b == 0
             xlim([-.4,axismax]);ylim([-.4,axismax]);
             yticks([0, (alpha(1,1)-1)/(w(1,1) - b)]);
             xticks([0, (alpha(2,2)-1)/(w(2,2) - b)]);
-            yticklabels({'0','$\frac{\alpha-1-G_0}{\omega}$'});
-            xticklabels({'0','$\frac{\alpha-1-G_0}{\omega}$'});
+            yticklabels({'0','$\frac{\alpha-1-B_G}{\omega}$'});
+            xticklabels({'0','$\frac{\alpha-1-B_G}{\omega}$'});
         elseif b >= 1
             xlim([-1.4,axismax]);ylim([-1.4,axismax]);
             yticks([0, (alpha(1,1)-1)/(w(1,1) + w(1,2) - b)]);
             xticks([0, (alpha(2,2)-1)/(w(2,2) + w(2,1) - b)]);
-            yticklabels({'0','$\frac{\alpha-1-G_0}{2\omega-\beta}$'});
-            xticklabels({'0','$\frac{\alpha-1-G_0}{2\omega-\beta}$'});
+            yticklabels({'0','$\frac{\alpha-1-B_G}{2\omega-\beta}$'});
+            xticklabels({'0','$\frac{\alpha-1-B_G}{2\omega-\beta}$'});
         end
     elseif w(1,1) ~= w(1,2) && b == 0
         if w(1,1) > w(1,2) % convergent
             xlim([-.8,axismax]);ylim([-.8,axismax]);
             yticks([0, (alpha(1,1)-1)/(w(1,1) + w(1,2)),(alpha(1,1)-1)/w(1,2)]);
             xticks([0, (alpha(2,2)-1)/(w(2,2) + w(2,1)),(alpha(2,2)-1)/w(2,1)]);
-            yticklabels({'0','$\frac{\alpha-1-G_0}{w+v}$','$\frac{\alpha-1-G_0}{v}$'});
-            xticklabels({'0','$\frac{\alpha-1-G_0}{w+v}$','$\frac{\alpha-1-G_0}{v}$'});
+            yticklabels({'0','$\frac{\alpha-1-B_G}{w+v}$','$\frac{\alpha-1-B_G}{v}$'});
+            xticklabels({'0','$\frac{\alpha-1-B_G}{w+v}$','$\frac{\alpha-1-B_G}{v}$'});
         elseif w(1,1) < w(1,2) % divergent
             xlim([-.4,axismax]);ylim([-.4,axismax]);
             yticks([0, (alpha(1,1)-1)/(w(1,1) + w(1,2)),(alpha(1,1)-1)/w(1,1)]);
             xticks([0, (alpha(2,2)-1)/(w(2,2) + w(2,1)),(alpha(2,2)-1)/w(2,2)]);
-            yticklabels({'0','$\frac{\alpha-1-G_0}{w+v}$','$\frac{\alpha-1-G_0}{w}$'});
-            xticklabels({'0','$\frac{\alpha-1-G_0}{w+v}$','$\frac{\alpha-1-G_0}{w}$'});
+            yticklabels({'0','$\frac{\alpha-1-B_G}{w+v}$','$\frac{\alpha-1-B_G}{w}$'});
+            xticklabels({'0','$\frac{\alpha-1-B_G}{w+v}$','$\frac{\alpha-1-B_G}{w}$'});
         end
     end
     set(gca,'TickLabelInterpreter', 'latex');
     xlabel('R_2 activity (a.u.)', 'FontAngle','italic');
     ylabel('R_1 activity (a.u.)', 'FontAngle','italic');
     lg3 = quiver(R10,R20,dR1,dR2,1.3,'k','LineWidth',1);
-    ratio = aspect5;
+    ratio = [4.3, 2.54];
     
     if bi == 1
         legend([lg1,lg2,lg3], {'\color[rgb]{.0667,.5412,.6980}dR_1/dt = 0',...
@@ -149,7 +149,7 @@ for bi = 1:2
     elseif bi == 2
         legend([lg1,lg2,lg3,lgdvec(1)], {'\color[rgb]{.0667,.5412,.6980}dR_1/dt = 0',...
             '\color[rgb]{.9373,.2784,.4353}dR_2/dt = 0','\color{black}Change rate',...
-            'Unstable point'}, 'FontName','Times New Roman', ...
+            'Unstable'}, 'FontName','Times New Roman', ...
             'FontAngle','Italic','FontSize',fontsize-4, 'Location','northeastoutside','Box','off');
     end
     savefigs(h, filename, plotdir, 11, ratio);

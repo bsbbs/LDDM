@@ -80,7 +80,8 @@ mysavefig(h, filename, plotdir, fontsize, aspect7);
 %% nullclines for R1 and R2 under unequal inputs, manually change parameters
 c = 0;
 V = 30*[1+c, 1-c];
-for spots = 1%:5
+Vprior = 30*[1, 1];
+for spots = 1:5
     switch spots
         case 1
             a = 5;
@@ -172,13 +173,13 @@ for spots = 1%:5
     xlim([.2,10^2]);ylim([.2,10^2]);
     if a < 1-(max(V)/100)
         xticks([1,10,V(1)/(1-a),100]);yticks([1,10,V(1)/(1-a),100]);
-        xticklabels({'$10^0$','$10^1$','$\frac{V_1}{1+G_0-\alpha}$','$10^2$'});
-        yticklabels({'$10^0$','$10^1$','$\frac{V_2}{1+G_0-\alpha}$','$10^2$'});
+        xticklabels({'$10^0$','$10^1$','$\frac{V_1+B_R}{1+B_G-\alpha}$','$10^2$'});
+        yticklabels({'$10^0$','$10^1$','$\frac{V_2+B_R}{1+B_G-\alpha}$','$10^2$'});
         set(gca,'TickLabelInterpreter', 'latex');
     else
         xticks([1,10,100]);yticks([1,10,100]);
-        xticklabels({'$10^0$','$10^1$','$\frac{V_1}{1+G_0-\alpha}$','$10^2$'});
-        yticklabels({'$10^0$','$10^1$','$\frac{V_2}{1+G_0-\alpha}$','$10^2$'});
+        xticklabels({'$10^0$','$10^1$','$\frac{V_1+B_R}{1+B_G-\alpha}$','$10^2$'});
+        yticklabels({'$10^0$','$10^1$','$\frac{V_2+B_R}{1+B_G-\alpha}$','$10^2$'});
         set(gca,'TickLabelInterpreter', 'latex');
     end
     xlabel('R_2 activity (a.u.)', 'FontAngle','italic');

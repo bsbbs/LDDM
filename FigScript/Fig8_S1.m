@@ -61,7 +61,7 @@ for wi = 1:3
         R2Line = [0,(alpha(1,1)-1)/w(1,2)];
     end
     R1Line = -w(1,2)/(w(1,1)-beta).*R2Line+(alpha(1,1) - 1)/(w(1,1)-beta);
-    lg1 = plot(R2Line,R1Line,'-','Color',colorpalette{4},'LineWidth',lwd*2);% dR1/dt = 0
+    lg1 = plot(R2Line,R1Line,'-','Color',colorpalette{4},'LineWidth',lwd);% dR1/dt = 0
     if w(2,2) - beta > 0 && w(1,2) == w(1,1)
         R1Line = [0,(alpha(1,1) - 1)/(w(1,1) - beta)];
     elseif w(2,2) - beta <= 0 && w(1,2) == w(1,1)
@@ -70,7 +70,7 @@ for wi = 1:3
         R1Line = [0,(alpha(2,2)-1)/w(2,1)];
     end
     R2Line = -w(2,1)/(w(2,2)-beta).*R2Line+(alpha(2,2) - 1)/(w(2,2)-beta);
-    lg2 = plot(R2Line,R1Line,'--','Color',colorpalette{1},'LineWidth',lwd*2);% dR2/dt = 0
+    lg2 = plot(R2Line,R1Line,'--','Color',colorpalette{1},'LineWidth',lwd);% dR2/dt = 0
     syms R1 R2;
     vars = [R1 R2];
     eqns = [(w(1,1)-beta)*R1 + w(1,2)*R2 == alpha(1,1) - 1, ... % dR1/dt = 0
@@ -109,34 +109,34 @@ for wi = 1:3
             xlim([-.4,axismax]);ylim([-.4,axismax]);
             yticks([0, (alpha(1,1)-1)/(w(1,1)+w(1,2)-beta), (alpha(1,1)-1)/(w(1,1) - beta)]);
             xticks([0, (alpha(2,2)-1)/(w(2,2)+w(2,1)-beta), (alpha(2,2)-1)/(w(2,2) - beta)]);
-            yticklabels({'0','$\frac{\alpha-1-G_0}{2\omega-\beta}$','$\frac{\alpha-1-G_0}{\omega-\beta}$'});
-            xticklabels({'0','$\frac{\alpha-1-G_0}{2\omega-\beta}$','$\frac{\alpha-1-G_0}{\omega-\beta}$'});
+            yticklabels({'0','$\frac{\alpha-1-B_G}{2\omega-\beta}$','$\frac{\alpha-1-B_G}{\omega-\beta}$'});
+            xticklabels({'0','$\frac{\alpha-1-B_G}{2\omega-\beta}$','$\frac{\alpha-1-B_G}{\omega-\beta}$'});
         elseif beta == 0
             xlim([-.4,axismax]);ylim([-.4,axismax]);
             yticks([0, (alpha(1,1)-1)/(w(1,1) - beta)]);
             xticks([0, (alpha(2,2)-1)/(w(2,2) - beta)]);
-            yticklabels({'0','$\frac{\alpha-1-G_0}{\omega}$'});
-            xticklabels({'0','$\frac{\alpha-1-G_0}{\omega}$'});
+            yticklabels({'0','$\frac{\alpha-1-B_G}{\omega}$'});
+            xticklabels({'0','$\frac{\alpha-1-B_G}{\omega}$'});
         elseif beta >= 1
             xlim([-.4,axismax]);ylim([-.4,axismax]);
             yticks([0, (alpha(1,1)-1)/(w(1,1) + w(1,2) - beta)]);
             xticks([0, (alpha(2,2)-1)/(w(2,2) + w(2,1) - beta)]);
-            yticklabels({'0','$\frac{\alpha-1-G_0}{2\omega-\beta}$'});
-            xticklabels({'0','$\frac{\alpha-1-G_0}{2\omega-\beta}$'});
+            yticklabels({'0','$\frac{\alpha-1-B_G}{2\omega-\beta}$'});
+            xticklabels({'0','$\frac{\alpha-1-B_G}{2\omega-\beta}$'});
         end
     elseif w(1,1) ~= w(1,2) && beta == 0
         if w(1,1) > w(1,2) % convergent
             xlim([-.8,axismax]);ylim([-.8,axismax]);
             yticks([0, (alpha(1,1)-1)/(w(1,1) + w(1,2)),(alpha(1,1)-1)/w(1,2)]);
             xticks([0, (alpha(2,2)-1)/(w(2,2) + w(2,1)),(alpha(2,2)-1)/w(2,1)]);
-            yticklabels({'0','$\frac{\alpha-1-G_0}{w+v}$','$\frac{\alpha-1-G_0}{v}$'});
-            xticklabels({'0','$\frac{\alpha-1-G_0}{w+v}$','$\frac{\alpha-1-G_0}{v}$'});
+            yticklabels({'0','$\frac{\alpha-1-B_G}{w+v}$','$\frac{\alpha-1-B_G}{v}$'});
+            xticklabels({'0','$\frac{\alpha-1-B_G}{w+v}$','$\frac{\alpha-1-B_G}{v}$'});
         elseif w(1,1) < w(1,2) % divergent
             xlim([-.4,axismax]);ylim([-.4,axismax]);
             yticks([0, (alpha(1,1)-1)/(w(1,1) + w(1,2)),(alpha(1,1)-1)/w(1,1)]);
             xticks([0, (alpha(2,2)-1)/(w(2,2) + w(2,1)),(alpha(2,2)-1)/w(2,2)]);
-            xticklabels({'0','$\frac{\alpha-1-G_0}{w+v}$','$\frac{\alpha-1-G_0}{w}$'});
-            yticklabels({'0','$\frac{\alpha-1-G_0}{w+v}$','$\frac{\alpha-1-G_0}{w}$'});
+            xticklabels({'0','$\frac{\alpha-1-B_G}{w+v}$','$\frac{\alpha-1-B_G}{w}$'});
+            yticklabels({'0','$\frac{\alpha-1-B_G}{w+v}$','$\frac{\alpha-1-B_G}{w}$'});
         end
     end
     set(gca,'TickLabelInterpreter', 'latex');
@@ -147,9 +147,9 @@ for wi = 1:3
     if wi == 3
         legend([lg1,lg2,lg3,lgdvec], {'\color[rgb]{.0667,.5412,.6980}dR_1/dt = 0',...
             '\color[rgb]{.9373,.2784,.4353}dR_2/dt = 0','\color{black}Change rate',...
-            'Stable point','Unstable point'}, 'FontName','Times New Roman', ...
+            'Stable','Unstable'}, 'FontName','Times New Roman', ...
             'FontAngle','Italic','FontSize',fontsize-4, 'Location','northeastoutside','Box','off');
-        ratio = aspect5;
+        ratio = [4.3, 2.54];
     end
     mysavefig(h, filename, plotdir, 11, ratio);
 end

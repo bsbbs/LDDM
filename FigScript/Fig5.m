@@ -30,14 +30,14 @@ triggert =  presentt;
 sgm = 0;
 thresh = 70;
 stoprule = 1;
-Vprior = [1, 1]*scale0 + B0;
+Vprior = [1, 1]*scale0 + BR;
 Tau = [.1,.1,.1];
 initialvals = zeros(3,2);
 for Nclass = ['R','G','D']
     h = figure; hold on;
     filename = sprintf('Fig5a_%s_latebeta',Nclass);
     for vi = 1:5
-        Vinput = [1+c(vi), 1-c(vi)]*scale0 + B0;
+        Vinput = [1+c(vi), 1-c(vi)]*scale0 + BR;
         [choice, rt, R, G, D] = LDDM(Vprior, Vinput, w, a, b,...
             sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
         lgd2(vi) = plot(eval([Nclass,'(:,2)']), 'k--', 'Color', mygray(vi+1,:), 'LineWidth',lwd);
@@ -76,12 +76,12 @@ triggert = presentt;
 sgm = 0;
 thresh = 70;
 stoprule = 1;
-Vprior = [1, 1]*scale0 + B0;
+Vprior = [1, 1]*scale0 + BR;
 Tau = [.1,.1,.1];
 initialvals = zeros(3,2);
 
 cplist = linspace(-1, 1, 100)';
-Vinput = [(1 + cplist)*scale0, (1 - cplist)*scale0] + B0;
+Vinput = [(1 + cplist)*scale0, (1 - cplist)*scale0] + BR;
 sgmvec = [15];
 sims = 10240;
 output = fullfile(datadir,sprintf('DCM_Sim%iV%ia%2.1fb%1.2f_sgm%1.1f_ChoiceRT.mat',sims,length(cplist),a(1,1),b(1,1),sgmvec));
@@ -137,7 +137,7 @@ yticks([.2:.4:max(RTALL(sgmi,:))]);
 mysavefig(h, filename, plotdir, fontsize - 2, [2.41 3]);
 %% panel c_left, nullclines for R1 and R2 under equal inputs
 a = a0;
-B = 70;
+BR = 70;
 w = 1;
 v = 1;
 sgm = .02; dur = 12;
@@ -147,13 +147,13 @@ initialvals = [4,4;8,8;0,0]/15; stimdur = dur; stoprule = 0;
 filenamelist = {'Fig5cL','Fig5cM','Fig5cR'};
 blist = [.9];
 cplist = [0, .512, 1];
-Vprior = [1, 1]*scale0 + B;
+Vprior = [1, 1]*scale0 + BR;
 for bi = 1
     b = blist(bi);
     for ci = 1:3
         cp = cplist(ci);
         rng('default'); rng(8);
-        V = [1+cp 1-cp]*scale0 + B;
+        V = [1+cp 1-cp]*scale0 + BR;
         h = figure; hold on;
         filename = filenamelist{bi,ci};
         % - Nullclines R1*-R2* space
@@ -229,7 +229,7 @@ b = blist(1);
 w = 1;
 v = 1;
 cplist = linspace(-1,1,40);
-Vprior = [1, 1]*scale0 + B0;
+Vprior = [1, 1]*scale0 + BR;
 CodeRatio = nan(size(cplist));
 name = sprintf('CodedRatio_WTA_LDDM_Sim%i_a%1.1f_b%1.1f',length(cplist), a, b);
 output = fullfile(datadir,[name '.mat']);
@@ -238,7 +238,7 @@ if ~exist(output,'file')
         fprintf('cp %3.1f',cplist(ii));
         fprintf('.');
         cp = [1 + cplist(ii), 1 - cplist(ii)];
-        V = cp*scale0 + B0;
+        V = cp*scale0 + BR;
         syms R1 R2
         eqns = [(V(1)/R1 - (w - b)*R1 - (1-a))/v == R2, ... % dR1/dt = 0
             (V(2)/R2 - (w - b)*R2 - (1-a))/v == R1];% dR2/dt = 0
@@ -276,7 +276,7 @@ xticks([0,.25,.5,.75,1]); yticks([0,.25,.5,.75,1]);
 legend([lgd1, lgd2],{'\color[rgb]{0.0235,0.8392,0.6275}Choice','\color[rgb]{0.0275,0.2314,0.2980}Representation'},'Box','off','Location','NorthWest','FontSize',fontsize-5);
 mysavefig(h, filename, plotdir, fontsize - 2, [2.8 2.54]*.95);
 %% panel e, parameter space for choice/representation under equal inputs
-V = [1, 1]*scale0 + B0;
+V = [1, 1]*scale0 + BR;
 w = 1;
 v = 1;
 V1 = V(1);
