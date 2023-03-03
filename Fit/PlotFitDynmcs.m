@@ -1,4 +1,4 @@
-function [h, h2, dot_tick] = PlotFitDynmcs(RoitmanDataDir, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD, plot_dir, name, realdata)
+function [h, h2, dot_tick_x] = PlotFitDynmcs(RoitmanDataDir, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD, plot_dir, name, realdata)
 load(fullfile(RoitmanDataDir,'DynmcsData.mat'));
 aspect = [3, 2.5];
 fontsize = 11;

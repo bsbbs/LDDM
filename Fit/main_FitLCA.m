@@ -87,8 +87,8 @@ if 0
     addpath(fullfile(Homedir,'Documents','LDDM','utils'));
     addpath(genpath(fullfile(Homedir,'Documents','LDDM','Fit')));
 %     Glgdr = 'G:\My Drive\LDDM';
-    Glgdr = '/Volumes/GoogleDrive/My Drive/LDDM';
-%     Glgdr = '/Users/bs3667/Library/CloudStorage/GoogleDrive-bs3667@nyu.edu/My Drive/LDDM';
+%     Glgdr = '/Volumes/GoogleDrive/My Drive/LDDM';
+    Glgdr = '/Users/bs3667/Library/CloudStorage/GoogleDrive-bs3667@nyu.edu/My Drive/LDDM';
     cd(fullfile(Glgdr, 'Fit'));
     RoitmanDataDir = fullfile(Homedir,'Documents','LDDM', 'Fit', 'RoitmanDataCode');
     dataDynmc = load(fullfile(RoitmanDataDir,'DynmcsData.mat'));
@@ -102,7 +102,7 @@ if 0
     if ~exist(plot_dir,'dir')
         mkdir(plot_dir);
     end
-    plot_dir = '~/Desktop';
+    
     params = [0.477431	16.579511	0.353479	2.475246	16947.87064];
     name = sprintf('k%.3f_b%1.2f_sgm%.3f_thresh%1.2f_nLL%5.2f',params);
     %% Simulation given parameters
@@ -186,8 +186,8 @@ if 0
         load(destfile);
     end
     %% plot fitted dynamics and abcd values
-    [h, h2, dot_tick] = PlotFitDynmcs(RoitmanDataDir, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD, plot_dir, name, 1);
-    
+    [h, h2, dot_tick_x] = PlotFitDynmcs(RoitmanDataDir, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD, plot_dir, name, 1);
+    dot_tick_x
     %% The dynamic of single trials
     mygray = gray(8);
     h = figure; hold on;
