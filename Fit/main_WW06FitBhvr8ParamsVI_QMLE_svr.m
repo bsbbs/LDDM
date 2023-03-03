@@ -212,8 +212,8 @@ if 0
     end
     
     %% plot fitted dynamics and abcd values
-    [h, h2, dot_tick] = PlotFitDynmcs(RoitmanDataDir, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD, plot_dir, name, 1);
-    
+    [h, h2, dot_tick_x] = PlotFitDynmcs(RoitmanDataDir, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD, plot_dir, name, 1);
+    dot_tick_x
     
     %% Single trials dynamics
     lwd = 1;
