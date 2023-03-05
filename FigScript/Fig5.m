@@ -153,59 +153,60 @@ for bi = 1
     end
 end
 %% panel d, equilibrium point for a noiseless system
-a = 0; %a0;
-b = blist(1);
+a = a0;
 w = 1;
 v = 1;
 cplist = linspace(-1,1,40);
 Vprior = [1, 1]*scale0 + 0;
-CodeRatio = nan(size(cplist));
-name = sprintf('CodedRatio_WTA_LDDM_Sim%i_a%1.1f_b%1.1f',length(cplist), a, b);
-output = fullfile(datadir,[name '.mat']);
-if ~exist(output,'file')
-    for ii = 1:length(cplist)
-        fprintf('cp %3.1f',cplist(ii));
-        fprintf('.');
-        cp = [1 + cplist(ii), 1 - cplist(ii)];
-        V = cp*scale0 + 0;
-        syms R1 R2
-        eqns = [(V(1)/R1 - (w - b)*R1 - (1-a))/v == R2, ... % dR1/dt = 0
-            (V(2)/R2 - (w - b)*R2 - (1-a))/v == R1];% dR2/dt = 0
-        vars = [R1 R2];
-        [AnswR1,AnswR2] = solve(eqns, vars);
-        AnswD1 = b*AnswR1;
-        AnswD2 = b*AnswR2;
-        AnswG1 = w*AnswR1 + v*AnswR2 - AnswD1;
-        AnswG2 = v*AnswR1 + w*AnswR2 - AnswD2;
-        PositiveRealAnsw = double(AnswR1) >0 & double(imag(AnswR1)) == 0;
-        Npoints = sum(PositiveRealAnsw);
-        Ratio = double((AnswR1(PositiveRealAnsw)./(AnswR1(PositiveRealAnsw)+AnswR2(PositiveRealAnsw))) - .5);
-        if sum(V == 0)
-            Ratio = [Ratio,V(1)/sum(V)];
-        end
-        Cntrst = abs(Ratio);
-        CodeRatio(ii) = Ratio(Cntrst == max(Cntrst))+.5;
-        if V(1)/(V(1)+V(2)) == 1 || V(1)/(V(1)+V(2)) == 0
-            CodeRatio(ii) = NaN;
-        end
-    end
-    save(output,'CodeRatio','cplist','a','b','w','v');
-else
-    load(output);
-end
 h = figure;
 filename = 'Fig5d'; hold on;
-name = sprintf('CodedRatio_VR_LDDM_DNM_RNM');
-output = fullfile(datadir,[name '.mat']);
-load(output);
-lgd2 = plot((1+cplist)/2, R1rp(:,1)./(R1rp(:,1)+R2rp(:,1)),'.-','Color',colorpalette{5},'MarkerSize',mksz/2);
-lgd1 = plot((1+cplist)/2, CodeRatio, '.-','Color',colorpalette{3},'MarkerSize',mksz/2);
+phasename = {'VR','WTA'};
+for phase = 1:2
+    if phase == 1
+        b = 0;
+    elseif phase == 2
+        b = blist(1);
+    end
+    CodeRatio = nan(size(cplist));
+    name = sprintf('CodedRatio_%s_LDDM_Sim%i_a%1.1f_b%1.1f',phasename{phase}, length(cplist), a, b);
+    output = fullfile(datadir,[name '.mat']);
+    if ~exist(output,'file')
+        for ii = 1:length(cplist)
+            fprintf('cp %3.1f',cplist(ii));
+            fprintf('.');
+            cp = [1 + cplist(ii), 1 - cplist(ii)];
+            V = cp*scale0 + 0;
+            syms R1 R2
+            eqns = [(V(1)/R1 - (w - b)*R1 - (1-a))/v == R2, ... % dR1/dt = 0
+                (V(2)/R2 - (w - b)*R2 - (1-a))/v == R1];% dR2/dt = 0
+            vars = [R1 R2];
+            [AnswR1,AnswR2] = solve(eqns, vars);
+            AnswD1 = b*AnswR1;
+            AnswD2 = b*AnswR2;
+            AnswG1 = w*AnswR1 + v*AnswR2 - AnswD1;
+            AnswG2 = v*AnswR1 + w*AnswR2 - AnswD2;
+            PositiveRealAnsw = double(AnswR1) >0 & double(imag(AnswR1)) == 0;
+            Npoints = sum(PositiveRealAnsw);
+            if all(V > 0)
+                Ratio = double((AnswR1(PositiveRealAnsw)./(AnswR1(PositiveRealAnsw)+AnswR2(PositiveRealAnsw))) - .5);
+                Cntrst = abs(Ratio);
+                CodeRatio(ii) = Ratio(Cntrst == max(Cntrst))+.5; % take the WTA attractor with larger contrast
+            else
+                CodeRatio(ii) = V(1)/sum(V); % assign ratio as 0 or 1 when any of the inputs is zero.
+            end
+        end
+        save(output,'CodeRatio','cplist','a','b','w','v');
+    else
+        load(output);
+    end
+    lgd(phase) = plot((1+cplist)/2, CodeRatio, '.-','Color',colorpalette{5-(phase-1)*2},'MarkerSize',mksz/2);
+end
 xlabel('Input ratio V_1/(V_1 + V_2)');ylabel('Coded ratio R_1/(R_1 + R_2)');
 xticks([0,.25,.5,.75,1]); yticks([0,.25,.5,.75,1]);
-legend([lgd1, lgd2],{'\color[rgb]{0.0235,0.8392,0.6275}Choice','\color[rgb]{0.0275,0.2314,0.2980}Representation'},'Box','off','Location','NorthWest','FontSize',fontsize-5);
+legend(lgd,{'\color[rgb]{0.0235,0.8392,0.6275}Choice','\color[rgb]{0.0275,0.2314,0.2980}Representation'},'Box','off','Location','NorthWest','FontSize',fontsize-5);
 mysavefig(h, filename, plotdir, fontsize - 2, [2.8 2.54]*.95);
 %% panel e, parameter space for choice/representation under equal inputs
-V = [1, 1]*scale0 + BR;
+V = [1, 1]*scale0 + 0;
 w = 1;
 v = 1;
 V1 = V(1);

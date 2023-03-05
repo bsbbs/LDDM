@@ -1,7 +1,7 @@
 % Fig5-S1 - detailed phase plane analysis on the LDDM
 
 %% colormap of a and beta/w space
-V = [30, 30];
+V = [1, 1]*scale0;
 w = 1;
 v = 1;
 V1 = V(1);
@@ -79,8 +79,8 @@ mysavefig(h, filename, plotdir, fontsize, aspect7);
 
 %% nullclines for R1 and R2 under unequal inputs, manually change parameters
 c = 0;
-V = 30*[1+c, 1-c];
-Vprior = 30*[1, 1];
+V = scale0*[1+c, 1-c];
+Vprior = scale0*[1, 1];
 for spots = 1:5
     switch spots
         case 1
@@ -88,8 +88,8 @@ for spots = 1:5
             b = .3;
             filename = 'Fig5S1b';
         case 2
-            a = .3;
-            b = 1.01;
+            a = .05;
+            b = 1.003;
             filename = 'Fig5S1c';
         case 3
             a = 10;
@@ -112,12 +112,12 @@ for spots = 1:5
     initialvals = [4,4;8,8;0,0]/15; stimdur = dur; stoprule = 0;
     % - Nullclines R1*-R2* space
     h = figure; hold on;
-    R2 = linspace(.1,145,400);
+    R2 = [linspace(.2,50,400), 51:5:1000];
     R1 = (V(2)./R2 - (w - b)*R2 - (1-a))/v; % dR2/dt = 0
     lgd2 = plot(R2,R1,'k--','LineWidth',lwd/2); % dR2/dt = 0
     plot([min(R2), V(2)/(1-a)],[V(1)/(1-a), V(1)/(1-a)],'--k','LineWidth',1);
     Line1 = [R1' R2'];
-    R1 = linspace(.1,155,800);
+    R1 = [linspace(.2,50,400), 51:5:1000];
     R2 = (V(1)./R1 - (w - b)*R1 - (1-a))/v; % dR1/dt = 0
     lgd1 = plot(R2,R1,'k-','LineWidth',lwd/2); % dR1/dt = 0
     plot([V(2)/(1-a), V(2)/(1-a)],[min(R1), V(1)/(1-a)],'--k','LineWidth',1);
@@ -170,17 +170,19 @@ for spots = 1:5
     end
     set(gca, 'XScale','log');
     set(gca, 'YScale','log');
-    xlim([.2,10^2]);ylim([.2,10^2]);
-    if a < 1-(max(V)/100)
-        xticks([1,10,V(1)/(1-a),100]);yticks([1,10,V(1)/(1-a),100]);
-        xticklabels({'$10^0$','$10^1$','$\frac{V_1+B_R}{1+B_G-\alpha}$','$10^2$'});
-        yticklabels({'$10^0$','$10^1$','$\frac{V_2+B_R}{1+B_G-\alpha}$','$10^2$'});
+    xlim([.2,10^3]);ylim([.2,10^3]);
+    if max(V)/(1-a) < 1000 && max(V)/(1-a) > 100
+        xticks([1,10,100,V(1)/(1-a),1000]);yticks([1,10,100,V(1)/(1-a),1000]);
+        xticklabels({'$10^0$','$10^1$','$10^2$','$\frac{V_1+B_R}{1+B_G-\alpha}$','$10^3$'});
+        yticklabels({'$10^0$','$10^1$','$10^2$','$\frac{V_2+B_R}{1+B_G-\alpha}$','$10^3$'});
         set(gca,'TickLabelInterpreter', 'latex');
     else
-        xticks([1,10,100]);yticks([1,10,100]);
-        xticklabels({'$10^0$','$10^1$','$\frac{V_1+B_R}{1+B_G-\alpha}$','$10^2$'});
-        yticklabels({'$10^0$','$10^1$','$\frac{V_2+B_R}{1+B_G-\alpha}$','$10^2$'});
-        set(gca,'TickLabelInterpreter', 'latex');
+        xticks([1,10,100,1000]);yticks([1,10,100,1000]);
+%         xticklabels({'$10^0$','$10^1$','$10^2$','$\frac{V_1+B_R}{1+B_G-\alpha}$','$10^3$'});
+%         yticklabels({'$10^0$','$10^1$','$10^2$','$\frac{V_2+B_R}{1+B_G-\alpha}$','$10^3$'});
+%         xticklabels({'$10^0$','$10^1$','$\frac{V_1+B_R}{1+B_G-\alpha}$','$10^2$'});
+%         yticklabels({'$10^0$','$10^1$','$\frac{V_2+B_R}{1+B_G-\alpha}$','$10^2$'});
+%         set(gca,'TickLabelInterpreter', 'latex');
     end
     xlabel('R_2 activity (a.u.)', 'FontAngle','italic');
     ylabel('R_1 activity (a.u.)', 'FontAngle','italic');
