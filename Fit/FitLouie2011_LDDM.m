@@ -3,8 +3,8 @@ Glgdir = 'G:\My Drive\LDDM\Fit';
 % Glgdir = '/Users/bs3667/Library/CloudStorage/GoogleDrive-bs3667@nyu.edu/My Drive/LDDM/Fit';
 % Glgdir = '/Volumes/GoogleDrive/My Drive/LDDM/Fit/';
 addpath(genpath(fullfile(Glgdir, 'bads-master_2019')));
-addpath(genpath('~/Documents/LDDM/utils'));
-% addpath(genpath('C:\Users\Bo\Documents\LDDM\utils'));
+% addpath(genpath('~/Documents/LDDM/utils'));
+addpath(genpath('C:\Users\Bo\Documents\LDDM\utils'));
 out_dir = fullfile(Glgdir,'Rslts/FitLouie2011/LDDM');
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
@@ -113,7 +113,7 @@ filename = 'PrmtrRcvry_Louie2011';
 subplot(1,2,1);
 hold on;
 plot(BG_a_rng,BG_a_rng,'--','LineWidth',.5);
-plot(summaries(:,2), summaries(:,5),'.','MarkerSize',10);
+plot(summaries(:,2), summaries(:,5),'o','MarkerSize',5);
 xlabel('Generated B_G-\alpha','FontAngle','italic','FontName','Times');
 ylabel('Recovered B_G-\alpha','FontAngle','italic','FontName','Times');
 xticks(-40:20:40);
@@ -140,7 +140,7 @@ else
         x0 = xBest;
         [x,fval,~,report] = bads(f,x0,LB,UB,PLB,PUB,options);
         Rsquared = 1 - fval/var(gnrt_activity)/(numel(gnrt_activity)-1);
-        summaries(i,:)  = [x_gnrt, x, fval, Rsquared];
+        summaries(i,:)  = [x_gnrt, x, fval,  Rsquared];
         reports{i} = report;
     end
     save(output,'summaries','reports');
@@ -148,7 +148,7 @@ end
 subplot(1,2,2);
 hold on;
 plot([0,140],[0,140],'--','LineWidth',.5);
-plot(summaries(:,3), summaries(:,6),'.','MarkerSize',10);
+plot(summaries(:,3), summaries(:,6),'o','MarkerSize',5);
 xlabel('Generated B_R','FontAngle','italic','FontName','Times');
 ylabel('Recovered B_R','FontAngle','italic','FontName','Times');
 xticks(0:40:140);
