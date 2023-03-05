@@ -1,6 +1,6 @@
 % Fit the mean firing rates from Louie, et al., 2011
-Glgdir = 'G:\My Drive\LDDM\Fit';
-% Glgdir = '/Users/bs3667/Library/CloudStorage/GoogleDrive-bs3667@nyu.edu/My Drive/LDDM/Fit';
+% Glgdir = 'G:\My Drive\LDDM\Fit';
+Glgdir = '/Users/bs3667/Library/CloudStorage/GoogleDrive-bs3667@nyu.edu/My Drive/LDDM/Fit';
 % Glgdir = '/Volumes/GoogleDrive/My Drive/LDDM/Fit/';
 addpath(genpath(fullfile(Glgdir, 'bads-master_2019')));
 addpath(genpath('~/Documents/LDDM/utils'));
@@ -113,7 +113,7 @@ filename = 'PrmtrRcvry_Louie2011';
 subplot(1,2,1);
 hold on;
 plot(BG_a_rng,BG_a_rng,'--','LineWidth',.5);
-plot(summaries(:,2), summaries(:,5),'.','MarkerSize',10);
+plot(summaries(:,2), summaries(:,5),'o','MarkerSize',2);
 xlabel('Generated B_G-\alpha','FontAngle','italic','FontName','Times');
 ylabel('Recovered B_G-\alpha','FontAngle','italic','FontName','Times');
 xticks(-40:20:40);
@@ -148,7 +148,7 @@ end
 subplot(1,2,2);
 hold on;
 plot([0,140],[0,140],'--','LineWidth',.5);
-plot(summaries(:,3), summaries(:,6),'.','MarkerSize',10);
+plot(summaries(:,3), summaries(:,6),'o','MarkerSize',2);
 xlabel('Generated B_R','FontAngle','italic','FontName','Times');
 ylabel('Recovered B_R','FontAngle','italic','FontName','Times');
 xticks(0:40:140);

@@ -20,9 +20,9 @@ end
 %% define parameters for simulation
 c = [3.2 12.8, 25.6, 38.4 51.2]'/100; % percentage of coherence
 scale0 = 250;
-B0 = 70;
+BR = 70;
 a0 = 15;
-G0 = 0;
+BG = 0;
 b0 = 1.1;
 dt = .001;
 Tau = ones(1,3)*.1;

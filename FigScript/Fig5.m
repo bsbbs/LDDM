@@ -18,7 +18,7 @@ set(gca,'LineWidth',1);
 h.PaperUnits = 'inches';
 h.PaperPosition = [0 0 3.1 2.8]/2.4;
 saveas(h,fullfile(plotdir,[filename,'.eps']),'epsc2');
-%% panel a, dynamic of neural firing rates
+%% panel a & b, dynamic of neural firing rates
 a = a0*eye(2);
 b = b0*eye(2);
 w = ones(2);
@@ -30,14 +30,14 @@ triggert =  presentt;
 sgm = 0;
 thresh = 70;
 stoprule = 1;
-Vprior = [1, 1]*scale0 + BR;
+Vprior = [1, 1]*scale0 + 0;
 Tau = [.1,.1,.1];
 initialvals = zeros(3,2);
 for Nclass = ['R','G','D']
     h = figure; hold on;
     filename = sprintf('Fig5a_%s_latebeta',Nclass);
     for vi = 1:5
-        Vinput = [1+c(vi), 1-c(vi)]*scale0 + BR;
+        Vinput = [1+c(vi), 1-c(vi)]*scale0 + 0;
         [choice, rt, R, G, D] = LDDM(Vprior, Vinput, w, a, b,...
             sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
         lgd2(vi) = plot(eval([Nclass,'(:,2)']), 'k--', 'Color', mygray(vi+1,:), 'LineWidth',lwd);
@@ -64,80 +64,9 @@ for Nclass = ['R','G','D']
         'FontAngle','italic','NumColumns',1,'Box','off');
     mysavefig(h, filename, plotdir, fontsize - 2, [2.8 2.54]);
 end
-%% panel b, choice accuracy and reaction time
-a = a0*eye(2);
-b = b0*eye(2);
-w = ones(2);
-predur = .8;  
-presentt = dt;
-dur = 4;
-stimdur = dur-presentt;
-triggert = presentt;
-sgm = 0;
-thresh = 70;
-stoprule = 1;
-Vprior = [1, 1]*scale0 + BR;
-Tau = [.1,.1,.1];
-initialvals = zeros(3,2);
 
-cplist = linspace(-1, 1, 100)';
-Vinput = [(1 + cplist)*scale0, (1 - cplist)*scale0] + BR;
-sgmvec = [15];
-sims = 10240;
-output = fullfile(datadir,sprintf('DCM_Sim%iV%ia%2.1fb%1.2f_sgm%1.1f_ChoiceRT.mat',sims,length(cplist),a(1,1),b(1,1),sgmvec));
-if ~exist(output,'file')
-    CRALL = []; RTALL = [];
-    for sgmi = 1:length(sgmvec)
-        sgm = sgmvec(sgmi);
-        RT = [];Choice = [];
-        [rt, choice, ~] = LDDM_GPU(Vprior, Vinput, w, a, b,...
-    sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims);
-        Choice = squeeze(gather(choice));
-        RT = squeeze(gather(rt));
-        CRALL(sgmi,:) = mean(Choice,2,'omitnan') - 1;
-        RTALL(sgmi,:) = mean(RT,2,'omitnan');
-    end
-    save(output,'CRALL','RTALL');
-else
-    load(output);
-end
-nticks = size(CRALL,2);
-h = figure;
-filename = 'Fig5b';
-subplot(2,1,1); hold on;
-for sgmi = length(sgmvec)
-    plot(1:nticks,100*(1-CRALL(sgmi,:)),'LineWidth',lwd/2,'Color',colorpalette{5});
-    lgdtext{sgmi} = sprintf('\\color[rgb]{%s}\\sigma = %1.1f',num2str(colorpalettergb(5,:)),sgmvec(sgmi));
-end
-plot([0,50.5],[50,50],'k--','LineWidth',.5);
-plot([50.5,50.5],[0,50],'k--','LineWidth',.5);
-xlim([1,nticks]);
-xticks(linspace(1,nticks,5));
-% xticklabels({'0','.25','.5','.75','1.0'});
-xticklabels({''});
-xlabel(' ');
-ylim([-2,100]);
-yticks([0:25:100]);
-ylabel('Choice (%)');
-%legend(lgdtext,'Location','NorthWest','FontSize',fontsize-5,'Box','off');
-mysavefig(h, filename, plotdir, fontsize - 2, [2.41 3]);
-subplot(2,1,2); hold on;
-for sgmi = length(sgmvec)
-    plot(RTALL(sgmi,:),'LineWidth',lwd/2,'Color',colorpalette{5});
-end
-plot([50.5,50.5],[0,max(RTALL(sgmi,:))],'k--','LineWidth',.5);
-xlim([1,nticks]);
-xticks(linspace(1,nticks,5));
-xticklabels({'0','.25','.5','.75','1.0'});
-xlabel('Input ratio'); ylabel('RT (a.u.)');
-ylim([min(RTALL(sgmi,:))*.8,max(RTALL(sgmi,:))*1.1]);
-yticks([.2:.4:max(RTALL(sgmi,:))]);
-% ylim([.6,1.4]);
-% yticks([.6:.2:1.4]);
-mysavefig(h, filename, plotdir, fontsize - 2, [2.41 3]);
 %% panel c_left, nullclines for R1 and R2 under equal inputs
 a = a0;
-BR = 70;
 w = 1;
 v = 1;
 sgm = .02; dur = 12;
@@ -147,13 +76,13 @@ initialvals = [4,4;8,8;0,0]/15; stimdur = dur; stoprule = 0;
 filenamelist = {'Fig5cL','Fig5cM','Fig5cR'};
 blist = [.9];
 cplist = [0, .512, 1];
-Vprior = [1, 1]*scale0 + BR;
+Vprior = [1, 1]*scale0 + 0;
 for bi = 1
     b = blist(bi);
     for ci = 1:3
         cp = cplist(ci);
         rng('default'); rng(8);
-        V = [1+cp 1-cp]*scale0 + BR;
+        V = [1+cp 1-cp]*scale0 + 0;
         h = figure; hold on;
         filename = filenamelist{bi,ci};
         % - Nullclines R1*-R2* space
@@ -186,10 +115,10 @@ for bi = 1
             (V(2)/R2 - (w - b)*R2 - (1-a)) == R1*v];% dR2/dt = 0
         vars = [R1 R2];
         [AnswR1, AnswR2] = solve(eqns, vars);
-        AnswI1 = b*AnswR1;
-        AnswI2 = b*AnswR2;
-        AnswG1 = w*AnswR1 + v*AnswR2 - AnswI1;
-        AnswG2 = v*AnswR1 + w*AnswR2 - AnswI2;
+        AnswD1 = b*AnswR1;
+        AnswD2 = b*AnswR2;
+        AnswG1 = w*AnswR1 + v*AnswR2 - AnswD1;
+        AnswG2 = v*AnswR1 + w*AnswR2 - AnswD2;
         PositiveRealAnsw = double(AnswR1) >0 & double(imag(AnswR1)) == 0;
         Npoints = sum(PositiveRealAnsw);
         lgdvec = [];
@@ -224,12 +153,12 @@ for bi = 1
     end
 end
 %% panel d, equilibrium point for a noiseless system
-a = a0;
+a = 0; %a0;
 b = blist(1);
 w = 1;
 v = 1;
 cplist = linspace(-1,1,40);
-Vprior = [1, 1]*scale0 + BR;
+Vprior = [1, 1]*scale0 + 0;
 CodeRatio = nan(size(cplist));
 name = sprintf('CodedRatio_WTA_LDDM_Sim%i_a%1.1f_b%1.1f',length(cplist), a, b);
 output = fullfile(datadir,[name '.mat']);
@@ -238,16 +167,16 @@ if ~exist(output,'file')
         fprintf('cp %3.1f',cplist(ii));
         fprintf('.');
         cp = [1 + cplist(ii), 1 - cplist(ii)];
-        V = cp*scale0 + BR;
+        V = cp*scale0 + 0;
         syms R1 R2
         eqns = [(V(1)/R1 - (w - b)*R1 - (1-a))/v == R2, ... % dR1/dt = 0
             (V(2)/R2 - (w - b)*R2 - (1-a))/v == R1];% dR2/dt = 0
         vars = [R1 R2];
         [AnswR1,AnswR2] = solve(eqns, vars);
-        AnswI1 = b*AnswR1;
-        AnswI2 = b*AnswR2;
-        AnswG1 = w*AnswR1 + v*AnswR2 - AnswI1;
-        AnswG2 = v*AnswR1 + w*AnswR2 - AnswI2;
+        AnswD1 = b*AnswR1;
+        AnswD2 = b*AnswR2;
+        AnswG1 = w*AnswR1 + v*AnswR2 - AnswD1;
+        AnswG2 = v*AnswR1 + w*AnswR2 - AnswD2;
         PositiveRealAnsw = double(AnswR1) >0 & double(imag(AnswR1)) == 0;
         Npoints = sum(PositiveRealAnsw);
         Ratio = double((AnswR1(PositiveRealAnsw)./(AnswR1(PositiveRealAnsw)+AnswR2(PositiveRealAnsw))) - .5);
@@ -303,10 +232,10 @@ if ~exist(output, 'file')
             eqns = [(V1/R1 - (w - b)*R1 - (1-a))/v == R2, ... % dR1/dt = 0
                 (V2/R2 - (w - b)*R2 - (1-a))/v == R1];% dR2/dt = 0
             [AnswR1,AnswR2] = solve(eqns, vars);
-            AnswI1 = b*AnswR1;
-            AnswI2 = b*AnswR2;
-            AnswG1 = w*AnswR1 + v*AnswR2 - AnswI1;
-            AnswG2 = v*AnswR1 + w*AnswR2 - AnswI2;
+            AnswD1 = b*AnswR1;
+            AnswD2 = b*AnswR2;
+            AnswG1 = w*AnswR1 + v*AnswR2 - AnswD1;
+            AnswG2 = v*AnswR1 + w*AnswR2 - AnswD2;
             PositiveRealAnsw = double(AnswR1) >0 & double(imag(AnswR1)) == 0;
             Npoints(ai,bi) = sum(PositiveRealAnsw);
             NegEigen = -ones(1,4);

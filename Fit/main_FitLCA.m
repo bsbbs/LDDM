@@ -186,8 +186,8 @@ if 0
         load(destfile);
     end
     %% plot fitted dynamics and abcd values
-    [h, h2, dot_tick_x] = PlotFitDynmcs(RoitmanDataDir, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD, plot_dir, name, 1);
-    dot_tick_x
+    [h, h2, mRT] = PlotFitDynmcs(RoitmanDataDir, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD, plot_dir, name, 1);
+    mRT
     %% The dynamic of single trials
     mygray = gray(8);
     h = figure; hold on;

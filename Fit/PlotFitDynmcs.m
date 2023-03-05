@@ -1,4 +1,4 @@
-function [h, h2, dot_tick_x] = PlotFitDynmcs(RoitmanDataDir, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD, plot_dir, name, realdata)
+function [h, h2, mRT] = PlotFitDynmcs(RoitmanDataDir, sm_mr1c, sm_mr2c, sm_mr1cD, sm_mr2cD, plot_dir, name, realdata)
 load(fullfile(RoitmanDataDir,'DynmcsData.mat'));
 aspect = [3, 2.5];
 fontsize = 11;
@@ -15,6 +15,7 @@ yuplim = yup + yrange/20;
 ylowlim = ylow - yrange/20;
 dot_tick = find(~isnan(sm_mr1c(:,6)), 1, "last");
 dot_tick_x = dot_ax(dot_tick);
+mRT = (dot_tick_x + 90)/1000;
 h = figure;
 subplot(1,2,1);hold on;
 plot([dot_tick_x,dot_tick_x]/1000,[ylow,yup],'-k');
@@ -22,7 +23,7 @@ for ci = 1:6
     lg(ci) = plot(dot_ax/1000, sm_mr1c(:,ci),'Color',mygray(ci+2,:),'LineWidth',lwd);
     plot(dot_ax/1000, sm_mr2c(:,ci),'--','Color',mygray(ci+2,:),'LineWidth',lwd);
 end
-ylim([ylowlim,yuplim]);
+ylim([ylowlim, yuplim]);
 ylabel('Firing rate (sp/s)');
 xlabel('Time (secs)');
 xlim([-.09, .8]);
@@ -39,7 +40,7 @@ end
 xlim([-.8, .03]);
 xticks([-.8:.2:0]+.03);
 xticklabels({'-.8','-.6','-.4','-.2','0'});
-ylim([ylowlim,yuplim]);
+ylim([ylowlim, yuplim]);
 yticks([]);
 set(gca,'ycolor',[1 1 1]);
 legend(flip(lg),flip({'0','3.2','6.4','12.8','25.6','51.2'}),'Location','best','FontSize',fontsize-2);

@@ -50,7 +50,7 @@ subplot(2,1,1); hold on;
 R1vecVin = [];
 for vi = 1:length(Vin)
     Vprior = [0, 0];
-    Vinput = Vin(vi,:) + B0;
+    Vinput = Vin(vi,:) + BR;
     [choice, rt, R, G, D] = LDDM(Vprior, Vinput, w, a, b,...
         sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
     lgd1 = plot(R(:,1), 'k-', 'Color', mygray5(vi+1,:), 'LineWidth',lwd);
@@ -82,7 +82,7 @@ mysavefig(h, filename, plotdir, fontsize, [2,4]);
 %% panel b_left, nullclines for R1 and R2 under equal inputs
 rng('default'); rng(5);
 cp = 0;
-V = [1+cp, 1-cp]*scale0 + B0;
+V = [1+cp, 1-cp]*scale0 + BR;
 a = a0;
 b = 0;
 w = 1;
@@ -150,7 +150,7 @@ mysavefig(h, filename, plotdir, fontsize, [2.8 2.54]);
 %% panel b_middle, nullcines for R1 and R2 under moderately unequal inputs
 rng('default'); rng(5);
 cp = .512;
-V = [1+cp 1-cp]*scale0 + B0; % 51.2 %
+V = [1+cp 1-cp]*scale0 + BR; % 51.2 %
 a = a0;
 b = 0;
 w = 1;
@@ -221,7 +221,7 @@ mysavefig(h, filename, plotdir, fontsize, [2.8 2.54]);
 %% panel b_right, nullcines for R1 and R2 under extremely unequal inputs
 rng('default'); rng(5);
 cp = 1;
-V = [1+cp 1-cp]*scale0 + B0; % 100 %
+V = [1+cp 1-cp]*scale0 + BR; % 100 %
 a = a0;
 b = 0;
 w = 1;
