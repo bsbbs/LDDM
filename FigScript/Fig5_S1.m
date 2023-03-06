@@ -81,7 +81,7 @@ mysavefig(h, filename, plotdir, fontsize, [3, 2.54]*1.5);
 c = 0;
 V = scale0*[1+c, 1-c];
 Vprior = scale0*[1, 1];
-for spots = 3
+for spots = 1:5
     switch spots
         case 1
             a = 5;
@@ -176,7 +176,7 @@ for spots = 3
         xticklabels({'$10^0$','$10^1$','','$\frac{V_1+B_R}{1+B_G-\alpha}$',''});
         yticklabels({'$10^0$','$10^1$','','$\frac{V_2+B_R}{1+B_G-\alpha}$','$10^3$'});
         set(gca,'TickLabelInterpreter', 'latex');
-        ratio = [3.1, 2.54];
+        ratio = [3.0, 2.54];
     else
         xticks([1,10,100,1000]);yticks([1,10,100,1000]);
 %         xticklabels({'$10^0$','$10^1$','$10^2$','$\frac{V_1+B_R}{1+B_G-\alpha}$','$10^3$'});

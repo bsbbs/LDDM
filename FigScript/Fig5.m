@@ -37,7 +37,7 @@ for Nclass = ['R','G','D']
     h = figure; hold on;
     filename = sprintf('Fig5a_%s_latebeta',Nclass);
     for vi = 1:5
-        Vinput = [1+c(vi), 1-c(vi)]*scale0 + 0;
+        Vinput = [1+c(vi), 1-c(vi)]*scale0*4 + 0;
         [choice, rt, R, G, D] = LDDM(Vprior, Vinput, w, a, b,...
             sgm, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
         lgd2(vi) = plot(eval([Nclass,'(:,2)']), 'k--', 'Color', mygray(vi+1,:), 'LineWidth',lwd);
