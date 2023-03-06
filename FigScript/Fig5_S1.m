@@ -75,13 +75,13 @@ yticklabels({'10^{-1}','10^0','10^1','10^2','10^3'});
 xlabel('\beta');
 ylabel('\alpha');
 view(0,90);
-mysavefig(h, filename, plotdir, fontsize, aspect7);
+mysavefig(h, filename, plotdir, fontsize, [3, 2.54]*1.5);
 
 %% nullclines for R1 and R2 under unequal inputs, manually change parameters
 c = 0;
 V = scale0*[1+c, 1-c];
 Vprior = scale0*[1, 1];
-for spots = 1:5
+for spots = 3
     switch spots
         case 1
             a = 5;
@@ -92,8 +92,8 @@ for spots = 1:5
             b = 1.003;
             filename = 'Fig5S1c';
         case 3
-            a = 10;
-            b = .7;
+            a = 30;
+            b = .9;
             filename = 'Fig5S1d';
         case 4
             a = 0;
@@ -173,16 +173,18 @@ for spots = 1:5
     xlim([.2,10^3]);ylim([.2,10^3]);
     if max(V)/(1-a) < 1000 && max(V)/(1-a) > 100
         xticks([1,10,100,V(1)/(1-a),1000]);yticks([1,10,100,V(1)/(1-a),1000]);
-        xticklabels({'$10^0$','$10^1$','$10^2$','$\frac{V_1+B_R}{1+B_G-\alpha}$','$10^3$'});
-        yticklabels({'$10^0$','$10^1$','$10^2$','$\frac{V_2+B_R}{1+B_G-\alpha}$','$10^3$'});
+        xticklabels({'$10^0$','$10^1$','','$\frac{V_1+B_R}{1+B_G-\alpha}$',''});
+        yticklabels({'$10^0$','$10^1$','','$\frac{V_2+B_R}{1+B_G-\alpha}$','$10^3$'});
         set(gca,'TickLabelInterpreter', 'latex');
+        ratio = [3.1, 2.54];
     else
         xticks([1,10,100,1000]);yticks([1,10,100,1000]);
 %         xticklabels({'$10^0$','$10^1$','$10^2$','$\frac{V_1+B_R}{1+B_G-\alpha}$','$10^3$'});
 %         yticklabels({'$10^0$','$10^1$','$10^2$','$\frac{V_2+B_R}{1+B_G-\alpha}$','$10^3$'});
 %         xticklabels({'$10^0$','$10^1$','$\frac{V_1+B_R}{1+B_G-\alpha}$','$10^2$'});
 %         yticklabels({'$10^0$','$10^1$','$\frac{V_2+B_R}{1+B_G-\alpha}$','$10^2$'});
-%         set(gca,'TickLabelInterpreter', 'latex');
+        set(gca,'TickLabelInterpreter', 'latex');
+        ratio = [2.8, 2.54];
     end
     xlabel('R_2 activity (a.u.)', 'FontAngle','italic');
     ylabel('R_1 activity (a.u.)', 'FontAngle','italic');
@@ -190,5 +192,5 @@ for spots = 1:5
         legend([lgd1, lgd2],{'dR_1/dt = 0','dR_2/dt = 0'}, 'FontName','Times New Roman', ...
             'FontAngle','Italic','FontSize',fontsize-5, 'Location','east','Box','off');
     end
-    mysavefig(h, filename, plotdir, fontsize, [3, 2.54]);
+    mysavefig(h, filename, plotdir, fontsize, ratio);
 end
