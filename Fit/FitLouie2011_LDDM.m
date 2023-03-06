@@ -113,11 +113,7 @@ filename = 'PrmtrRcvry_Louie2011';
 subplot(1,2,1);
 hold on;
 plot(BG_a_rng,BG_a_rng,'--','LineWidth',.5);
-<<<<<<< HEAD
 plot(summaries(:,2), summaries(:,5),'o','MarkerSize',2);
-=======
-plot(summaries(:,2), summaries(:,5),'o','MarkerSize',5);
->>>>>>> 35d07b0b2577f7c984c16cb486aa12b3ddabb46d
 xlabel('Generated B_G-\alpha','FontAngle','italic','FontName','Times');
 ylabel('Recovered B_G-\alpha','FontAngle','italic','FontName','Times');
 xticks(-40:20:40);
@@ -152,11 +148,7 @@ end
 subplot(1,2,2);
 hold on;
 plot([0,140],[0,140],'--','LineWidth',.5);
-<<<<<<< HEAD
 plot(summaries(:,3), summaries(:,6),'o','MarkerSize',2);
-=======
-plot(summaries(:,3), summaries(:,6),'o','MarkerSize',5);
->>>>>>> 35d07b0b2577f7c984c16cb486aa12b3ddabb46d
 xlabel('Generated B_R','FontAngle','italic','FontName','Times');
 ylabel('Recovered B_R','FontAngle','italic','FontName','Times');
 xticks(0:40:140);
