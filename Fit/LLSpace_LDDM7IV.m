@@ -4,7 +4,8 @@ addpath(fullfile(Homedir, 'LDDM','CoreFunctions'));
 addpath(fullfile(Homedir, 'LDDM','utils'));
 addpath(fullfile(Homedir, 'LDDM', 'Fit','SvrCode'));
 
-Glgdir = '/Volumes/GoogleDrive/My Drive/LDDM';
+Glgdir = '/Users/bs3667/Library/CloudStorage/GoogleDrive-bs3667@nyu.edu/My Drive/LDDM';
+% Glgdir = 'G:\My Drive\LDDM';
 out_dir = fullfile(Glgdir,'Fit/Rslts/FitBhvr7ParamsIV_QMLE_SvrGPU/LLSpace');
 if ~exist(out_dir,'dir')
     mkdir(out_dir);
@@ -15,10 +16,10 @@ end
 dataBhvr = LoadRoitmanData(fullfile(Glgdir,'Fit','RoitmanDataCode'));
 
 %% the best fitting parameters
-% a, b, noise, scale, tauR, tauG, tauD, nLL
-bestparams = [0	1.433631	25.35945	3251.289056	0.185325	0.224459	0.323132 16539.138186];
-names = {'alpha','beta','sgm','S','tauR','tauG','tauD'};
-latexnames = {'\alpha','\beta','\sigma','S','\tau_R','\tau_G','\tau_D'};
+% a, b, noise, scale, tauR, tauG, tauD, BG
+bestparams = [0	1.433631	25.35945	3251.289056	0.185325	0.224459	0.323132 0];
+names = {'alpha','beta','sgm','S','tauR','tauG','tauD', 'BG'};
+latexnames = {'\alpha','\beta','\sigma','S','\tau_R','\tau_G','\tau_D', 'B_G'};
 %% Check the space of alpha and beta
 ivec = linspace(0,100,41); % [0, 10.^[-1:.1:3]]; %10.^[-1:.01:3];
 jvec = linspace(0,4,41); %linspace(0,4,401);
@@ -49,6 +50,12 @@ jvec = 10.^[-2:.1:1]; %linspace(.025,1.025,41); % tauD, best fit = .32
 idx = [6, 7];
 [filename, nLLmat] = SpaceCheck(bestparams, names, ivec, jvec, idx, dataBhvr, out_dir);
 Visualization(out_dir,filename, names, idx, 4, latexnames);
+%% Check the space of alpha and BG
+ivec = linspace(0,100,41); % [0, 10.^[-1:.1:3]]; %10.^[-1:.01:3];
+jvec = linspace(0,100,41); %
+idx = [1, 8];
+[filename, nLLmat] = SpaceCheck(bestparams, names, ivec, jvec, idx, dataBhvr, out_dir);
+Visualization(out_dir,filename, names, idx, 5, latexnames);
 %% functions
 function [filename, nLLmat] = SpaceCheck(bestparams, names, ivec, jvec, idx, dataBhvr, out_dir)
 iN = length(ivec);
@@ -62,7 +69,7 @@ if ~exist(fullfile(out_dir,[filename, '.mat']), 'file')
         parfor j = 1:jN
             params = bestparams;
             params(idx) = [ival, jvec(j)];
-            [nLL, ~,~,~,~,~] = LDDMFitBhvr7ParamsIV_QMLE_GPU(params, dataBhvr);
+            [nLL, ~,~,~,~,~] = LDDMFitBhvr7ParamsIVG0_QMLE_GPU(params, dataBhvr);
             nLLmat(i,j) = nLL;
         end
     end
@@ -79,26 +86,9 @@ mksz = 18;
 fontsize = 14;
 load(fullfile(out_dir,[filename, '.mat']));
 h = figure;
-% subplot(1,2,1);
 hold on;
-% s = surf(nLLmat,'EdgeColor','none');
 minnLL = min(nLLmat(:));
 [r, c] = find(nLLmat == minnLL);
-% plot3(c,r,minnLL*1.01, 'rx', 'MarkerSize', mksz/3, 'LineWidth', lwd);
-% ylim([1,length(ivec)]);
-% xlim([1,length(jvec)]);
-% xticks(linspace(1,length(jvec),nticks));
-% xticklabels(jvec(linspace(1,length(jvec),nticks)));
-% yticks(linspace(1,length(ivec),nticks));
-% yticklabels(ivec(linspace(1,length(ivec),nticks))); % {'10^{-1}','10^0','10^1','10^2','10^3'});
-% xlabel(names{idx(2)});
-% ylabel(names{idx(1)});
-% clb = colorbar;
-% ylabel(clb, 'Negative Log likelihood');
-% view(0,90);
-% grid on;
-% 
-% subplot(1,2,2); hold on;
 contour(-nLLmat,60);
 plot3(c,r,-minnLL*1.01, 'rx', 'MarkerSize', mksz/3, 'LineWidth', lwd);
 xticks(linspace(1,length(jvec),nticks));
@@ -110,8 +100,7 @@ ylabel(latexnames{idx(1)},'FontAngle', 'italic');
 clb = colorbar;
 colormap('turbo');
 ylabel(clb, 'Log likelihood');
-savefig(h, fullfile(out_dir,['Contour',filename]));
-% savefigs(h, filename, out_dir, fontsize - 2, [9 3]);
-savefigs(h, ['Contour',filename], out_dir, fontsize - 2, [4 3]);
+savefig(h, fullfile(out_dir,['Contour', filename]));
+savefigs(h, ['Contour', filename], out_dir, fontsize - 2, [4 3]); % [9 3]
 % close(h);
 end
