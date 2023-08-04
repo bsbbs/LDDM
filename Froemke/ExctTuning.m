@@ -1,6 +1,6 @@
 % Excitatory neurons, tuning to the inputs, binary as an example
 %% setup
-outdir = '/Users/bs3667/Library/CloudStorage/GoogleDrive-bs3667@nyu.edu/My Drive/LDDM/Froemke/DynamicVersion';
+outdir = '/Users/bs3667/Library/CloudStorage/GoogleDrive-bs3667@nyu.edu/My Drive/LDDM/Froemke/DynamicVersionPP';
 addpath('./utils/');
 addpath('./functions/');
 addpath('../utils/bluewhitered/');
@@ -26,7 +26,7 @@ OKeeffe = [
     ]/255;
 h = figure;
 hold on;
-for i = 1:numel(OKeeffe)
+for i = 1:size(OKeeffe,1)
     plot(i, 0, '.', 'Color', OKeeffe(i,:), 'MarkerSize',180);
 end
 %% The structure of the network
@@ -157,12 +157,13 @@ rng(2023);
 Seq = CreateEvents(Ntrial, dt);
 % time = [0:(size(Seq, 1)-1)]*dt/60; % unit in Mins
 time = [0:20000]*dt; % unit in Secs
-
 value = [20, 20];
 R = zeros(Ntwk.Exct.N,numel(time));
 G = zeros(Ntwk.Inhbt.N,numel(time));
 wIE = .02*randn(Ntwk.Exct.N, Ntwk.Inhbt.N).*Ntwk.Cnnct_IE'; % synaptic weight from I to E, weak initial connections from the nearby SST 
 wIE(wIE<0) = 0;
+wIE_initial = wIE;
+%%
 if Ntwk.show
     % synaptic connection weights
     h = figure;
@@ -199,7 +200,7 @@ for ti = 1:(length(time)-1)
         postbinary = (postAP(:,t) >= threshR)';
         t_neg = max([1, t-3*tau_neg/dt]):t;
         prebinary = (preAP(:,t_neg) > threshG);
-        synapticIE_rollover(:,:, t) = synapticIE_rollover(:,:,t) - (prebinary * exp((t_neg - t)*dt / tau_neg)') * postbinary;
+        synapticIE_rollover(:,:, t) = synapticIE_rollover(:,:,t) + (prebinary * exp((t_neg - t)*dt / tau_neg)') * postbinary;
     end
     synapticIE_change = sum(synapticIE_rollover,3).*Ntwk.Cnnct_IE;
     dP = (-wIE/Ntwk.tauhet_i + Ntwk.gamma*(1-wIE).*synapticIE_change'/Ntwk.tauhom_i)*dt;
@@ -211,8 +212,25 @@ for ti = 1:(length(time)-1)
     G(G(:, ti+1) < 0, ti+1) = 0;
     wIE(wIE<0) = 0;
 end
+save(fullfile(outdir, 'Simulation20s.mat'), 'Ntwk', 'R', 'G', 'wIE', 'wIE_initial', 'synapticIE_change', 'synapticIE_rollover', 'Seq');
 %% visualization
 if Ntwk.show
+    % kernal
+    h = figure; hold on;
+    filename = 'Kernal';
+    t_pos = -3*tau_pos/dt:0;
+    y1 = exp(t_pos*dt / tau_pos);
+    t_neg = 0:3*tau_neg/dt;
+    y2 = exp(-t_neg*dt / tau_neg);
+    plot([t_pos, t_neg], [y1, y2], '-', 'Color',OKeeffe(10,:), 'LineWidth',2);
+    plot([0,0],[-1,1], 'k--');
+    plot([-60,60],[0,0], 'k--');
+    ylim([-1, 1]);
+    ylabel('Connection change');
+    xlabel('\Delta t_{pre} - t_{post}');
+    text(-45,0.6,'Pre-Post');
+    text(30,0.6,'Post-Pre');
+    mysavefig(h, filename, outdir, 12, [5, 4]);
     % V
     h = figure;
     filename = 'InputDynamic';
@@ -271,9 +289,18 @@ if Ntwk.show
     xlabel('Exct channels');
     ylabel('Inhbt channels');
     mysavefig(h, filename, outdir, 14, [9, 6]);
+    % synaptic weight change
+    h = figure;
+    filename = sprintf('SynapticW_change');
+    imagesc(wIE - wIE_initial);
+    caxis([-1, 1]);
+    colormap(bluewhitered(256)), colorbar;
+    xlabel('Exct channels');
+    ylabel('Inhbt channels');
+    mysavefig(h, filename, outdir, 14, [9, 6]);
     % Example dynamics R and G
     h = figure;
-    minValue = min(synapticIE_change(:));
+    minValue = max(synapticIE_change(:));
     [IdxI, IdxE] = find(synapticIE_change == minValue);
     filename = sprintf('Exmplpair_at_E%iandI%i',IdxE(1), IdxI(1));
     hold on;
@@ -283,4 +310,33 @@ if Ntwk.show
     ylabel('Normalized activity');
     legend({"PYR", "SST"}, 'Location', "best");
     mysavefig(h, filename, outdir, 12, [5, 3]);
+    %%
+    rng(2023);
+    h = figure;
+    filename = 'Network structure';
+    hold on;
+    plot(Ntwk.Exct.Location(:,1), Ntwk.Exct.Location(:,2), 'kv', 'MarkerSize', Ntwk.Exct.Properties.size/3, 'MarkerFaceColor','auto');
+    plot(Ntwk.Inhbt.Location(:,1), Ntwk.Inhbt.Location(:,2), '.', 'Color', [.5, .5, .5], 'MarkerSize', Ntwk.Inhbt.Properties.size);
+    xlabel('\mum');
+    ylabel('\mum');
+    xlim([-Ntwk.Scale/2, Ntwk.Scale/2]);
+    ylim([-Ntwk.Scale/4, Ntwk.Scale/4]);
+    % trained connection from E -> I and I -> E
+    EIs = find(Cnnct_EI(:, example));
+    for i = EIs'
+        lgd1 = plot([Ntwk.Exct.Location(example,1), Ntwk.Inhbt.Location(i,1)],...
+            [Ntwk.Exct.Location(example,2), Ntwk.Inhbt.Location(i,2)],...
+            '-', 'Color', OKeeffe(3,:), 'LineWidth',1.6);
+    end
+    plot(Ntwk.Inhbt.Location(EIs,1), Ntwk.Inhbt.Location(EIs,2), '.', 'Color', OKeeffe(8,:), 'MarkerSize', Ntwk.Inhbt.Properties.size);
+
+    IEs = find(Cnnct_IE(:, example));
+    for i = IEs'
+        lgd2 = plot([Ntwk.Exct.Location(example,1), Ntwk.Inhbt.Location(i,1)],...
+            [Ntwk.Exct.Location(example,2), Ntwk.Inhbt.Location(i,2)],...
+            '-', 'Color', OKeeffe(4,:), 'LineWidth',1.6);
+    end
+    plot(Ntwk.Inhbt.Location(IEs,1), Ntwk.Inhbt.Location(IEs,2), '.', 'Color', OKeeffe(7,:), 'MarkerSize', Ntwk.Inhbt.Properties.size);
+    legend([lgd1, lgd2], {'E->I','I->E'});
+    mysavefig(h, filename, outdir, 14, [6, 3]);
 end
