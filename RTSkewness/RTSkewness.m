@@ -31,7 +31,7 @@ params = [0	1.433631	25.35945	3251.289056	0.185325	0.224459	0.323132	16539.13818
 sgm = params(3);
 tauR = params(5);
 tauG = params(6);
-tauI = params(7);
+tauD = params(7);
 
 predur = 0;
 presentt = 0; 
@@ -45,7 +45,7 @@ w = [1 1; 1 1];
 Rstar = 42; % ~ 42 Hz at the bottom of initial fip, according to Roitman and Shadlen's data
 initialvals = [Rstar,Rstar; sum(w(1,:))*Rstar,sum(w(2,:))*Rstar; 0,0];
 eqlb = Rstar; % set equilibrium value before task as R^*
-Tau = [tauR tauG tauI];
+Tau = [tauR tauG tauD];
 sims = 10240;
 Npiles = 1;
 Bdim = numel(bvec);

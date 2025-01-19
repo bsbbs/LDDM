@@ -1,4 +1,4 @@
-function [choice, rt, R, G, I, Vcourse] = LDDM_RndInput(Vprior, Vinput, w, a, b,...
+function [choice, rt, R, G, D, Vcourse] = LDDM_RndInput(Vprior, Vinput, w, a, b,...
     sgm, sgmInput, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule)
 %%%%%%%%%%%%%%%%%%
 % The core function of local disinhibition decision model (LDDM)
@@ -63,17 +63,17 @@ choice = NaN;
 %% stablizing noise for 200 ms
 InoiseG = zeros(sizeVinput);
 InoiseR = zeros(sizeVinput);
-InoiseI = zeros(sizeVinput);
+InoiseD = zeros(sizeVinput);
 stablizetime = round(.2/dt);
 for kk = 1:stablizetime
     % update noise
     InoiseG = InoiseG + (-InoiseG + randn(sizeVinput).*sqrt(dt).*sgm)/tauN*dt;
-    InoiseI = InoiseI + (-InoiseI + randn(sizeVinput).*sqrt(dt).*sgm)/tauN*dt;
+    InoiseD = InoiseD + (-InoiseD + randn(sizeVinput).*sqrt(dt).*sgm)/tauN*dt;
     InoiseR = InoiseR + (-InoiseR + randn(sizeVinput).*sqrt(dt).*sgm)/tauN*dt;
 end
 G = initialvals(2,:) + InoiseG;
 R = initialvals(1,:) + InoiseR;
-I = initialvals(3,:) + InoiseI;
+D = initialvals(3,:) + InoiseD;
 %% simulation begin
 Vnoise = randn(sizeVinput)*sgmInput;
 t_stamp = pretask_steps + 1;
@@ -93,19 +93,19 @@ for ti = (-pretask_steps):posttask_steps % align the beginning of the task as ti
     
     % update R, G, I
     dR = (-R(ti+t_stamp,:)' + (V' + a*R(ti+t_stamp,:)')./(1+G(ti+t_stamp,:)'))/Tau(1)*dt;
-    dG = (-G(ti+t_stamp,:)' + w * R(ti+t_stamp,:)' - I(ti+t_stamp,:)')/Tau(2)*dt;
-    dI = (-I(ti+t_stamp,:)' + b*(ti >= onset_of_trigger)*R(ti+t_stamp,:)')/Tau(3)*dt;
+    dG = (-G(ti+t_stamp,:)' + w * R(ti+t_stamp,:)' - D(ti+t_stamp,:)')/Tau(2)*dt;
+    dD = (-D(ti+t_stamp,:)' + b*(ti >= onset_of_trigger)*R(ti+t_stamp,:)')/Tau(3)*dt;
     R(ti+t_stamp+1,:) = R(ti+t_stamp,:) + dR' + InoiseR;
     G(ti+t_stamp+1,:) = G(ti+t_stamp,:) + dG' + InoiseG;
-    I(ti+t_stamp+1,:) = I(ti+t_stamp,:) + dI' + InoiseI;
+    D(ti+t_stamp+1,:) = D(ti+t_stamp,:) + dD' + InoiseD;
     
     % update noise
     InoiseG = InoiseG + (-InoiseG + randn(sizeVinput).*sqrt(dt).*sgm)/tauN*dt;
-    InoiseI = InoiseI + (-InoiseI + randn(sizeVinput).*sqrt(dt).*sgm)/tauN*dt;
+    InoiseD = InoiseD + (-InoiseD + randn(sizeVinput).*sqrt(dt).*sgm)/tauN*dt;
     InoiseR = InoiseR + (-InoiseR + randn(sizeVinput).*sqrt(dt).*sgm)/tauN*dt;
     % setting lower boundary, forcing neural firing rates to be non-negative
     G(ti+t_stamp+1,G(ti+t_stamp+1,:) < 0) = 0;
-    I(ti+t_stamp+1,I(ti+t_stamp+1,:) < 0) = 0;
+    D(ti+t_stamp+1,D(ti+t_stamp+1,:) < 0) = 0;
     R(ti+t_stamp+1,R(ti+t_stamp+1,:) < 0) = 0;
     % threshold detecting
     if ti > onset_of_trigger && isnan(rt)

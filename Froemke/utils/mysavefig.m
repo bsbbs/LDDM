@@ -1,9 +1,12 @@
-function mysavefig(h, filename, outdir, fontsize, aspect)
+function mysavefig(h, filename, outdir, fontsize, aspect, ticklength)
+if ~exist('ticklength','var')
+    ticklength = 0;
+end
 set(gca,'FontSize',fontsize);
 set(gca,'FontName','Arial')
 set(gca,'TickDir','in');
 ax = gca;
-ax.TickLength = ax.TickLength*3;
+ax.TickLength = ax.TickLength*ticklength;
 set(gca,'LineWidth',1); 
 xl = get(gca,'XLabel');
 xAX = get(gca,'XAxis');

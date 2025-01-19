@@ -1,34 +1,7 @@
 % Excitatory neurons, tuning to the inputs, binary as an example
 %% setup
-outdir = '/Users/bs3667/Library/CloudStorage/GoogleDrive-bs3667@nyu.edu/My Drive/LDDM/Froemke/DynamicVersionPP';
-addpath('./utils/');
-addpath('./functions/');
-addpath('../utils/bluewhitered/');
-pastelPalette = [ ...
-    0.8941, 0.4471, 0.2471;  % Pastel Red
-    0.3686, 0.6118, 0.8275;  % Pastel Blue
-    0.4314, 0.8039, 0.6314;  % Pastel Green
-    0.9569, 0.7608, 0.5176;  % Pastel Yellow
-    0.8157, 0.5412, 0.7647;  % Pastel Purple
-    1.0000, 0.6471, 0.5098;  % Pastel Orange
-    ];
-OKeeffe = [
-    255, 192, 203;  % Pink (Pale Violet Red)
-    100, 149, 237;  % Cornflower Blue
-    255, 127, 80;   % Coral
-    144, 238, 144;  % Light Green (Pale Green)
-    255, 228, 196;  % Bisque
-    147, 112, 219;  % Medium Purple
-    0, 206, 209;    % Dark Turquoise
-    250, 128, 114;  % Salmon
-    152, 251, 152;  % Pale Green (Light Green)
-    218, 112, 214;  % Orchid
-    ]/255;
-h = figure;
-hold on;
-for i = 1:size(OKeeffe,1)
-    plot(i, 0, '.', 'Color', OKeeffe(i,:), 'MarkerSize',180);
-end
+outdir = '/Users/bs3667/Library/CloudStorage/GoogleDrive-bs3667@nyu.edu/My Drive/LDDM/Froemke/DynamicVersionPPAsync';
+Setup;
 %% The structure of the network
 Ntwk.Scale = 4000; % scale of the micro structure to test, 2D square (length and width) in unit of um
 Ntwk.Input.N = 2; % number of inputs 
@@ -49,20 +22,22 @@ Ntwk.tauR = .1853; % time constant for the three types of neurons
 Ntwk.tauG = .2244;
 Ntwk.tauD = .3231;
 Ntwk.w = 1; % connection weight from R to G
+Ntwk.a = 1; % self-excitation weight from R to R
 % the time constant of synaptic plasticity for E and I neurons
 % according to Feild,... Freomke, 2020, Neuron, Figure 4
 % The time constants for homosynaptic plasticity are 1.0 min and 0.6 min for excitation and inhibition, respectively
 % The time constants for heterosynaptic plasticity are 4.8 and 9.1 min for excitation and inhibition, respectively
-Ntwk.tauhet_e = 4.8*60;
-Ntwk.tauhom_e = 1*60; 
+% Ntwk.tauhet_e = 4.8*60;
+% Ntwk.tauhom_e = 1*60; 
 Ntwk.tauhet_i = 9.1*60;
-Ntwk.tauhom_i = .6*60; 
+% Ntwk.tauhom_i = .6*60; 
 Ntwk.gamma = .001; % the changing rate of potentiation
 Ntwk.show = 1; % control for visualization
 %% physical location of the cells, assuming located on the same layer, thus
 % spreading on the 2D surface
 rng(2023);
 xE = -Ntwk.Scale/2 + rand(Ntwk.Exct.N,1)*Ntwk.Scale;
+[xE, I] = sort(xE);
 yE = zeros(Ntwk.Exct.N,1);
 Ntwk.Exct.Location = [xE, yE];
 
@@ -168,7 +143,7 @@ if Ntwk.show
     % synaptic connection weights
     h = figure;
     filename = sprintf('SynapticW_at_time%1.2fs', 0*dt);
-    imagesc(wIE);
+    imagesc(wIE_initial');
     caxis([-1, 1]);
     colormap(bluewhitered(256)), colorbar;
     xlabel('Exct channels');
@@ -189,7 +164,7 @@ for ti = 1:(length(time)-1)
     tau_pos = .02; % 20 ms
     tau_neg = .02; % 20 ms
     % Calculate STDP kernel
-    synapticIE_rollover = zeros([size(Cnnct_IE), ti]);
+    synapticIE_rollover = zeros([size(Ntwk.Cnnct_IE), ti]);
     for t = 1:ti % accumulation over time points
         % Potentiation effect
         prebinary = preAP(:,t) >= threshG;
@@ -212,25 +187,12 @@ for ti = 1:(length(time)-1)
     G(G(:, ti+1) < 0, ti+1) = 0;
     wIE(wIE<0) = 0;
 end
+fprintf('\n');
+Ntwk.wIE = wIE;
 save(fullfile(outdir, 'Simulation20s.mat'), 'Ntwk', 'R', 'G', 'wIE', 'wIE_initial', 'synapticIE_change', 'synapticIE_rollover', 'Seq');
 %% visualization
+load(fullfile(outdir, 'Simulation20s.mat'));
 if Ntwk.show
-    % kernal
-    h = figure; hold on;
-    filename = 'Kernal';
-    t_pos = -3*tau_pos/dt:0;
-    y1 = exp(t_pos*dt / tau_pos);
-    t_neg = 0:3*tau_neg/dt;
-    y2 = exp(-t_neg*dt / tau_neg);
-    plot([t_pos, t_neg], [y1, y2], '-', 'Color',OKeeffe(10,:), 'LineWidth',2);
-    plot([0,0],[-1,1], 'k--');
-    plot([-60,60],[0,0], 'k--');
-    ylim([-1, 1]);
-    ylabel('Connection change');
-    xlabel('\Delta t_{pre} - t_{post}');
-    text(-45,0.6,'Pre-Post');
-    text(30,0.6,'Post-Pre');
-    mysavefig(h, filename, outdir, 12, [5, 4]);
     % V
     h = figure;
     filename = 'InputDynamic';
@@ -283,7 +245,7 @@ if Ntwk.show
     % synaptic connection weights
     h = figure;
     filename = sprintf('SynapticW_at_time%1.2fs', ti*dt);
-    imagesc(wIE);
+    imagesc(wIE');
     caxis([-1, 1]);
     colormap(bluewhitered(256)), colorbar;
     xlabel('Exct channels');
@@ -292,13 +254,13 @@ if Ntwk.show
     % synaptic weight change
     h = figure;
     filename = sprintf('SynapticW_change');
-    imagesc(wIE - wIE_initial);
+    imagesc((wIE - wIE_initial)');
     caxis([-1, 1]);
     colormap(bluewhitered(256)), colorbar;
     xlabel('Exct channels');
     ylabel('Inhbt channels');
     mysavefig(h, filename, outdir, 14, [9, 6]);
-    % Example dynamics R and G
+    % Example dynamics synamtic
     h = figure;
     minValue = max(synapticIE_change(:));
     [IdxI, IdxE] = find(synapticIE_change == minValue);
@@ -311,32 +273,93 @@ if Ntwk.show
     legend({"PYR", "SST"}, 'Location', "best");
     mysavefig(h, filename, outdir, 12, [5, 3]);
     %%
-    rng(2023);
+    % tune, input connection weight .* EI and IE weights
     h = figure;
-    filename = 'Network structure';
-    hold on;
-    plot(Ntwk.Exct.Location(:,1), Ntwk.Exct.Location(:,2), 'kv', 'MarkerSize', Ntwk.Exct.Properties.size/3, 'MarkerFaceColor','auto');
-    plot(Ntwk.Inhbt.Location(:,1), Ntwk.Inhbt.Location(:,2), '.', 'Color', [.5, .5, .5], 'MarkerSize', Ntwk.Inhbt.Properties.size);
-    xlabel('\mum');
-    ylabel('\mum');
-    xlim([-Ntwk.Scale/2, Ntwk.Scale/2]);
-    ylim([-Ntwk.Scale/4, Ntwk.Scale/4]);
-    % trained connection from E -> I and I -> E
-    EIs = find(Cnnct_EI(:, example));
-    for i = EIs'
-        lgd1 = plot([Ntwk.Exct.Location(example,1), Ntwk.Inhbt.Location(i,1)],...
-            [Ntwk.Exct.Location(example,2), Ntwk.Inhbt.Location(i,2)],...
-            '-', 'Color', OKeeffe(3,:), 'LineWidth',1.6);
-    end
-    plot(Ntwk.Inhbt.Location(EIs,1), Ntwk.Inhbt.Location(EIs,2), '.', 'Color', OKeeffe(8,:), 'MarkerSize', Ntwk.Inhbt.Properties.size);
+    filename = 'Tuning_Exct';
+    imagesc(Ntwk.Exct.tuning');
+    caxis([0, 1]);
+    colormap(bluewhitered(256));
+    c = colorbar;
+    xlabel('Exct channels');
+    yticks([1,2]);
+    yticklabels({'Input 1', 'Input 2'});
+    c.Label.String = 'Tuning';
+    mysavefig(h, filename, outdir, 12, [5, 1]);
+    
+    h = figure;
+    filename = 'Tuning_Inhbt';
+    Ntwk.Inhbt.tuning = Ntwk.Cnnct_EI * Ntwk.Exct.tuning;
+    imagesc(Ntwk.Inhbt.tuning');
+    caxis([0, max(Ntwk.Inhbt.tuning(:))]);
+    colormap(bluewhitered(256));
+    c = colorbar;
+    xlabel('Inhbt channels');
+    yticks([1,2]);
+    yticklabels({'Input 1', 'Input 2'});
+    c.Label.String = 'Tuning';
+    mysavefig(h, filename, outdir, 12, [5, 1]);
+    
+    h = figure;
+    filename = 'Tuning_Inhbt_IE';
+    Ntwk.Inhbt.tuningIE = Ntwk.wIE' * Ntwk.Exct.tuning;
+    imagesc(Ntwk.Inhbt.tuningIE');
+    caxis([0, max(Ntwk.Inhbt.tuningIE(:))]);
+    colormap(bluewhitered(256));
+    c = colorbar;
+    xlabel('Inhbt channels');
+    yticks([1,2]);
+    yticklabels({'Input 1', 'Input 2'});
+    c.Label.String = 'Selective Inhibition';
+    mysavefig(h, filename, outdir, 12, [5, 1]);
+    
+    h = figure;
+    filename = 'Tuning_Inhbt_IE_sort';
+    [IE1, I] = sort(Ntwk.Inhbt.tuningIE(:,1), 'descend');
+    IE2 = Ntwk.Inhbt.tuningIE(I,2);
+    imagesc([IE1, IE2]');
+    caxis([0, max(Ntwk.Inhbt.tuningIE(:))]);
+    colormap(bluewhitered(256));
+    c = colorbar;
+    xlabel('Inhbt channels');
+    yticks([1,2]);
+    yticklabels({'Input 1', 'Input 2'});
+    c.Label.String = 'Selective Inhibition';
+    mysavefig(h, filename, outdir, 12, [5, 1]);
 
-    IEs = find(Cnnct_IE(:, example));
-    for i = IEs'
-        lgd2 = plot([Ntwk.Exct.Location(example,1), Ntwk.Inhbt.Location(i,1)],...
-            [Ntwk.Exct.Location(example,2), Ntwk.Inhbt.Location(i,2)],...
-            '-', 'Color', OKeeffe(4,:), 'LineWidth',1.6);
-    end
-    plot(Ntwk.Inhbt.Location(IEs,1), Ntwk.Inhbt.Location(IEs,2), '.', 'Color', OKeeffe(7,:), 'MarkerSize', Ntwk.Inhbt.Properties.size);
-    legend([lgd1, lgd2], {'E->I','I->E'});
-    mysavefig(h, filename, outdir, 14, [6, 3]);
+    h = figure; hold on;
+    filename = 'Tuning_Inhbt_EI_IE';
+    maxv = max(Ntwk.Inhbt.tuning(:));
+    plot(Ntwk.Inhbt.tuning(:,1)/maxv, Ntwk.Inhbt.tuning(:,2)/maxv, '.','MarkerSize', Ntwk.Inhbt.Properties.size, 'Color', OKeeffe(3,:));
+    maxu = max(Ntwk.Inhbt.tuningIE(:));
+    plot(Ntwk.Inhbt.tuningIE(:,1)/maxu, Ntwk.Inhbt.tuningIE(:,2)/maxu, '.','MarkerSize', Ntwk.Inhbt.Properties.size, 'Color', OKeeffe(4,:));
+    xlabel('Tuning to input 1');
+    ylabel('Tuning to input 2');
+    xlim([-.1, 1]);
+    ylim([-.1, 1]);
+    legend({'E->I','I->E'});
+    mysavefig(h, filename, outdir, 12, [5, 5]);
+    % mean-field connectome
+    % InhbtMtrx(1,1) = sum(Ntwk.Inhbt.tuning(:,1).*Ntwk.Inhbt.tuningIE(:,1), 1);
+    % InhbtMtrx(1,2) = sum(Ntwk.Inhbt.tuning(:,1).*Ntwk.Inhbt.tuningIE(:,2), 1);
+    % InhbtMtrx(2,1) = sum(Ntwk.Inhbt.tuning(:,2).*Ntwk.Inhbt.tuningIE(:,1), 1);
+    % InhbtMtrx(2,2) = sum(Ntwk.Inhbt.tuning(:,2).*Ntwk.Inhbt.tuningIE(:,2), 1);
+    InhbtMtrx(1,1) = sum((Ntwk.Inhbt.tuning(:,1)/sum(Ntwk.Inhbt.tuning(:,1), 1)).*(Ntwk.Inhbt.tuningIE(:,1)/sum(Ntwk.Inhbt.tuningIE(:,1),1)), 1);
+    InhbtMtrx(1,2) = sum((Ntwk.Inhbt.tuning(:,1)/sum(Ntwk.Inhbt.tuning(:,1), 1)).*(Ntwk.Inhbt.tuningIE(:,2)/sum(Ntwk.Inhbt.tuningIE(:,2),1)), 1);
+    InhbtMtrx(2,1) = sum((Ntwk.Inhbt.tuning(:,2)/sum(Ntwk.Inhbt.tuning(:,2), 1)).*(Ntwk.Inhbt.tuningIE(:,1)/sum(Ntwk.Inhbt.tuningIE(:,1), 1)), 1);
+    InhbtMtrx(2,2) = sum((Ntwk.Inhbt.tuning(:,2)/sum(Ntwk.Inhbt.tuning(:,2), 1)) .*(Ntwk.Inhbt.tuningIE(:,2)/sum(Ntwk.Inhbt.tuningIE(:,2), 1)), 1);
+    h = figure;
+    filename = 'Meanfield-RcrtInhbt';
+    imagesc(InhbtMtrx);
+    caxis([0, max(InhbtMtrx(:))*1.2]);
+    colormap('gray');
+    %colormap(bluewhitered(556));
+    c = colorbar;
+    c.Label.String = 'Recurrent Inhibition';
+    xticks([1,2]);
+    xticklabels({'Input 1', 'Input 2'});
+    yticks([1,2]);
+    yticklabels({'Input 1', 'Input 2'});
+    xlabel('E -> I');
+    ylabel('I -> E');
+    mysavefig(h, filename, outdir, 12, [5, 4]);
 end
