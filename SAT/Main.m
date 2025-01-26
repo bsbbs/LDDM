@@ -1,22 +1,16 @@
-% Main function of generating figures for the paper: Shen, Louie, and
-% Glimcher, A disinhibition-based circuit model of decision-making
-Codedir = '/Users/bs3667/LDDM';
-% Codedir = 'C:\Users\Bo\Documents\LDDM';
+% Main function of generating figures for the paper: Tian & Shen, Speed
+% accuracy tradeoff
+[os, ~, ~] = computer;
+if strcmp(os,'MACA64')
+    Codedir = '/Users/bs3667/LDDM';
+    rootdir = '/Users/bs3667/NYU Langone Health Dropbox/Shen Bo/Bo Shen Working files/Speed-accuracy-tradeoff';
+elseif strcmp(os, 'PCWIN64')
+    Codedir = 'C:\Users\Bo\Documents\LDDM';
+    rootdir = 'C:\Users\Bo\NYU Langone Health Dropbox\Shen Bo\Bo Shen Working files\Speed-accuracy-tradeoff';
+end
 addpath(genpath(fullfile(Codedir,'CoreFunctions'))); % inlcude the core functions
 addpath(genpath(fullfile(Codedir,'utils'))); % inlcude utilities and functions
-outdir = '/Users/bs3667/NYU Langone Health Dropbox/Shen Bo/Bo Shen Working files/Speed-accuracy-tradeoff/Fig1';
-% outdir = 'G:\My Drive\LDDM\Figs4Paper';
-if ~exist(outdir,'dir')
-    mkdir(outdir);
-end
-plotdir = fullfile(outdir,'Graphics');
-if ~exist(plotdir,'dir')
-    mkdir(plotdir);
-end
-datadir = fullfile(outdir,'SimRslts');
-if ~exist(datadir,'dir')
-    mkdir(datadir);
-end
+
 %% define parameters for simulation
 c = [3.2 12.8, 25.6, 38.4 51.2]'/100; % percentage of coherence
 scale0 = 250;
@@ -30,7 +24,7 @@ thresh = 70;
 %% define parameters for visualization
 lwd = 2.0;
 mksz = 18;
-fontsize = 14;
+fontsize = 12;
 mygray = flip(gray(length(c) + 2));
 colorpalette = {'#ef476f','#ffd166','#06d6a0','#118ab2','#073b4c'};
 colorpalettergb = [239,71,111;255,209,102;6,214,160;17,138,178;7,59,76]/255;
@@ -61,4 +55,15 @@ aspect15 = [3, 11]; % for combined Fig7
 
 
 %% Fig 2 - Example dynamics of different model
-Fig2;
+outdir = fullfile(rootdir, 'Fig2');
+if ~exist(outdir,'dir')
+    mkdir(outdir);
+end
+plotdir = fullfile(outdir,'Graphics');
+if ~exist(plotdir,'dir')
+    mkdir(plotdir);
+end
+datadir = fullfile(outdir,'SimRslts');
+if ~exist(datadir,'dir')
+    mkdir(datadir);
+end

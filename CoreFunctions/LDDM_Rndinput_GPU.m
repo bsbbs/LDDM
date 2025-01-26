@@ -49,7 +49,7 @@ function [rt, choice, argmaxR] = LDDM_Rndinput_GPU(Vprior, Vinput, w, a, b,...
 %   must be a 3xN matrix.
 %   - example      initialvals = [R1_0, R2_0
 %                                 G1_0, G2_0]
-%                                 I1_0, I2_0]
+%                                 D1_0, D2_0]
 % - stimdur: defines the duration of stimuli presenting, starting from presentt.
 %   After withdrawal of stimuli, all input values turn into zeros.
 % - stoprule:  a control parameter to tell the program if need
@@ -123,24 +123,24 @@ InoiseR1 = gpuArray.zeros(sizeComput);
 InoiseG1 = gpuArray.zeros(sizeComput);
 InoiseR2 = gpuArray.zeros(sizeComput);
 InoiseG2 = gpuArray.zeros(sizeComput);
-InoiseI1 = gpuArray.zeros(sizeComput);
-InoiseI2 = gpuArray.zeros(sizeComput);
+InoiseD1 = gpuArray.zeros(sizeComput);
+InoiseD2 = gpuArray.zeros(sizeComput);
 stablizetime = round(.2/dt);
 for kk = 1:stablizetime
     InoiseR1 = InoiseR1 + (-InoiseR1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
     InoiseR2 = InoiseR2 + (-InoiseR2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
     InoiseG1 = InoiseG1 + (-InoiseG1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
     InoiseG2 = InoiseG2 + (-InoiseG2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseI1 = InoiseI1 + (-InoiseI1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseI2 = InoiseI2 + (-InoiseI2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+    InoiseD1 = InoiseD1 + (-InoiseD1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+    InoiseD2 = InoiseD2 + (-InoiseD2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
 end
 X = gpuArray(ones(sizeComput));
 R1 = (X*initialvals(1,1)) + InoiseR1;
 R2 = (X*initialvals(1,2)) + InoiseR2;
 G1 = (X*initialvals(2,1)) + InoiseG1;
 G2 = (X*initialvals(2,2)) + InoiseG2;
-I1 = (X*initialvals(3,1)) + InoiseI1;
-I2 = (X*initialvals(3,2)) + InoiseI2;
+D1 = (X*initialvals(3,1)) + InoiseD1;
+D2 = (X*initialvals(3,2)) + InoiseD2;
 
 %% initialize variables
 rt = gpuArray.zeros(sizeComput);
@@ -206,10 +206,10 @@ for ti = -pretask_steps:max(posttask_steps(:))
     % update R, G, I
     G1old = G1;
     G2old = G2;
-    G1 = G1 + (-G1 + w11*R1 + w12*R2 - I1)/Tau2*dtArray + InoiseG1;
-    G2 = G2 + (-G2 + w21*R1 + w22*R2  - I2)/Tau2*dtArray + InoiseG2;
-    I1 = I1 + (-I1 + beta11*R1.*Continue.*BetasUp + beta12*R2.*Continue.*BetasUp)/Tau3*dtArray + InoiseI1;
-    I2 = I2 + (-I2 + beta21*R1.*Continue.*BetasUp + beta22*R2.*Continue.*BetasUp)/Tau3*dtArray + InoiseI2;
+    G1 = G1 + (-G1 + w11*R1 + w12*R2 - D1)/Tau2*dtArray + InoiseG1;
+    G2 = G2 + (-G2 + w21*R1 + w22*R2  - D2)/Tau2*dtArray + InoiseG2;
+    D1 = D1 + (-D1 + beta11*R1.*Continue.*BetasUp + beta12*R2.*Continue.*BetasUp)/Tau3*dtArray + InoiseD1;
+    D2 = D2 + (-D2 + beta21*R1.*Continue.*BetasUp + beta22*R2.*Continue.*BetasUp)/Tau3*dtArray + InoiseD2;
     R1 = R1 + (-R1 + (V1Array + V1prArray*(ti<0) + alpha11*R1+alpha12*R2).*Continue./(1+G1old))/Tau1*dtArray + InoiseR1;
     R2 = R2 + (-R2 + (V2Array + V2prArray*(ti<0) + alpha21*R1+alpha22*R2).*Continue./(1+G2old))/Tau1*dtArray + InoiseR2;
     % update noise
@@ -217,17 +217,17 @@ for ti = -pretask_steps:max(posttask_steps(:))
     InoiseR2 = InoiseR2 + (-InoiseR2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
     InoiseG1 = InoiseG1 + (-InoiseG1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
     InoiseG2 = InoiseG2 + (-InoiseG2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseI1 = InoiseI1 + (-InoiseI1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseI2 = InoiseI2 + (-InoiseI2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+    InoiseD1 = InoiseD1 + (-InoiseD1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+    InoiseD2 = InoiseD2 + (-InoiseD2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
     % setting lower boundary, forcing neural firing rates to be non-negative
     inside = G1 >= 0;
     G1 = G1 .* inside;
     inside = G2 >= 0;
     G2 = G2 .* inside;
-    inside = I1 >= 0;
-    I1 = I1 .* inside;
-    inside = I2 >= 0;
-    I2 = I2 .* inside;
+    inside = D1 >= 0;
+    D1 = D1 .* inside;
+    inside = D2 >= 0;
+    D2 = D2 .* inside;
     inside = R1 >= 0;
     R1 = R1 .* inside;
     inside = R2 >= 0;
