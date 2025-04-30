@@ -1,8 +1,8 @@
 % Demo
 
 %% define paths
-% Homedir = 'C:\Users\Bo';
-Homedir = '~';
+Homedir = 'C:\Users\Bo\Documents\GitHub';
+% Homedir = '~';
 % addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
 addpath(fullfile(Homedir,'LDDM','Froemke','Revision1'));
 addpath(fullfile(Homedir,'LDDM','Froemke','utils'));
