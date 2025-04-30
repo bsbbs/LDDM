@@ -176,7 +176,7 @@ for ti = -pretask_steps:max(posttask_steps(:))
         end
     end
     % update the values
-    if numel(unique(onset_of_stimuli)) == 1
+    if isscalar(unique(onset_of_stimuli))
         if ti >= onset_of_stimuli(1)
             if (mod(ti*dt, .005) == 0)
                 V1noise = gpuArray.randn(sizeComput).*sgmInput;
@@ -198,7 +198,7 @@ for ti = -pretask_steps:max(posttask_steps(:))
         V2Array = (V2inputArray + V2noise).*flip;
     end
 
-    if numel(unique(offset_of_stimuli)) == 1
+    if isscalar(unique(offset_of_stimuli))
         if ti >= offset_of_stimuli(1)
             V1Array = 0;
             V2Array = 0;
@@ -209,7 +209,7 @@ for ti = -pretask_steps:max(posttask_steps(:))
         V2Array(flip) = 0;
     end
 
-    if numel(unique(onset_of_trigger)) == 1
+    if isscalar(unique(onset_of_trigger))
         if ti >= onset_of_trigger(1)
             BetasUp = gpuArray(ones(sizeComput));
         end
