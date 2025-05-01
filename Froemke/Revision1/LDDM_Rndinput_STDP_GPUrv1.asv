@@ -215,8 +215,8 @@ for ti = -pretask_steps:max(posttask_steps(:))
     % update R, G, I
     G1old = G1;
     G2old = G2;
-    G1 = G1 + (-G1 + w11*R1 + w12*R2 + BG - D1)/Tau2*dtArray + InoiseG1;
-    G2 = G2 + (-G2 + w21*R1 + w22*R2 + BG - D2)/Tau2*dtArray + InoiseG2;
+    G1 = G1 + (-G1 + w11*R1 + w12*R2 + BR - D1)/Tau2*dtArray + InoiseG1;
+    G2 = G2 + (-G2 + w21*R1 + w22*R2 + BR - D2)/Tau2*dtArray + InoiseG2;
     D1 = D1 + (-D1 + beta11*R1.*Continue.*BetasUp + beta12*R2.*Continue.*BetasUp)/Tau3*dtArray + InoiseD1;
     D2 = D2 + (-D2 + beta21*R1.*Continue.*BetasUp + beta22*R2.*Continue.*BetasUp)/Tau3*dtArray + InoiseD2;
     R1 = R1 + (-R1 + ((V1Array + V1prArray*(ti<0))+ alpha11*R1 + BR).*Continue./(1 + G1old.*STDP_GR))/Tau1*dtArray + InoiseR1;
