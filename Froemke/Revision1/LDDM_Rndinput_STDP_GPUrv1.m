@@ -1,4 +1,4 @@
-function [rt, choice, argmaxR, p1, p2] = LDDM_Rndinput_STDP_GPUrv1(Vprior, Vinput, BR, BG, STDP_GR, w, a, b,...
+function [rt, choice, argmaxR, p1, p2] = LDDM_Rndinput_STDP_GPUrv1(Vprior, Vinput, BR, BG, eltp, iltp, w, a, b,...
     sgm, sgmInput, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims)
 %%%%%%%%%%%%%%%%%%
 %% GPU calculation, only binary choice is allowed. N is limited as 2.
@@ -104,8 +104,8 @@ sizeVinput = size(V1mat);
 sizeComput = [sizeVinput, sims];
 NComput = prod(sizeComput);
 
-if all(size(STDP_GR)==sizeVinput)
-    STDP_GR = gpuArray(repmat(STDP_GR,1,1,sims));
+if all(size(iltp)==sizeVinput)
+    iltp = gpuArray(repmat(iltp,1,1,sims));
 end
 if all(size(sgmInput) == sizeVinput)
     sgmInput = gpuArray(repmat(sgmInput,1,1,sims));
@@ -215,12 +215,12 @@ for ti = -pretask_steps:max(posttask_steps(:))
     % update R, G, I
     G1old = G1;
     G2old = G2;
-    G1 = G1 + (-G1 + w11*R1 + w12*R2 + BG - D1)/Tau2*dtArray + InoiseG1;
-    G2 = G2 + (-G2 + w21*R1 + w22*R2 + BG - D2)/Tau2*dtArray + InoiseG2;
-    D1 = D1 + (-D1 + beta11*R1.*Continue.*BetasUp + beta12*R2.*Continue.*BetasUp)/Tau3*dtArray + InoiseD1;
-    D2 = D2 + (-D2 + beta21*R1.*Continue.*BetasUp + beta22*R2.*Continue.*BetasUp)/Tau3*dtArray + InoiseD2;
-    R1 = R1 + (-R1 + ((V1Array + V1prArray*(ti<0))+ alpha11*R1 + BR).*Continue./(1 + G1old.*STDP_GR))/Tau1*dtArray + InoiseR1;
-    R2 = R2 + (-R2 + ((V2Array + V2prArray*(ti<0)) + alpha22*R2 + BR).*Continue./(1 + G2old.*STDP_GR))/Tau1*dtArray + InoiseR2;
+    G1 = G1 + (-G1 + eltp*w11*R1 + eltp*w12*R2 + BG - D1)/Tau2*dtArray + InoiseG1;
+    G2 = G2 + (-G2 + eltp*w21*R1 + eltp*w22*R2 + BG - D2)/Tau2*dtArray + InoiseG2;
+    D1 = D1 + (-D1 + eltp*beta11*R1.*Continue.*BetasUp + eltp*beta12*R2.*Continue.*BetasUp)/Tau3*dtArray + InoiseD1;
+    D2 = D2 + (-D2 + eltp*beta21*R1.*Continue.*BetasUp + eltp*beta22*R2.*Continue.*BetasUp)/Tau3*dtArray + InoiseD2;
+    R1 = R1 + (-R1 + ((V1Array + V1prArray*(ti<0))+ alpha11*R1 + BR).*Continue./(1 + G1old.*iltp))/Tau1*dtArray + InoiseR1;
+    R2 = R2 + (-R2 + ((V2Array + V2prArray*(ti<0)) + alpha22*R2 + BR).*Continue./(1 + G2old.*iltp))/Tau1*dtArray + InoiseR2;
     % update noise
     InoiseR1 = InoiseR1 + (-InoiseR1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
     InoiseR2 = InoiseR2 + (-InoiseR2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;

@@ -1,7 +1,7 @@
 %% I-E and E-E both
 
 %% Property 1. integration of noise
-potentiation = [1, 2];
+potentiation = linspace(0.1,1,5);
 predur = 0;
 dur = 100;
 sgm = .01;
@@ -65,9 +65,10 @@ dur = 4.5;
 sims = 102400;
 sgm = .01;
 sgmInput = sgmInput_choice;
+scale0 = w*[1;1]*eqlb^2 + (BG+1-a*[1;1])*eqlb - BR;
 thresh = 70;
 stoprule = 1;
-cp = [2 4 8 16 32 64 128 256 512]'/1000;
+cp = [0 2 4 8 16 32 64 128 256 512]'/1000;
 potentiation = linspace(0.1,1,5); %[1:.5:2.5];
 filename = sprintf('LDDM_%s_STDPfrom%1.1fto%1.1f_a%1.2f_b%1.2f_sgm%1.1fsinpt%0.3f_sims%i',...
         task,min(potentiation), max(potentiation),a0,b0,sgm,sgmInput,sims);
@@ -80,22 +81,19 @@ if ~exist(output,'file')
         eltp = potentiation(i);
         iltp = potentiation(i);
 
-        w = eltp*w0*ones(2);
+        w = w0*ones(2);
         a = a0*eye(2);
         b = b0*eye(2);
 
-        scale = iltp*w*[1;1]*eqlb^2 + (iltp*BG+1-a*[1;1])*eqlb - BR; %2*w0*eqlb.^2 + (1-a0).*eqlb;
+        scale = iltp*eltp*w*[1;1]*eqlb^2 + (iltp*BG+1-a*[1;1])*eqlb - BR; %2*w0*eqlb.^2 + (1-a0).*eqlb;
         R0 = eqlb*[1;1];
         D0 = 0*[1;1];
-        G0 = w*R0+BG;
-        Vprior = scale';
+        G0 = eltp*w*R0+BG;
         initialvals = [R0'; G0'; D0'];
-
-        STDP_GR = iltp;
         Vinput = [1+cp, 1-cp].*scale';
         Vprior = ones(size(Vinput)).*scale';
-        [rt, choice, ~] = LDDM_Rndinput_STDP_GPUrv1(Vprior, Vinput, BR, BG, STDP_GR, w, a, b,...
-            sgm, sgmInput*mean(scale), Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims);
+        [rt, choice, ~] = LDDM_Rndinput_STDP_GPUrv1(Vprior, Vinput, BR, BG, eltp, iltp, w, a, b,...
+            sgm, sgmInput*mean(scale0), Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims);
         ACC(:,i) = gather(mean(2-choice,3,'omitnan'));
         meanRT(:,i) = gather(mean(rt,3,'omitnan'));
     end
@@ -104,7 +102,6 @@ else
     load(output);
 end
 
-%%
 mygray = [.9:-.9/numel(potentiation):0];
 h = figure;
 filename = 'RT_ACC_I-E&E-E';
