@@ -1,4 +1,4 @@
-function [choice, rt, R, G, D, Vcourse] = LDDM_RndInputrv1(Vprior, Vinput, BR, BG, winput, wrg, wgr, a, b,...
+function [R, G, D, Vcourse, winputp, wrgp, wgrp] = LDDM_RndInputPlastic(Vprior, Vinput, BR, BG, winput0, wrg0, wgr0, a, b,...
     sgmR, sgmG, sgmInput, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule)
 %%%%%%%%%%%%%%%%%%
 % The core function of local disinhibition decision model (LDDM)
@@ -47,8 +47,14 @@ function [choice, rt, R, G, D, Vcourse] = LDDM_RndInputrv1(Vprior, Vinput, BR, B
 %   to stop simulating when one of the R neurons' firing rates hit threshold
 % 	1 for to stop, 0 for to continue simulating until total duration set in dur. 
 %%%%%%%%%%%%%%%%%%%
-tauN =0.002; % time constant for Ornstein-Uhlenbeck process of noise
+tauN = 0.002; % time constant for Ornstein-Uhlenbeck process of noise
+eta = .00001; % learning rate of synaptic weight on Oja's rule
+targetrate = 32; % target firing rate of inhibitory synaptic plasticity
 %% define parameters
+winput = winput0;
+wrg = wrg0;
+wgr = wgr0;
+
 pretask_steps = round(predur/dt);
 onset_of_stimuli = round(presentt/dt); % align to the beginning of task as t = 0.
 stim_duration = round(stimdur/dt);
@@ -59,6 +65,11 @@ sizeVinput = size(Vinput);
 if sizeVinput(1) > 1 error('Error: the size of Vinput has to be 1xN'); end
 rt = NaN;
 choice = NaN;
+smplrate = 1000; % per seccond
+smplsz = round((predur+dur)/smplrate);
+winputp = nan(smplsz,sizeVinput(2));
+wrgp = nan(smplsz,sizeVinput(2), sizeVinput(2));
+wgrp = nan(smplsz,sizeVinput(2));
 %% stablizing noise for 200 ms
 InoiseG = zeros(sizeVinput);
 InoiseR = zeros(sizeVinput);
@@ -82,19 +93,28 @@ for ti = (-pretask_steps):posttask_steps % align the beginning of the task as ti
         if (mod(ti*dt, .005) == 0)
             Vnoise = randn(sizeVinput)*sgmInput;
         end
-        V = Vinput;
+        V = Vinput + Vnoise;
     else
         V = zeros(sizeVinput);
     end
     Vcourse(ti+t_stamp,:) = V;
     
     % update R, G, I
-    dR = (-R(ti+t_stamp,:)' + ((winput.*V)' + a*R(ti+t_stamp,:)' + BR + Vnoise')./(1+wgr*G(ti+t_stamp,:)'))/Tau(1)*dt;
+    dR = (-R(ti+t_stamp,:)' + ((winput.*V)' + a*R(ti+t_stamp,:)' + BR)./(1+wgr.*G(ti+t_stamp,:)'))/Tau(1)*dt;
     dG = (-G(ti+t_stamp,:)' + wrg*R(ti+t_stamp,:)'  + BG - D(ti+t_stamp,:)')/Tau(2)*dt;
     dD = (-D(ti+t_stamp,:)' + b*(ti >= onset_of_trigger)*R(ti+t_stamp,:)')/Tau(3)*dt;
+
+    dwinput = eta*(R(ti+t_stamp,:).*V - winput.*(R(ti+t_stamp,:).^2))*dt;
+    dwrg = eta*(G(ti+t_stamp,:)'*R(ti+t_stamp,:) - diag(G(ti+t_stamp,:).^2)*wrg)*dt;
+    dwgr = eta*(G(ti+t_stamp,:).*(R(ti+t_stamp,:) - targetrate))*dt;
+
     R(ti+t_stamp+1,:) = R(ti+t_stamp,:) + dR' + InoiseR;
     G(ti+t_stamp+1,:) = G(ti+t_stamp,:) + dG' + InoiseG;
     D(ti+t_stamp+1,:) = D(ti+t_stamp,:) + dD';
+
+    winput = winput + dwinput;
+    wrg = wrg + dwrg;
+    wgr = wgr + dwgr;
     
     % update noise
     InoiseG = InoiseG + (-InoiseG + randn(sizeVinput).*sqrt(dt).*sgmG)/tauN*dt;
@@ -103,6 +123,16 @@ for ti = (-pretask_steps):posttask_steps % align the beginning of the task as ti
     G(ti+t_stamp+1,G(ti+t_stamp+1,:) < 0) = 0;
     D(ti+t_stamp+1,D(ti+t_stamp+1,:) < 0) = 0;
     R(ti+t_stamp+1,R(ti+t_stamp+1,:) < 0) = 0;
+    winput(winput < 0) = 0;
+    wrg(wrg < 0) = 0;
+    wgr(wgr < 0) = 0;
+    
+    if mod((ti+t_stamp)*dt, 1/smplrate) == 0
+        si = round((ti+t_stamp)*dt*smplrate);
+        winputp(si,:) = winput;
+        wrgp(si,:,:) = wrg;
+        wgrp(si,:) = wgr;
+    end
     % threshold detecting
     if ti > onset_of_trigger && isnan(rt)
         if max(R(ti+t_stamp,:)) >= thresh

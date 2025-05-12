@@ -1,6 +1,6 @@
 function mysavefig(h, filename, outdir, fontsize, aspect, ticklength)
 if ~exist('ticklength','var')
-    ticklength = 2.3623;
+    ticklength = .75; %2.3623;
 end
 set(gca,'FontSize',fontsize);
 set(gca,'FontName','Arial')
