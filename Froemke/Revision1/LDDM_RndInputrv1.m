@@ -89,7 +89,7 @@ for ti = (-pretask_steps):posttask_steps % align the beginning of the task as ti
     Vcourse(ti+t_stamp,:) = V;
     
     % update R, G, I
-    dR = (-R(ti+t_stamp,:)' + ((winput.*V)' + a*R(ti+t_stamp,:)' + BR + Vnoise')./(1+wgr*G(ti+t_stamp,:)'))/Tau(1)*dt;
+    dR = (-R(ti+t_stamp,:)' + ((winput.*V)' + a*R(ti+t_stamp,:)' + BR + Vnoise')./(1+(wgr.*G(ti+t_stamp,:))'))/Tau(1)*dt;
     dG = (-G(ti+t_stamp,:)' + wrg*R(ti+t_stamp,:)'  + BG - D(ti+t_stamp,:)')/Tau(2)*dt;
     dD = (-D(ti+t_stamp,:)' + b*(ti >= onset_of_trigger)*R(ti+t_stamp,:)')/Tau(3)*dt;
     R(ti+t_stamp+1,:) = R(ti+t_stamp,:) + dR' + InoiseR;

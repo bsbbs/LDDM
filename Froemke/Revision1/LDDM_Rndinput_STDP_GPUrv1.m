@@ -1,5 +1,5 @@
-function [rt, choice, argmaxR, p1, p2] = LDDM_Rndinput_STDP_GPUrv1(Vprior, Vinput, BR, BG, eltp, iltp, w, a, b,...
-    sgm, sgmInput, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims)
+function [rt, choice, argmaxR] = LDDM_Rndinput_STDP_GPUrv1(Vprior, Vinput, BR, BG, winput, wrg, wgr, a, b,...
+    sgmR, sgmG, sgmInput, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule, sims)
 %%%%%%%%%%%%%%%%%%
 %% GPU calculation, only binary choice is allowed. N is limited as 2.
 % Created by Bo Shen, NYU, 2019
@@ -25,15 +25,15 @@ function [rt, choice, argmaxR, p1, p2] = LDDM_Rndinput_STDP_GPUrv1(Vprior, Vinpu
 %   self-excitation for R neurons. alpha must be a NxN diagonal matrix.
 %   Non-zero values only on the diagnal means that each R neuron has its own
 %   excitation loop. Lateral or cross excitation does not exist.
-%   - example      [a11, a12;   [15, 15;
-%                 a21, a22] =  15, 15];
+%   - example      [a11, a12;   [15, 0;
+%                 a21, a22] =  0, 15];
 % - b: the weight of local disinhibition,
-%   - example      [b11, b12;   [2, 2;
-%                 b21, b22] =  2, 2];
+%   - example      [b11, b12;   [2, 0;
+%                 b21, b22] =  0, 2];
 % - sgm: the magnitude of background noise as a scalar, determines the
 %   variance of Ornstein-Uhlenbeck process
 % - Tau: a 1x3 array contains the time constants for R, G, and I neurons.
-%   - example      Tau =  [.2,.2,.2];
+%   - example      Tau =  [.1,.1,.1];
 % - dur: total duration of simulations, from the beginning of simulation to a
 %   force ending, unit in second.
 % - dt: the time step for numerical integration in unit of second, for example 0.001 (1 msec).
@@ -49,7 +49,7 @@ function [rt, choice, argmaxR, p1, p2] = LDDM_Rndinput_STDP_GPUrv1(Vprior, Vinpu
 %   must be a 3xN matrix.
 %   - example      initialvals = [R1_0, R2_0
 %                                 G1_0, G2_0]
-%                                 I1_0, I2_0]
+%                                 D1_0, D2_0]
 % - stimdur: defines the duration of stimuli presenting, starting from presentt.
 %   After withdrawal of stimuli, all input values turn into zeros.
 % - stoprule:  a control parameter to tell the program if need
@@ -62,15 +62,15 @@ function [rt, choice, argmaxR, p1, p2] = LDDM_Rndinput_STDP_GPUrv1(Vprior, Vinpu
 % indicated the task enters motion stage from premotion stage
 %%%%%%%%%%%%%%%%%%%
 tauN = 0.002; % time constant for Ornstein-Uhlenbeck process of noise
-tauInput = .1; % time constant for Ornstein-Uhlenbeck process of input noise
 %% define parameters
-sgmArray = gpuArray(sgm);
+sgmArrayR = gpuArray(sgmR);
+sgmArrayG = gpuArray(sgmG);
 tauN = gpuArray(tauN);
 dtArray = gpuArray(dt);
-w11 = gpuArray(w(1,1));
-w12 = gpuArray(w(1,2));
-w21 = gpuArray(w(2,1));
-w22 = gpuArray(w(2,2));
+w11 = gpuArray(wrg(1,1));
+w12 = gpuArray(wrg(1,2));
+w21 = gpuArray(wrg(2,1));
+w22 = gpuArray(wrg(2,2));
 Tau1 = gpuArray(Tau(1));
 Tau2 = gpuArray(Tau(2));
 Tau3 = gpuArray(Tau(3));
@@ -104,9 +104,6 @@ sizeVinput = size(V1mat);
 sizeComput = [sizeVinput, sims];
 NComput = prod(sizeComput);
 
-if all(size(iltp)==sizeVinput)
-    iltp = gpuArray(repmat(iltp,1,1,sims));
-end
 if all(size(sgmInput) == sizeVinput)
     sgmInput = gpuArray(repmat(sgmInput,1,1,sims));
 end
@@ -130,24 +127,24 @@ InoiseR1 = gpuArray.zeros(sizeComput);
 InoiseG1 = gpuArray.zeros(sizeComput);
 InoiseR2 = gpuArray.zeros(sizeComput);
 InoiseG2 = gpuArray.zeros(sizeComput);
-InoiseD1 = gpuArray.zeros(sizeComput);
-InoiseD2 = gpuArray.zeros(sizeComput);
+%InoiseD1 = gpuArray.zeros(sizeComput);
+%InoiseD2 = gpuArray.zeros(sizeComput);
 stablizetime = round(.2/dt);
 for kk = 1:stablizetime
-    InoiseR1 = InoiseR1 + (-InoiseR1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseR2 = InoiseR2 + (-InoiseR2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseG1 = InoiseG1 + (-InoiseG1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseG2 = InoiseG2 + (-InoiseG2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseD1 = InoiseD1 + (-InoiseD1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseD2 = InoiseD2 + (-InoiseD2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+    InoiseR1 = InoiseR1 + (-InoiseR1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArrayR)/tauN*dtArray;
+    InoiseR2 = InoiseR2 + (-InoiseR2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArrayR)/tauN*dtArray;
+    InoiseG1 = InoiseG1 + (-InoiseG1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArrayG)/tauN*dtArray;
+    InoiseG2 = InoiseG2 + (-InoiseG2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArrayG)/tauN*dtArray;
+    %InoiseD1 = InoiseD1 + (-InoiseD1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+    %InoiseD2 = InoiseD2 + (-InoiseD2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
 end
 X = gpuArray(ones(sizeComput));
 R1 = (X*initialvals(1,1)) + InoiseR1;
 R2 = (X*initialvals(1,2)) + InoiseR2;
 G1 = (X*initialvals(2,1)) + InoiseG1;
 G2 = (X*initialvals(2,2)) + InoiseG2;
-D1 = (X*initialvals(3,1)) + InoiseD1;
-D2 = (X*initialvals(3,2)) + InoiseD2;
+D1 = (X*initialvals(3,1));% + InoiseD1;
+D2 = (X*initialvals(3,2));% + InoiseD2;
 
 %% initialize variables
 rt = gpuArray.zeros(sizeComput);
@@ -177,8 +174,8 @@ for ti = -pretask_steps:max(posttask_steps(:))
                 V1noise = gpuArray.randn(sizeComput).*sgmInput;
                 V2noise = gpuArray.randn(sizeComput).*sgmInput;
             end
-            V1Array = V1inputArray + V1noise;
-            V2Array = V2inputArray + V2noise;
+            V1Array = V1inputArray;
+            V2Array = V2inputArray;
         else
             V1Array = 0;
             V2Array = 0;
@@ -189,8 +186,8 @@ for ti = -pretask_steps:max(posttask_steps(:))
             V2noise = gpuArray.randn(sizeComput).*sgmInput;
         end
         flip = ti >= onset_of_stimuli;
-        V1Array = (V1inputArray + V1noise).*flip;
-        V2Array = (V2inputArray + V2noise).*flip;
+        V1Array = V1inputArray.*flip;
+        V2Array = V2inputArray.*flip;
     end
 
     if isscalar(unique(offset_of_stimuli))
@@ -212,22 +209,22 @@ for ti = -pretask_steps:max(posttask_steps(:))
         flip = ti >= onset_of_trigger;
         BetasUp(flip) = 1;
     end
-    % update R, G, I
+    % update R, G, D
     G1old = G1;
     G2old = G2;
-    G1 = G1 + (-G1 + eltp*w11*R1 + eltp*w12*R2 + BG - D1)/Tau2*dtArray + InoiseG1;
-    G2 = G2 + (-G2 + eltp*w21*R1 + eltp*w22*R2 + BG - D2)/Tau2*dtArray + InoiseG2;
-    D1 = D1 + (-D1 + eltp*beta11*R1.*Continue.*BetasUp + eltp*beta12*R2.*Continue.*BetasUp)/Tau3*dtArray + InoiseD1;
-    D2 = D2 + (-D2 + eltp*beta21*R1.*Continue.*BetasUp + eltp*beta22*R2.*Continue.*BetasUp)/Tau3*dtArray + InoiseD2;
-    R1 = R1 + (-R1 + ((V1Array + V1prArray*(ti<0))+ alpha11*R1 + BR).*Continue./(1 + G1old.*iltp))/Tau1*dtArray + InoiseR1;
-    R2 = R2 + (-R2 + ((V2Array + V2prArray*(ti<0)) + alpha22*R2 + BR).*Continue./(1 + G2old.*iltp))/Tau1*dtArray + InoiseR2;
+    G1 = G1 + (-G1 + w11*R1 + w12*R2 + BG - D1)/Tau2*dtArray + InoiseG1;
+    G2 = G2 + (-G2 + w21*R1 + w22*R2 + BG - D2)/Tau2*dtArray + InoiseG2;
+    D1 = D1 + (-D1 + beta11*R1.*Continue.*BetasUp + beta12*R2.*Continue.*BetasUp)/Tau3*dtArray; % + InoiseD1;
+    D2 = D2 + (-D2 + beta21*R1.*Continue.*BetasUp + beta22*R2.*Continue.*BetasUp)/Tau3*dtArray; % + InoiseD2;
+    R1 = R1 + (-R1 + ((V1Array + V1prArray*(ti<0))*winput(1)+ alpha11*R1 + BR + V1noise).*Continue./(1 + G1old*wgr(1)))/Tau1*dtArray + InoiseR1;
+    R2 = R2 + (-R2 + ((V2Array + V2prArray*(ti<0))*winput(2) + alpha22*R2 + BR + V2noise).*Continue./(1 + G2old*wgr(2)))/Tau1*dtArray + InoiseR2;
     % update noise
-    InoiseR1 = InoiseR1 + (-InoiseR1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseR2 = InoiseR2 + (-InoiseR2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseG1 = InoiseG1 + (-InoiseG1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseG2 = InoiseG2 + (-InoiseG2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseD1 = InoiseD1 + (-InoiseD1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
-    InoiseD2 = InoiseD2 + (-InoiseD2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+    InoiseR1 = InoiseR1 + (-InoiseR1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArrayR)/tauN*dtArray;
+    InoiseR2 = InoiseR2 + (-InoiseR2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArrayR)/tauN*dtArray;
+    InoiseG1 = InoiseG1 + (-InoiseG1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArrayG)/tauN*dtArray;
+    InoiseG2 = InoiseG2 + (-InoiseG2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArrayG)/tauN*dtArray;
+    % InoiseD1 = InoiseD1 + (-InoiseD1 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
+    % InoiseD2 = InoiseD2 + (-InoiseD2 + gpuArray.randn(sizeComput)*sqrt(dtArray)*sgmArray)/tauN*dtArray;
     % setting lower boundary, forcing neural firing rates to be non-negative
     inside = G1 >= 0;
     G1 = G1 .* inside;
@@ -241,9 +238,6 @@ for ti = -pretask_steps:max(posttask_steps(:))
     R1 = R1 .* inside;
     inside = R2 >= 0;
     R2 = R2 .* inside;
-    % Pre-Post STDP
-    p1 = p1 + G1old.*R1.*Continue*dt;
-    p2 = p2 + G2old.*R2.*Continue*dt;
     % threshold detecting
     inside = (R1 >= threshArray) + (R2 >= threshArray);
     flip = (inside > 0) & (choice == 0) & (ti > onset_of_trigger);
@@ -267,5 +261,3 @@ argmaxR = inside + 1; % keep consistant as other models, 1 for choose R1, 2 for 
 rt = gather(rt);
 choice = gather(choice);
 argmaxR = gather(argmaxR);
-p1 = gather(p1);
-p2 = gather(p2);

@@ -27,9 +27,12 @@ fontsize = 8;
 mksz = 25;
 lwd = 1.5;
 cp = [.032, .064,.128, .256];
+
+cp = [.032, .128, .256, .512];
 mygray = flip(gray(numel(cp) + 2));
 myred = mygray; myred(:,1) = 1;
-myblue = mygray; myblue(:,3) = 1;%% parameters for simulation
+myblue = mygray; myblue(:,3) = 1;
+mygreen = mygray; mygreen(:,2) = 1;
 %% kinematic parameters
 dt = .001; % second
 tauR = .1; % second
@@ -39,7 +42,7 @@ Tau = [tauR, tauG, tauD];
 %% weighting parameters
 w0 = 1;
 a0 = 0;
-b0 = 1.5; % 1.1;
+b0 = 1.0; % 1.1;
 %% input parameters
 c_rprsnt = .064;
 sgmInput_rprsnt = 1/30;

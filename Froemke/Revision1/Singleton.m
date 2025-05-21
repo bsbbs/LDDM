@@ -38,6 +38,7 @@ sgmInput = 0; %66;
 winputc(end) % 3.1250
 wrgc(end) % .7352; .6357
 wgrc(end) % .2229; .1927
+
 %%
 h = figure; 
 filename = sprintf('MeanFR_N%i', N);
@@ -87,6 +88,7 @@ ax.YColor = [0,0,0];
 legend(ldg, {'w_{Input}','w_{R to G}', 'w_{G to R}'}, "Location","east");
 xlabel('Time (mins)');
 mysavefig(h, filename, plotdir, fontsize, [2.59,1.86], .75);
+
 %% Example trace
 predur = 0;
 presentt = 0;
@@ -417,7 +419,7 @@ for j = 2
         xlim([mu(1)-myxrng, mu(1)+myxrng]);
         xlabel('G firing rate (Hz)');
         ylabel('R firing rate (Hz)');
-        mysavefig(h, filename, plotdir, fontsize, [2.4,2.2]);
+        mysavefig(h, filename, plotdir, fontsize, [2.4,2.2]); %% *116/141
         exportgraphics(h, fullfile(plotdir, [filename, '.pdf']), 'ContentType','vector');
     end
 end

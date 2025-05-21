@@ -1,4 +1,4 @@
-function [R, G, D, Vcourse, winputp, wrgp, wgrp, ap] = LDDM_RndInputPlastic(Vprior, Vinput, BR, BG, winput0, wrg0, wgr0, a0, b,...
+function [R, G, D, Vcourse, winputp, wrgp, wgrp, ap] = LDDM_RndInputPlastico(Vprior, Vinput, BR, BG, winput0, wrg0, wgr0, a0, b,...
     sgmR, sgmG, sgmInput, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule)
 %%%%%%%%%%%%%%%%%%
 % The core function of local disinhibition decision model (LDDM)
@@ -108,7 +108,7 @@ for ti = (-pretask_steps):posttask_steps % align the beginning of the task as ti
 
     dwinput = eta*(R(ti+t_stamp,:).*V - winput.*(R(ti+t_stamp,:).^2))*dt;
     dwrg = eta*(G(ti+t_stamp,:)'*R(ti+t_stamp,:) - diag(G(ti+t_stamp,:).^2)*wrg)*dt;
-    dwgr = eta*(G(ti+t_stamp,:).*(R(ti+t_stamp,:) - targetrate))*dt;
+    %dwgr = eta*(G(ti+t_stamp,:).*(R(ti+t_stamp,:) - targetrate))*dt;
     %da = eta*(R(ti+t_stamp,:).^2 - diag(a)'.*(R(ti+t_stamp,:).^2))*dt;
 
     R(ti+t_stamp+1,:) = R(ti+t_stamp,:) + dR' + InoiseR;
@@ -117,7 +117,7 @@ for ti = (-pretask_steps):posttask_steps % align the beginning of the task as ti
 
     winput = winput + dwinput;
     wrg = wrg + dwrg;
-    wgr = wgr + dwgr;
+    %wgr = wgr + dwgr;
     %a = a + diag(da);
     
     % update noise
@@ -129,7 +129,7 @@ for ti = (-pretask_steps):posttask_steps % align the beginning of the task as ti
     R(ti+t_stamp+1,R(ti+t_stamp+1,:) < 0) = 0;
     winput(winput < 0) = 0;
     wrg(wrg < 0) = 0;
-    wgr(wgr < 0) = 0;
+    %wgr(wgr < 0) = 0;
     %a(a < 0) = 0;
     
     if mod((ti+t_stamp)*dt, 1/smplrate) == 0

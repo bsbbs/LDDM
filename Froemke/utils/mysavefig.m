@@ -19,3 +19,4 @@ set(yl, 'FontSize', fontsize);
 h.PaperUnits = 'inches';
 h.PaperPosition = [0 0 aspect];
 saveas(h,fullfile(outdir,sprintf('%s.pdf',filename)),'pdf');
+% print('-depsc2', '-cmyk', fullfile(outdir,sprintf('%s.eps',filename)));
