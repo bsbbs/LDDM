@@ -33,12 +33,13 @@ wgr0 = rand(1,N)*0;
 sgmR = 0; %12;
 sgmG = 0; %12;
 sgmInput = 0; %66;
-[R, G, D, Vcourse, winputc, wrgc, wgrc] = LDDM_RndInputPlastic(Vprior, Vinput, BR, BG, winput0, wrg0, wgr0, a, b,...
+% [R, G, D, Vcourse, winputp, wrgp, wgrp, ap]
+[R, G, D, Vcourse, winputc, wrgc, wgrc, ac] = LDDM_RndInputPlastic(Vprior, Vinput, BR, BG, winput0, wrg0, wgr0, a, b,...
         sgmR, sgmG, sgmInput, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
 winputc(end) % 3.1250
-wrgc(end) % .7352; .6357
-wgrc(end) % .2229; .1927
-
+wrgc(end) % .6357
+wgrc(end) % .1927
+ac(end)
 %%
 h = figure; 
 filename = sprintf('MeanFR_N%i', N);
@@ -288,73 +289,6 @@ for testi = 1:3
     mysavefig(h, filename, plotdir, fontsize, [9,2.2]);
 end
 
-%%
-% Late noise
-sgmR = 18;
-sgmG = 0;
-sgmInput = 0;
-subplot(1,3,2);
-hold on;
-rng(2025);
-mylgd = [];
-for i = 1:length(potentiation)
-    eltp = potentiation(i);
-    iltp = potentiation(i);
-    balance_scale = iltp*eltp*mean(w*ones(N,1))*eqlb^2 + (iltp*BG+1-mean(a*ones(N,1)))*eqlb - BR;
-    R0 = eqlb*ones(N,1);
-    D0 = 0*ones(N,1);
-    G0 = eltp*w*R0+BG;
-    initialvals = [R0'; G0'; D0'];
-    Vprior = ones(size(cp));
-    Vinput = ones(1,N).*cp;
-    [choice, rt, R, G, D, Vcourse] = LDDM_RndInputrv1(Vprior, Vinput, BR, BG, eltp, iltp, balance_scale, w, a, b,...
-        sgmR, sgmG, sgmInput, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-
-    hst1 = histogram(R(5000:end,1),...
-        'EdgeColor', 'none', 'FaceColor', colorpalette{i}, 'FaceAlpha', .3, 'Normalization', 'pdf');
-    pd1 = fitdist(R(:,1),'kernel','Kernel','normal');
-    x = hst1.BinEdges;
-    y1 = pdf(pd1,x);
-    plot(x, y1, '-', 'Color', colorpalette{i}, 'LineWidth', lwd);
-end
-ylabel('Density');
-xlabel('Activity (Hz)');
-title('Late Noise');
-mysavefig(h, filename, plotdir, fontsize, [9,2.2]);
-
-% Interneuronal noise
-sgmR = 0;
-sgmG = 2;
-sgmInput = 0;
-subplot(1,3,3);
-hold on;
-rng(2025);
-mylgd = [];
-for i = 1:length(potentiation)
-    eltp = potentiation(i);
-    iltp = potentiation(i);
-    balance_scale = iltp*eltp*mean(w*ones(N,1))*eqlb^2 + (iltp*BG+1-mean(a*ones(N,1)))*eqlb - BR;
-    R0 = eqlb*ones(N,1);
-    D0 = 0*ones(N,1);
-    G0 = eltp*w*R0+BG;
-    initialvals = [R0'; G0'; D0'];
-    Vprior = ones(size(cp));
-    Vinput = ones(1,N).*cp;
-    [choice, rt, R, G, D, Vcourse] = LDDM_RndInputrv1(Vprior, Vinput, BR, BG, eltp, iltp, balance_scale, w, a, b,...
-        sgmR, sgmG, sgmInput, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-
-    hst1 = histogram(R(5000:end,1),...
-        'EdgeColor', 'none', 'FaceColor', colorpalette{i}, 'FaceAlpha', .3, 'Normalization', 'pdf');
-    pd1 = fitdist(R(:,1),'kernel','Kernel','normal');
-    x = hst1.BinEdges;
-    y1 = pdf(pd1,x);
-    plot(x, y1, '-', 'Color', colorpalette{i}, 'LineWidth', lwd);
-end
-% xlim([47,56]);
-ylabel('Density');
-xlabel('Activity (Hz)');
-title('Interneuronal Noise');
-mysavefig(h, filename, plotdir, fontsize, [9,2.2]);
 %% Surrogated Fokker-Plank probability distribution
 task = sprintf('PrbDstrbS_N%i',N);
 predur = 0;
@@ -433,6 +367,7 @@ dur = 120; % second
 stoprule = 1;
 sgmG = 18;
 myxrng = 10;
+names = {'EarlyNoise', 'LateNoise'};
 for j = 1:2
     switch j
         case 1
@@ -450,29 +385,34 @@ for j = 1:2
     x1 = 1:rate:(6*60/dt);
     x2 = (24*60/dt):rate:(25*60/dt);
     tvec = [x1, x2];
-    % tvec = 1:10000:length(winputc);
-    SNR = nan(length(tvec),2);
-    SD = nan(length(tvec),3);
-    r = nan(length(tvec), 1);
-    for ti = 1:length(tvec)
-        winput = winputc(tvec(ti));
-        wrg = wrgc(tvec(ti));
-        wgr = wgrc(tvec(ti));
-        R0 = eqlb*ones(N,1);
-        D0 = 0*ones(N,1);
-        G0 = wrg*R0+BG;
-        initialvals = [R0'; G0'; D0'];
-        Vprior = 100*ones(size(cp));
-        Vinput = 100*ones(1,N).*cp;
-        [choice, rt, R, G, D, Vcourse] = LDDM_RndInputrv1(Vprior, Vinput, BR, BG, winput, wrg, wgr, a, b,...
-            sgmR, sgmG, sgmInput, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-        data(:,1) = G(5000:end,1);
-        data(:,2) = R(5000:end,1);
-        mu = mean(data);
-        Sigma = cov(data);
-        SD(ti,:) = [Sigma(1,1), Sigma(2,2), Sigma(1,2)];
-        SNR(ti,:) = mu./[Sigma(1,1), Sigma(2,2)];
-        r(ti) = Sigma(1,2)/sqrt(Sigma(1,1)*Sigma(2,2));
+    simfile = fullfile(Simdir, sprintf('%s_%s.mat',task, names{j}));
+    if ~exist(simfile, 'file')
+        SNR = nan(length(tvec),2);
+        SD = nan(length(tvec),3);
+        r = nan(length(tvec), 1);
+        for ti = 1:length(tvec)
+            winput = winputc(tvec(ti));
+            wrg = wrgc(tvec(ti));
+            wgr = wgrc(tvec(ti));
+            R0 = eqlb*ones(N,1);
+            D0 = 0*ones(N,1);
+            G0 = wrg*R0+BG;
+            initialvals = [R0'; G0'; D0'];
+            Vprior = 100*ones(size(cp));
+            Vinput = 100*ones(1,N).*cp;
+            [choice, rt, R, G, D, Vcourse] = LDDM_RndInputrv1(Vprior, Vinput, BR, BG, winput, wrg, wgr, a, b,...
+                sgmR, sgmG, sgmInput, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+            data(:,1) = G(5000:end,1);
+            data(:,2) = R(5000:end,1);
+            mu = mean(data);
+            Sigma = cov(data);
+            SD(ti,:) = [Sigma(1,1), Sigma(2,2), Sigma(1,2)];
+            SNR(ti,:) = mu./[Sigma(1,1), Sigma(2,2)];
+            r(ti) = Sigma(1,2)/sqrt(Sigma(1,1)*Sigma(2,2));
+        end
+        save(simfile, 'SD','SNR','r');
+    else
+        load(simfile);
     end
 
     h = figure;
