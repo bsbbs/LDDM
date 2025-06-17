@@ -108,7 +108,7 @@ for ti = (-pretask_steps):posttask_steps % align the beginning of the task as ti
 
     dwinput = eta*(R(ti+t_stamp,:).*V - winput.*(R(ti+t_stamp,:).^2))*dt;
     dwrg = eta*(G(ti+t_stamp,:)'*R(ti+t_stamp,:) - diag(G(ti+t_stamp,:).^2)*wrg)*dt;
-    dwgr = eta*(G(ti+t_stamp,:).*(R(ti+t_stamp,:) - targetrate))*dt;
+    dwgr = eta*(G(ti+t_stamp,:).*(R(ti+t_stamp,:) - 32))*dt;
     %da = eta*(R(ti+t_stamp,:).^2 - diag(a)'.*(R(ti+t_stamp,:).^2))*dt;
 
     R(ti+t_stamp+1,:) = R(ti+t_stamp,:) + dR' + InoiseR;

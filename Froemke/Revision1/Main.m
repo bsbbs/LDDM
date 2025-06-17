@@ -23,7 +23,7 @@ if ~exist(Simdir,'dir')
     mkdir(Simdir);
 end
 %% parameters for visulization
-fontsize = 8;
+fontsize = 10;
 mksz = 25;
 lwd = 1.5;
 cp = [.032, .064,.128, .256];
