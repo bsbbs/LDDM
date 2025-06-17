@@ -54,3 +54,10 @@ BR = 30; % background inputs, Hz
 thresh = 70; % Hz
 eqlb = 32; % mean activities during equilibrium when D is off and with equal inputs
 
+
+%% Simulation start...
+%% Figure 3: B-F, Single input network with plasticity and two types of noise
+Singleton;
+
+%% Figures 4&5, Binary choice with E plasticity only and E-I plasticity, and two types of noise
+Binary;
