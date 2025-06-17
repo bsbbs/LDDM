@@ -235,7 +235,7 @@ predur = 0;
 presentt = 0;
 stimdur = Inf;
 triggert = Inf;
-dur = 60; % second
+dur = 120; % second
 h = figure;
 filename = sprintf('%s_BeforetoAfter',task);
 names = ["Early noise", "Late noise", "Interneuronal noise"];
@@ -288,73 +288,7 @@ for testi = 1:3
     mysavefig(h, filename, plotdir, fontsize, [9,2.2]);
 end
 
-%%
-% Late noise
-sgmR = 18;
-sgmG = 0;
-sgmInput = 0;
-subplot(1,3,2);
-hold on;
-rng(2025);
-mylgd = [];
-for i = 1:length(potentiation)
-    eltp = potentiation(i);
-    iltp = potentiation(i);
-    balance_scale = iltp*eltp*mean(w*ones(N,1))*eqlb^2 + (iltp*BG+1-mean(a*ones(N,1)))*eqlb - BR;
-    R0 = eqlb*ones(N,1);
-    D0 = 0*ones(N,1);
-    G0 = eltp*w*R0+BG;
-    initialvals = [R0'; G0'; D0'];
-    Vprior = ones(size(cp));
-    Vinput = ones(1,N).*cp;
-    [choice, rt, R, G, D, Vcourse] = LDDM_RndInputrv1(Vprior, Vinput, BR, BG, eltp, iltp, balance_scale, w, a, b,...
-        sgmR, sgmG, sgmInput, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
 
-    hst1 = histogram(R(5000:end,1),...
-        'EdgeColor', 'none', 'FaceColor', colorpalette{i}, 'FaceAlpha', .3, 'Normalization', 'pdf');
-    pd1 = fitdist(R(:,1),'kernel','Kernel','normal');
-    x = hst1.BinEdges;
-    y1 = pdf(pd1,x);
-    plot(x, y1, '-', 'Color', colorpalette{i}, 'LineWidth', lwd);
-end
-ylabel('Density');
-xlabel('Activity (Hz)');
-title('Late Noise');
-mysavefig(h, filename, plotdir, fontsize, [9,2.2]);
-
-% Interneuronal noise
-sgmR = 0;
-sgmG = 2;
-sgmInput = 0;
-subplot(1,3,3);
-hold on;
-rng(2025);
-mylgd = [];
-for i = 1:length(potentiation)
-    eltp = potentiation(i);
-    iltp = potentiation(i);
-    balance_scale = iltp*eltp*mean(w*ones(N,1))*eqlb^2 + (iltp*BG+1-mean(a*ones(N,1)))*eqlb - BR;
-    R0 = eqlb*ones(N,1);
-    D0 = 0*ones(N,1);
-    G0 = eltp*w*R0+BG;
-    initialvals = [R0'; G0'; D0'];
-    Vprior = ones(size(cp));
-    Vinput = ones(1,N).*cp;
-    [choice, rt, R, G, D, Vcourse] = LDDM_RndInputrv1(Vprior, Vinput, BR, BG, eltp, iltp, balance_scale, w, a, b,...
-        sgmR, sgmG, sgmInput, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-
-    hst1 = histogram(R(5000:end,1),...
-        'EdgeColor', 'none', 'FaceColor', colorpalette{i}, 'FaceAlpha', .3, 'Normalization', 'pdf');
-    pd1 = fitdist(R(:,1),'kernel','Kernel','normal');
-    x = hst1.BinEdges;
-    y1 = pdf(pd1,x);
-    plot(x, y1, '-', 'Color', colorpalette{i}, 'LineWidth', lwd);
-end
-% xlim([47,56]);
-ylabel('Density');
-xlabel('Activity (Hz)');
-title('Interneuronal Noise');
-mysavefig(h, filename, plotdir, fontsize, [9,2.2]);
 %% Surrogated Fokker-Plank probability distribution
 task = sprintf('PrbDstrbS_N%i',N);
 predur = 0;
