@@ -72,7 +72,7 @@ G = initialvals(2,:) + InoiseG;
 R = initialvals(1,:) + InoiseR;
 D = initialvals(3,:);
 %% simulation begin
-Vnoise = randn(sizeVinput)*sgmInput;
+Vnoise = [randn(sizeVinput-1), 0]*sgmInput;
 t_stamp = pretask_steps + 1;
 for ti = (-pretask_steps):posttask_steps % align the beginning of the task as ti = 0
     % input values
@@ -80,7 +80,7 @@ for ti = (-pretask_steps):posttask_steps % align the beginning of the task as ti
         V = Vprior;
     elseif ti >= onset_of_stimuli && ti < offset_of_stimuli
         if (mod(ti*dt, .005) == 0)
-            Vnoise = randn(sizeVinput)*sgmInput;
+            Vnoise = [randn(sizeVinput-1), 0]*sgmInput;
         end
         V = Vinput;
     else
@@ -99,7 +99,7 @@ for ti = (-pretask_steps):posttask_steps % align the beginning of the task as ti
     
     % update noise
     InoiseG = InoiseG + (-InoiseG + randn(sizeVinput).*sqrt(dt).*sgmG)/tauN*dt;
-    InoiseR = InoiseR + (-InoiseR + randn(sizeVinput).*sqrt(dt).*sgmR)/tauN*dt;
+    InoiseR = InoiseR + (-InoiseR + [randn(sizeVinput-1), 0].*sqrt(dt).*sgmR)/tauN*dt;
     % setting lower boundary, forcing neural firing rates to be non-negative
     G(ti+t_stamp+1,G(ti+t_stamp+1,:) < 0) = 0;
     D(ti+t_stamp+1,D(ti+t_stamp+1,:) < 0) = 0;
