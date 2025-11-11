@@ -115,7 +115,6 @@ N = 3;
 cp = 6.4/100;
 b = eye(N)*b0;
 a = eye(N)*a0;
-task = sprintf('SNR_V3_N%i_SST',N);
 predur = 0;
 presentt = 0;
 stimdur = Inf;
@@ -123,79 +122,94 @@ triggert = Inf;
 dur = 240; % second
 stoprule = 1;
 sgmG = 0;
-v3vec = 0:0.1:1;
+BR = 0;
+BG = 0;
+v3vec = 0:0.05:1;
 names = ["Early noise", "Late noise"];
-myy1rng = [120,38];
 mycols = [1,0,0; 0,0,1];
-h = figure;
-set(h, 'Units', 'inches','Position', [1,1,4,1.8]);
-filename = task;
-ldg = [];
-for testi = 1:2
-    switch testi
-        case 1
-            sgmInput = 66*0.6;
-            sgmR = 0;
-        case 2
-            sgmInput = 0;
-            sgmR = 48*0.15;
-    end
-
-    Vprior = zeros(1,N);
-    winput = squeeze(winputc(end,:));
-    wrg = squeeze(wrgc(end,:,:));
-    wgr = squeeze(wgrc(end,:));
-    R0 = 20*ones(1,N);
-    D0 = 0*R0;
-    G0 = (wrg*R0')';
-    initialvals = [R0; G0; D0];
-
-    simfile = fullfile(Simdir, sprintf('%s_%s_%i.mat', task, names{testi}));
-    if ~exist(simfile, 'file')
-        MU = nan(length(v3vec),2);
-        COV = nan(length(v3vec),3);
-        SNR = nan(length(v3vec),2);
-        r = nan(length(v3vec), 1);
-        fprintf('%s',names{testi});
-        for v3i = 1:length(v3vec)
-            fprintf('.');
-            Vinput = 100*[1+cp, 1-cp, v3vec(v3i)];
-            rept = 10;
-            mu = [];
-            Sigma2 = [];
-            parfor i = 1:rept
-                data = [];
-                [choice, rt, R, G, D, Vcourse] = LDDM_RndInputrv2(Vprior, Vinput, BR, BG, winput, wrg, wgr, a, b,...
-                    sgmR, sgmG, sgmInput, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
-                data(:,1) = R(10000:end,1);
-                data(:,2) = R(10000:end,2);
-                mu(i,:) = mean(data);
-                Sigma2(i,:,:) = cov(data);
-            end
-            MU(v3i,:) = mean(mu, 1);
-            COV(v3i,:) = [mean(Sigma2(:,1,1)), mean(Sigma2(:,2,2)), mean(Sigma2(:,1,2))];
-            SNR(v3i,:) = MU(v3i,:)./sqrt([COV(v3i,1), COV(v3i,2)]);
-            r(v3i) = COV(v3i,3)/sqrt(COV(v3i,1)*COV(v3i,2));
+CellTypes = {"SST", "PV"}; 
+for type = 1:2
+    task = sprintf('SNR_V3_N%i_%s',N, CellTypes{type});
+    h = figure;
+    set(h, 'Units', 'inches','Position', [1,1,4,1.8]);
+    filename = task;
+    ldg = [];
+    for testi = 1:2
+        switch testi
+            case 1
+                sgmInput = 66*0.62;
+                sgmR = 0;
+            case 2
+                if type == 1
+                    sgmInput = 0;
+                    sgmR = 48*0.22;
+                elseif type == 2
+                    sgmInput = 66*0.62;
+                    sgmR = 0;
+                end
         end
-        fprintf('\n');
-        dp = abs(MU(:,1) -  MU(:,2))./sqrt(COV(:,1) + COV(:,2) - 2*COV(:,3));
-        save(simfile, 'MU','Sigma2','COV','SNR','r', 'dp');
-    else
-        load(simfile);
+
+        Vprior = zeros(1,N);
+        % winput = squeeze(winputc(end,:));
+        % wrg = squeeze(wrgc(end,:,:));
+        % wgr = squeeze(wgrc(end,:));
+        winput = ones(1,N)*3.1250;
+        wrg = ones(N,N)*.4419;
+        wgr = ones(1,N)*.1927;
+
+        R0 = 20*ones(1,N);
+        D0 = 0*R0;
+        G0 = (wrg*R0')';
+        initialvals = [R0; G0; D0];
+
+        simfile = fullfile(Simdir, sprintf('%s_%s_%2.1f_%2.1f.mat', task, names{testi}, sgmInput, sgmR));
+        if ~exist(simfile, 'file')
+            MU = nan(length(v3vec),2);
+            COV = nan(length(v3vec),3);
+            SNR = nan(length(v3vec),2);
+            r = nan(length(v3vec), 1);
+            fprintf('%s',names{testi});
+            for v3i = 1:length(v3vec)
+                fprintf('.');
+                Vinput = 100*[1+cp, 1-cp, v3vec(v3i)];
+                rept = 160; %10;
+                mu = [];
+                Sigma2 = [];
+                parfor i = 1:rept
+                    data = [];
+                    [choice, rt, R, G, D, Vcourse] = LDDM_RndInputrv3(Vprior, Vinput, BR, BG, winput, wrg, wgr, a, b,...
+                        sgmR, sgmG, sgmInput, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+                    data(:,1) = R(10000:end,1);
+                    data(:,2) = R(10000:end,2);
+                    mu(i,:) = mean(data);
+                    Sigma2(i,:,:) = cov(data);
+                end
+                % Sigma2 = cov(data);
+                MU(v3i,:) = mean(mu, 1);
+                % COV(v3i,:) = [Sigma2(1,1), Sigma2(2,2), Sigma2(1,2)];
+                COV(v3i,:) = [mean(Sigma2(:,1,1)), mean(Sigma2(:,2,2)), mean(Sigma2(:,1,2))];
+                SNR(v3i,:) = MU(v3i,:)./([COV(v3i,1), COV(v3i,2)]);
+                r(v3i) = COV(v3i,3)/sqrt(COV(v3i,1)*COV(v3i,2));
+            end
+            fprintf('\n');
+            dp = abs(MU(:,1) -  MU(:,2))./(COV(:,1) + COV(:,2) - 2*COV(:,3));
+            save(simfile, 'MU','COV','SNR','r', 'dp');
+        else
+            load(simfile);
+        end
+        subplot(1,2,1); hold on;
+        plot(v3vec, SNR(:,1), '-', 'Color', mycols(testi,:), 'LineWidth', lwd);
+        plot(v3vec, SNR(:,2), '--', 'Color', mycols(testi,:), 'LineWidth', lwd);
+        ylabel('SNR (V1 & V2)');
+        xlabel('V3');
+
+        subplot(1,2,2); hold on;
+        ldg(testi) = plot(v3vec, dp, '-', 'Color', mycols(testi,:), 'LineWidth', lwd);
+        ylabel('Discriminability (V1 & V2)');
+        xlabel('V3');
+
     end
-    subplot(1,2,1); hold on;
-    plot(v3vec, SNR(:,1), '-', 'Color', mycols(testi,:), 'LineWidth', lwd);
-    plot(v3vec, SNR(:,2), '--', 'Color', mycols(testi,:), 'LineWidth', lwd);
-    ylabel('SNR (V1 & V2)');
-    xlabel('V3');
-
-    subplot(1,2,2); hold on;
-    ldg(testi) = plot(v3vec, dp, '-', 'Color', mycols(testi,:), 'LineWidth', lwd);
-    ylabel('d'' (V1 & V2)');
-    xlabel('V3');
-
+    legend(ldg, {'Early noise', 'Late noise'}, "Location","east");
+    mysavefig(h, filename, plotdir, fontsize, [4,1.8]);
+    % exportgraphics(h, fullfile(plotdir, [filename, '.pdf']), 'ContentType','vector');
 end
-legend(ldg, {'Early noise', 'Late noise'}, "Location","east");
-mysavefig(h, filename, plotdir, fontsize, [4,1.8]);
-% exportgraphics(h, fullfile(plotdir, [filename, '.pdf']), 'ContentType','vector');
-

@@ -1,4 +1,4 @@
-function [choice, rt, R, G, D, Vcourse] = LDDM_RndInputrv2(Vprior, Vinput, BR, BG, winput, wrg, wgr, a, b,...
+function [choice, rt, R, G, D, Vcourse] = LDDM_RndInputrv3(Vprior, Vinput, BR, BG, winput, wrg, wgr, a, b,...
     sgmR, sgmG, sgmInput, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule)
 %%%%%%%%%%%%%%%%%%
 % The core function of local disinhibition decision model (LDDM)
@@ -66,7 +66,7 @@ stablizetime = round(.2/dt);
 for kk = 1:stablizetime
     % update noise
     InoiseG = InoiseG + (-InoiseG + randn(sizeVinput).*sqrt(dt).*sgmG)/tauN*dt;
-    InoiseR = InoiseR + (-InoiseR + randn(sizeVinput).*sqrt(dt).*sgmR)/tauN*dt; % [randn([sizeVinput(1), sizeVinput(2)-1]), zeros(sizeVinput(1),1)]
+    InoiseR = InoiseR + (-InoiseR + [randn([sizeVinput(1), sizeVinput(2)-1]), zeros(sizeVinput(1),1)].*sqrt(dt).*sgmR)/tauN*dt; % 
 end
 G = initialvals(2,:) + InoiseG;
 R = initialvals(1,:) + InoiseR;
@@ -80,7 +80,7 @@ for ti = (-pretask_steps):posttask_steps % align the beginning of the task as ti
         V = Vprior;
     elseif ti >= onset_of_stimuli && ti < offset_of_stimuli
         if (mod(ti*dt, .005) == 0)
-            Vnoise = randn(sizeVinput)*sgmInput; % [randn([sizeVinput(1), sizeVinput(2)-1]), zeros(sizeVinput(1),1)]
+            Vnoise = [randn([sizeVinput(1), sizeVinput(2)-1]), zeros(sizeVinput(1),1)]*sgmInput; % 
         end
         V = Vinput;
     else
@@ -99,7 +99,7 @@ for ti = (-pretask_steps):posttask_steps % align the beginning of the task as ti
     
     % update noise
     InoiseG = InoiseG + (-InoiseG + randn(sizeVinput).*sqrt(dt).*sgmG)/tauN*dt;
-    InoiseR = InoiseR + (-InoiseR + randn(sizeVinput).*sqrt(dt).*sgmR)/tauN*dt; % [randn([sizeVinput(1), sizeVinput(2)-1]), zeros(sizeVinput(1),1)]
+    InoiseR = InoiseR + (-InoiseR + [randn([sizeVinput(1), sizeVinput(2)-1]), zeros(sizeVinput(1),1)].*sqrt(dt).*sgmR)/tauN*dt; % 
     % setting lower boundary, forcing neural firing rates to be non-negative
     G(ti+t_stamp+1,G(ti+t_stamp+1,:) < 0) = 0;
     D(ti+t_stamp+1,D(ti+t_stamp+1,:) < 0) = 0;
