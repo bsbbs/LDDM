@@ -4,12 +4,13 @@
 %%%%%%%%%%
 
 %% define paths
-Homedir = 'C:\Users\Bo\Documents\GitHub';
-% Homedir = '~';
+% Homedir = 'C:\Users\Bo\Documents\GitHub';
+Homedir = '~';
 % addpath(fullfile(Homedir,'Documents','LDDM','CoreFunctions'));
 addpath(fullfile(Homedir,'LDDM','Froemke','Revision1'));
 addpath(fullfile(Homedir,'LDDM','Froemke','utils'));
-Drpbx = "C:\Users\Bo\NYU Langone Health Dropbox\Shen Bo\Bo Shen Working files\STDP_Project0";
+% Drpbx = "C:\Users\Bo\NYU Langone Health Dropbox\Shen Bo\Bo Shen Working files\STDP_Project0";
+Drpbx = "/Users/bs3667/NYU Langone Health Dropbox/Shen Bo/Bo Shen Working files/STDP_Project0";
 out_dir = fullfile(Drpbx, 'Revision1');
 if ~exist("out_dir",'dir')
     mkdir(out_dir);

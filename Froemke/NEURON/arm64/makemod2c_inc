@@ -1,0 +1,8 @@
+intfsw.cpp: .././/intfsw.mod $(NOCMODL)
+	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
+	(cd "../.";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "intfsw.mod"  -o "/Users/bs3667/LDDM/Froemke/NEURON/arm64" )
+
+./intfsw.o: intfsw.cpp
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) /Users/bs3667/LDDM/Froemke/NEURON/arm64/$<\\n"
+	$(CXXCOMPILE) -I"../." $(INCLUDES) -fPIC -c "/Users/bs3667/LDDM/Froemke/NEURON/arm64/$<" -o $@
+

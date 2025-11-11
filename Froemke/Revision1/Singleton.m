@@ -40,6 +40,10 @@ winputc(end) % 3.1250
 wrgc(end) % .6357
 wgrc(end) % .1927
 ac(end)
+winputs = [0, winputc(end)]; %3.1250;
+wrgs = [0, wrgc(end)]; % .6357
+wgrs = [0, wgrc(end)]; % .1927
+
 %%
 h = figure; 
 filename = sprintf('MeanFR_N%i', N);
@@ -103,9 +107,6 @@ filename = sprintf('%s_BeforetoAfter',task);
 sgmR = 0;
 sgmG = 0;
 sgmInput = 0;
-winputs = [0, winputc(end)]; %3.1250;
-wrgs = [0, wrgc(end)]; % .6357
-wgrs = [0, wgrc(end)]; % .1927
 for i = [1,2]
     winput = winputs(i);
     wrg = wrgs(i);
@@ -299,7 +300,7 @@ dur = 120; % second
 stoprule = 1;
 sgmG = 18;
 myxrng = 10;
-for j = 2
+for j = 3
     switch j
         case 1
             sgmInput = 66;
@@ -311,6 +312,11 @@ for j = 2
             sgmR = 26;
             myylim = [20,40];
             myyrng = 18;
+        case 3
+            sgmInput = 66;
+            sgmR = 0;
+            myylim = [0,60];
+            myyrng = 30;
     end
     
     for i = [1,2]
@@ -318,7 +324,7 @@ for j = 2
         set(h, 'Units', 'inches','Position', [1,1,2.4,2.2]);
         filename = sprintf('%s%i%i',task, i, j);
         hold on;
-        winput = winputs(i);
+        winput = winputs(2);
         wrg = wrgs(i);
         wgr = wgrs(i);
         R0 = eqlb*ones(N,1);
@@ -327,8 +333,13 @@ for j = 2
         initialvals = [R0'; G0'; D0'];
         Vprior = 100*ones(size(cp));
         Vinput = 100*ones(1,N).*cp;
-        [choice, rt, R, G, D, Vcourse] = LDDM_RndInputrv1(Vprior, Vinput, BR, BG, winput, wrg, wgr, a, b,...
-            sgmR, sgmG, sgmInput, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+        if j <= 2
+            [choice, rt, R, G, D, Vcourse] = LDDM_RndInputrv1(Vprior, Vinput, BR, BG, winput, wrg, wgr, a, b,...
+                sgmR, sgmG, sgmInput, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+        elseif j == 3
+            [choice, rt, R, G, D, Vcourse] = LDDM_RndInputrv2(Vprior, Vinput, BR, BG, winput, wrg, wgr, a, b,...
+                sgmR, sgmG, sgmInput, Tau, predur, dur, dt, presentt, triggert, thresh, initialvals, stimdur, stoprule);
+        end
         data(:,1) = G(5000:end,1);
         data(:,2) = R(5000:end,1);
         mu = mean(data);
