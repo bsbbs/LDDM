@@ -127,9 +127,9 @@ BG = 0;
 v3vec = 0:0.05:1;
 names = ["Early noise", "Late noise"];
 mycols = [1,0,0; 0,0,1];
-CellTypes = {"SST", "PV"}; 
+CellTypes = ["SST", "PV"]; 
 for type = 1:2
-    task = sprintf('SNR_V3_N%i_%s',N, CellTypes{type});
+    task = sprintf('SNR_V3_N%i_%s',N, CellTypes(type));
     h = figure;
     set(h, 'Units', 'inches','Position', [1,1,4,1.8]);
     filename = task;
@@ -161,8 +161,8 @@ for type = 1:2
         D0 = 0*R0;
         G0 = (wrg*R0')';
         initialvals = [R0; G0; D0];
-
-        simfile = fullfile(Simdir, sprintf('%s_%s_%2.1f_%2.1f.mat', task, names{testi}, sgmInput, sgmR));
+        rept = 40; %10;
+        simfile = fullfile(Simdir, sprintf('%s_%s_%2.1f_%2.1f_%i.mat', task, names{testi}, sgmInput, sgmR, rept));
         if ~exist(simfile, 'file')
             MU = nan(length(v3vec),2);
             COV = nan(length(v3vec),3);
@@ -172,7 +172,7 @@ for type = 1:2
             for v3i = 1:length(v3vec)
                 fprintf('.');
                 Vinput = 100*[1+cp, 1-cp, v3vec(v3i)];
-                rept = 160; %10;
+                
                 mu = [];
                 Sigma2 = [];
                 parfor i = 1:rept
@@ -210,6 +210,6 @@ for type = 1:2
 
     end
     legend(ldg, {'Early noise', 'Late noise'}, "Location","east");
-    mysavefig(h, filename, plotdir, fontsize, [4,1.8]);
+    mysavefig(h, filename, plotdir, fontsize, [5, 1.8]);
     % exportgraphics(h, fullfile(plotdir, [filename, '.pdf']), 'ContentType','vector');
 end
